@@ -2,7 +2,7 @@
 
 MAGNUS is an algorithm described in [this paper](https://arxiv.org/pdf/2501.07056) for multiplying very large sparse matrices. Any uncertainties or ambiguities should be resolved by referring back to the source.
 
-This roadmap outlines a comprehensive plan for building a high-performance implementation in Rust. The implementation will prioritize hardware-agnostic components first, followed by Intel-specific optimizations, and eventually ARM architecture support.
+This roadmap outlines a comprehensive plan for building a high-performance implementation in Rust. The implementation will prioritize a working prototype with hardware-agnostic components first, followed by performance optimizations, and eventually architecture-specific enhancements.
 
 ## Part 1: System Architecture and Technology Selection
 
@@ -110,23 +110,30 @@ fn create_accelerator() -> Box<dyn SimdAccelerator<f32>> {
 
 ### Test Driven Development
 
-We'll prioritize sections which can be tested on any architecture:
+We'll follow a strict test-driven approach to ensure functionality and reliability:
 
 1. Before beginning work on a section:
    - Identify essential features
    - Write test coverage for each feature
+   - Start with simple tests for core functionality
 
 2. Once work has been completed:
    - Test, reevaluate, rewrite as needed
    - Document mistakes in a separate document
    - Reassess roadmap if serious problems are encountered
 
-3. For Intel-specific sections requiring AVX-512:
-   - Work on Linux systems with appropriate hardware
-   - Test Intel implementation first
+3. Development priority order:
+   - Core functionality with hardware-agnostic implementation first
+   - Focus on correctness before performance
+   - Simple, working implementation before optimization
 
-4. After functionality tests are implemented:
-   - Add performance tests for Intel hardware
+4. Architecture-specific optimizations:
+   - Only after core functionality is stable and well-tested
+   - Work on appropriate hardware as needed
+   - Test against reference implementation
+
+5. After functionality tests are implemented:
+   - Add performance tests
    - Benchmark against the graphs in the original paper
 
 ## Part 2: Core Data Structures
@@ -223,20 +230,29 @@ enum RowCategory {
 }
 ```
 
-## Part 3: Implementation Roadmap
+## Part 3: Revised Implementation Roadmap
 
-### Stage 1: Foundation Layer (Weeks 1-2)
+### Phase 1: Minimum Viable Implementation (8-10 weeks)
 
-1. **Matrix Fundamentals**
+> Focus on a working prototype with correct functionality over performance
+
+1. **Matrix Fundamentals** (Weeks 1-2)
    - Implement or adapt CSR/CSC matrix formats
    - Implement conversion between formats
    - Basic sparse matrix operations (for testing correctness)
+   - Set up project structure and testing framework
 
-2. **System Parameter Detection**
-   - Cache size detection (using CPU feature detection)
-   - Optimal parameter calculation (implementing Section 3.5 equations)
+2. **Simple SpGEMM Implementation** (Weeks 3-4)
+   - Implement a basic sparse matrix multiplication algorithm
+   - Focus on correctness rather than performance
+   - Use this as a reference implementation for testing
 
-3. **Row Categorization Logic**
+3. **System Parameter Detection** (Week 5)
+   - Simple environment detection (number of threads, etc.)
+   - Basic parameter settings based on the paper
+   - Defer complex optimizations for later phases
+
+4. **Row Categorization Logic** (Week 6)
    - Implement the categorization logic for rows as described in Section 3.1
    - Determine which accumulation method to use for each row
 
@@ -254,19 +270,15 @@ fn categorize_rows<T>(
 }
 ```
 
-### Stage 2: Accumulators (Weeks 3-4)
-
-1. **Dense Accumulator**
+5. **Basic Accumulators** (Weeks 7-8)
    - Implement the standard dense accumulator (Algorithm 1)
-   - Optimize for different data types and cache efficiency
+   - Implement a simple sort-based accumulator
+   - Define pluggable interface for future optimization
 
-2. **Sort-Based Accumulator Framework**
-   - Create pluggable interface for the sort implementation
-   - Implement wrapper for threshold-based selection
-
-3. **Hardware-Agnostic Sort-Then-Reduce Implementation**
-   - Implement a generic version that works on all platforms
-   - Design interface for later optimization with AVX-512/NEON
+6. **Integration and Testing** (Weeks 9-10)
+   - Integrate all components into a working prototype
+   - Extensive testing against reference implementation
+   - Document current functionality and limitations
 
 ```rust
 trait Accumulator<T> {
@@ -292,19 +304,20 @@ fn sort_then_reduce<T: AddAssign + Copy>(
 }
 ```
 
-### Stage 3: Fine-Level Algorithm (Weeks 5-6)
+### Phase 2: Core MAGNUS Algorithm (8-10 weeks)
 
-1. **Histogram and Prefix Sum**
+> Implement the core MAGNUS algorithm components with focus on correctness over performance
+
+1. **Fine-Level Algorithm** (Weeks 1-3)
    - Implement the histogram computation (Algorithm 3, lines 2-6)
-   - Implement prefix sum with platform-agnostic optimization
-
-2. **Reordering Logic**
+   - Implement basic prefix sum
    - Implement the reordering step (Algorithm 3, lines 11-17)
-   - Hardware-agnostic optimizations for memory access patterns
+   - Connect all components with extensive testing
 
-3. **Fine-Level Integration**
-   - Connect the histogram, prefix sum, reorder, and accumulate steps
-   - Implement chunk-based accumulation logic
+2. **GPU Acceleration Investigation** (Week 4)
+   - Research potential for GPU acceleration of sorting and accumulation
+   - Evaluate CUDA or ROCm integration points
+   - Document findings for future implementation
 
 ```rust
 fn fine_level_histogram(col_indices: &[usize], metadata: &ChunkMetadata) -> Vec<usize> {
@@ -335,23 +348,17 @@ fn process_fine_level<T: AddAssign + Copy>(
 }
 ```
 
-### Stage 4: Coarse-Level Algorithm (Weeks 7-9)
+3. **Coarse-Level Algorithm** (Weeks 5-7)
+   - Implement basic AˆCSC construction (Gap 1)
+   - Implement simple batching strategy (Gap 3)
+   - Implement coarse-level reordering
+   - Integrate with fine-level components
 
-1. **AˆCSC Construction (Gap 1)**
-   - Implement subset extraction and CSR to CSC conversion
-   - Optimize for parallel execution
-
-2. **Batching Strategy (Gap 3)**
-   - Implement heuristic for coarse batch size determination
-   - Memory-aware batching with configurable limits
-
-3. **Coarse-Level Reordering**
-   - Implement the histogram, prefix sum, and reordering steps
-   - Optimize memory access patterns
-
-4. **Integration with Fine-Level**
-   - Apply fine-level to each coarse-level chunk
-   - Merge results into final output
+4. **Integration and Advanced Features** (Weeks 8-10)
+   - Connect all algorithms by row category
+   - Implement parallel execution (basic thread utilization)
+   - Test with larger matrices
+   - Benchmark against simple implementation
 
 ```rust
 // Gap 1: AˆCSC Construction
@@ -383,19 +390,37 @@ fn process_coarse_level<T: AddAssign + Copy>(
 }
 ```
 
-### Stage 5: Architecture-Specific Optimizations (Weeks 10-12)
+### Phase 3: Performance Optimization (8-12 weeks)
 
-1. **Intel AVX-512 Optimizations**
-   - Implement AVX-512 sort-then-reduce
-   - Optimize for Intel hardware
+> Focus on improving performance while maintaining correctness
 
-2. **Modified Compare-Exchange (Gap 4 Alternative)**
-   - Research existing implementations in Fortran/MATLAB
-   - Implement AVX-512 bitonic sort with integrated accumulation
+1. **Performance Analysis** (Weeks 1-2)
+   - Identify performance bottlenecks
+   - Analyze memory access patterns
+   - Create performance benchmarks
+   - Compare against reference implementations
 
-3. **ARM NEON Implementation (Future)**
-   - Scaffolding for ARM NEON vectorized sorting
-   - Performance parameter retuning for Apple Silicon
+2. **Algorithm Tuning** (Weeks 3-4)
+   - Optimize parameter selection
+   - Improve thread utilization
+   - Enhance memory locality
+   - Refine row categorization heuristics
+
+3. **Hardware-Specific Optimizations** (Weeks 5-8)
+   - **Intel AVX-512 Optimizations**
+     - Implement AVX-512 sort-then-reduce
+     - Optimize for Intel hardware
+   - **Modified Compare-Exchange (Gap 4)**
+     - Research existing implementations
+     - Implement preliminary version
+   - **GPU Acceleration Implementation** (if viable from Phase 2)
+     - Implement selected GPU acceleration components
+     - Test performance improvements
+
+4. **ARM/Apple Silicon Support** (Weeks 9-12)
+   - Implement ARM NEON vectorized operations
+   - Performance parameter tuning
+   - Cross-platform testing and benchmarking
 
 ```rust
 // Intel-specific implementation
@@ -427,19 +452,14 @@ impl<T: AddAssign + Copy> SimdAccelerator<T> for NeonAccelerator {
 }
 ```
 
-### Stage 6: Integration and Main Algorithm (Weeks 13-14)
+### Phase 4: Full Integration and Productionization (6-8 weeks)
 
-1. **SpGEMM Driver**
-   - Implement the main SpGEMM function
-   - Set up the workflow for symbolic and numeric phases
+> Finalize the implementation for production use
 
-2. **Row Processing by Category**
-   - Process rows according to their category
-   - Group rows by category for better cache efficiency
-
-3. **Parallel Execution Strategy**
-   - Implement work distribution across threads
-   - Handle synchronization points appropriately
+1. **Complete Integration** (Weeks 1-2)
+   - Finalize the SpGEMM driver architecture
+   - Ensure consistent interface across all components
+   - Implement comprehensive error handling
 
 ```rust
 pub fn magnus_spgemm<T: AddAssign + Copy + Num>(
@@ -455,19 +475,22 @@ pub fn magnus_spgemm<T: AddAssign + Copy + Num>(
 }
 ```
 
-### Stage 7: Performance Optimization (Weeks 15-16)
+2. **Advanced Optimizations** (Weeks 3-4)
+   - Implement advanced parallel execution strategies
+   - Fine-tune all algorithms based on benchmarks
+   - Optimize for both performance and memory usage
 
-1. **Benchmarking Infrastructure**
-   - Implement test matrices from the paper
-   - Set up performance measurement framework
+3. **Comprehensive Benchmarking** (Weeks 5-6)
+   - Implement full test matrix suite from the paper
+   - Set up automated performance measurement
+   - Compare against all reference implementations
+   - Generate performance reports and visualizations
 
-2. **Microbenchmarks for Parameter Tuning**
-   - Benchmark accumulator threshold selection
-   - Tune coarse/fine level parameters
-
-3. **Profiling and Hotspot Optimization**
-   - Identify and optimize performance bottlenecks
-   - Fine-tune SIMD utilization
+4. **Documentation and Release** (Weeks 7-8)
+   - Complete API documentation
+   - Write comprehensive usage guide
+   - Create examples for common use cases
+   - Prepare for initial open-source release
 
 ```rust
 fn benchmark_accumulator_crossover(
@@ -727,25 +750,47 @@ fn generate_test_matrices() -> Vec<TestMatrix> {
 }
 ```
 
-## Part 6: Cross-Platform Performance Expectations
+## Part 6: Revised Timeline and Expectations
 
-1. **Intel with AVX-512**: Will likely achieve performance closest to the paper's results.
+### Overall Timeline (30-40 weeks part-time)
 
-2. **Other x86_64 Platforms**: Will work with the generic implementation, with performance varying based on available SIMD instructions.
+1. **Phase 1: Minimum Viable Implementation** (8-10 weeks)
+   - Focus: Correct functionality, learning Rust, core data structures
+   - Output: Working prototype that passes correctness tests
 
-3. **Apple Silicon**: Will use ARM NEON optimizations but probably won't match AVX-512 performance for the sorting accelerator. The overall algorithm's locality generation benefits would still apply.
+2. **Phase 2: Core MAGNUS Algorithm** (8-10 weeks)
+   - Focus: Implementing the key algorithmic components
+   - Output: Complete implementation with all core features
 
-4. **Generic Fallback**: The implementation would still work on all platforms but with varying performance levels.
+3. **Phase 3: Performance Optimization** (8-12 weeks)
+   - Focus: Improving performance, hardware-specific optimizations
+   - Output: Optimized implementation with measurable performance gains
+
+4. **Phase 4: Full Integration and Productionization** (6-8 weeks)
+   - Focus: Final integration, comprehensive testing, documentation
+   - Output: Production-ready library ready for open-source release
+
+### Cross-Platform Performance Expectations
+
+1. **Initial Implementation**: Focus on correctness first, with acceptable performance on any platform.
+
+2. **Intel with AVX-512**: Will likely achieve performance closest to the paper's results in the final optimization phase.
+
+3. **Apple Silicon**: Will benefit from ARM NEON optimizations in later phases. The overall algorithm's locality generation benefits would apply regardless of specific SIMD instructions.
+
+4. **GPU Acceleration**: Potential for significant performance improvements for specific operations, particularly sorting and accumulation steps.
+
+5. **Generic Fallback**: The implementation will work on all platforms with varying performance levels, ensuring broad compatibility.
 
 ## Conclusion
 
-This roadmap provides a structured approach to implementing the MAGNUS algorithm in Rust with cross-platform support. The implementation strategy:
+This revised roadmap provides a pragmatic approach to implementing the MAGNUS algorithm in Rust, prioritizing a working prototype before performance optimizations. The implementation strategy:
 
-1. Prioritizes hardware-agnostic components first
-2. Uses Rust's safety features while maintaining performance
-3. Leverages existing libraries for core functionality
-4. Addresses each implementation gap with practical solutions
-5. Provides a pluggable approach to architecture-specific optimizations
-6. Includes comprehensive testing and benchmarking
+1. Prioritizes learning and correctness in early phases
+2. Focuses on hardware-agnostic components first
+3. Uses Rust's safety features while building towards high performance
+4. Addresses implementation gaps with practical solutions
+5. Includes comprehensive testing throughout development
+6. Provides a path to hardware-specific optimizations after core functionality is stable
 
-The most challenging aspect will be the AVX-512 sort with accumulation (Gap 4), but the proposed sort-then-reduce approach offers a practical starting point while we investigate more optimized solutions. For truly performance-critical sections, we can fall back to C or even assembly through Rust's FFI capabilities if necessary.
+The most challenging aspects will be learning Rust while implementing complex algorithms and the hardware-specific optimizations in later phases. By focusing on a working prototype first and following test-driven development, we can build a solid foundation before tackling more advanced performance optimizations.
