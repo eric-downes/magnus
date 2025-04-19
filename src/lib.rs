@@ -7,7 +7,7 @@ pub mod reordering;
 pub mod utils;
 
 // Re-export primary components
-pub use matrix::{SparseMatrixCSR, SparseMatrixCSC};
+pub use matrix::{SparseMatrixCSR, SparseMatrixCSC, reference_spgemm};
 pub use matrix::config::{MagnusConfig, SystemParameters, Architecture};
 
 /// Performs sparse general matrix-matrix multiplication (SpGEMM)

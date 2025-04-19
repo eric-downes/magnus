@@ -1,4 +1,4 @@
-use magnus::{SparseMatrixCSR, MagnusConfig};
+use magnus::{SparseMatrixCSR, MagnusConfig, reference_spgemm};
 
 fn main() {
     println!("MAGNUS: Matrix Algebra for GPU and Multicore Systems");
@@ -35,6 +35,11 @@ fn main() {
     println!("    Threads: {}", config.system_params.n_threads);
     println!("    L2 cache size: {} bytes", config.system_params.l2_cache_size);
     
-    // Note: Full multiplication not implemented yet
-    println!("\nMatrix multiplication implementation in progress...");
+    // Use the reference implementation for now
+    println!("\nUsing reference implementation (sprs):");
+    let result = reference_spgemm(&a, &b);
+    println!("{:?}", result);
+    
+    // Note: MAGNUS implementation not yet complete
+    println!("\nMAGNUS implementation in progress...");
 }
