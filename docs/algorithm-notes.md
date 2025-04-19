@@ -1,6 +1,6 @@
 # MAGNUS Algorithm Notes
 
-*Last updated: April 19, 2025*
+*Last updated: April 20, 2025*
 
 This document contains detailed notes on the MAGNUS algorithm and our implementation approach. It serves as a reference for key algorithmic components and implementation decisions.
 
@@ -149,12 +149,83 @@ The selection is based on:
 - A configurable threshold (default 256, which is a typical L2 cache line count)
 - This aligns with the paper's recommendation to use dense accumulators when they fit in cache
 
+## Reordering Strategies
+
+### Fine-Level Reordering (Algorithm 3)
+
+We've implemented the fine-level reordering strategy as described in the paper:
+
+```rust
+pub struct FineLevelReordering {
+    /// Metadata about the chunk size and count
+    metadata: ChunkMetadata,
+}
+```
+
+Key features of our implementation:
+- Divides columns into chunks based on L2 cache size
+- Uses power-of-2 chunk sizes for efficient division via bit shifts
+- Reorders intermediate products by chunk for improved locality
+- Processes chunks sequentially to maximize cache hits
+- Includes specialized handling for different matrix types and sizes
+
+### Coarse-Level Reordering (Algorithm 4)
+
+For rows with extremely large intermediate products, we've implemented the coarse-level reordering:
+
+```rust
+pub struct AHatCSC<T> {
+    /// Maps to original rows in matrix A
+    pub original_row_indices: Vec<usize>,
+    
+    /// The CSC representation of the matrix
+    pub matrix: SparseMatrixCSC<T>,
+}
+
+pub struct CoarseLevelReordering {
+    /// Metadata about the chunk size and count
+    metadata: ChunkMetadata,
+    
+    /// Maximum batch size for processing
+    batch_size: usize,
+}
+```
+
+Key features of our implementation:
+- Converts selected rows of A to CSC format for column-oriented access
+- Processes rows in batches to maintain memory efficiency
+- Reorders and processes each column chunk separately
+- Maintains row identity mapping between original matrix and subset
+- Implements the merge step for combining multiple chunks efficiently
+
+### Chunking Metadata
+
+Both reordering strategies rely on a common chunking approach:
+
+```rust
+pub struct ChunkMetadata {
+    /// Size of each chunk (in elements)
+    pub chunk_length: usize,
+    
+    /// Number of chunks
+    pub n_chunks: usize,
+    
+    /// Number of bits to shift right to get chunk index (for power-of-2 chunk sizes)
+    pub shift_bits: usize,
+}
+```
+
+Key features:
+- Uses power-of-2 chunk sizes for fast division via bit shifts
+- Adapts to cache size for optimal memory usage
+- Includes helper methods for efficient chunk manipulation
+
 ## Implementation Gaps
 
-The paper leaves several implementation details that we still need to address:
+The paper leaves some implementation details that we still need to address:
 
-1. **Coarse-Level Details**: Exact method for constructing AˆCSC
-2. **Coarse-Level Batch Size**: How to determine optimal batch size
+1. ~~**Coarse-Level Details**: Exact method for constructing AˆCSC~~ ✅
+2. ~~**Coarse-Level Batch Size**: How to determine optimal batch size~~ ✅ 
 3. **AVX-512 Sort**: Implementation of the AVX-512 sort with accumulation
 4. **Parameter Tuning**: Finding optimal thresholds for different architectures
 
@@ -168,8 +239,8 @@ We are implementing the algorithm in phases:
    - Basic accumulator implementations (dense and sort-based) ✅
 
 2. **Phase 2**: Complete MAGNUS algorithm (in progress)
-   - Fine-level reordering algorithm
-   - Coarse-level reordering algorithm
+   - Fine-level reordering algorithm ✅
+   - Coarse-level reordering algorithm ✅
    - Integrated SpGEMM implementation
 
 3. **Phase 3**: Performance optimization

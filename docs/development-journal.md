@@ -2,6 +2,60 @@
 
 This document chronologically tracks key development decisions, challenges, and milestones.
 
+## April 21, 2025 - Parallelization of MAGNUS SpGEMM
+
+### Completed Components
+- **Parallel SpGEMM Implementation**: Created parallel version of the MAGNUS algorithm using Rayon
+- **Row-Level Parallelism**: Implemented parallel row processing for all strategies
+- **Comprehensive Testing**: Created test suite for verifying parallel implementation correctness
+- **Benchmarking Infrastructure**: Updated benchmarks to compare parallel and sequential versions
+
+### Key Decisions
+- **Rayon Integration**: Used Rayon's parallel iterators for straightforward parallelization
+- **Embarrassingly Parallel Approach**: Leveraged the row-independent nature of SpGEMM
+- **Shared Data Structures**: Used immutable sharing of input matrices across threads
+- **Testing Strategy**: Direct comparison between sequential and parallel results
+
+### Challenges Overcome
+- Ensured thread safety in all data structures
+- Added proper trait bounds for parallel processing (Send + Sync)
+- Designed tests to verify identical results between sequential and parallel versions
+- Extended benchmark suite to properly evaluate parallel performance
+
+### Next Steps
+- Optimize parallel execution for different hardware architectures
+- Implement parallel processing for coarse-level reordering batches
+- Conduct comprehensive performance analysis with different matrix types
+- Investigate potential GPU acceleration for specific components
+
+## April 20, 2025 - Reordering Strategies Implementation
+
+### Completed Components
+- **Fine-Level Reordering**: Implemented Algorithm 3 from the MAGNUS paper
+- **Coarse-Level Reordering**: Implemented Algorithm 4 from the MAGNUS paper
+- **ChunkMetadata**: Implemented a flexible chunking approach for improved cache locality
+- **AHatCSC**: Created CSC representation of matrix A for coarse-level reordering
+- **Reordering Trait**: Added polymorphic interface for reordering strategies
+- **Batch Processing**: Implemented batch-oriented processing for coarse-level reordering
+
+### Key Decisions
+- **Chunking Strategy**: Used power-of-two chunk sizes for fast division via bit shifts
+- **Memory Locality**: Implemented reordering to improve cache utilization
+- **Histogram-based Approach**: Used histograms and prefix sums for efficient reordering
+- **Testing Approach**: Created comprehensive unit tests and integration tests for both strategies
+
+### Challenges Overcome
+- Handled the complexity of AˆCSC construction with a two-pass algorithm
+- Ensured proper accumulation of values when merging sorted arrays
+- Optimized chunk size selection based on L2 cache parameters
+- Ensured correct handling of batch processing for coarse-level reordering
+
+### Next Steps
+- ✅ Integrate all algorithm components into a unified SpGEMM function
+- ✅ Implement parallelism for row processing
+- Conduct benchmarking to evaluate the implementation
+- Investigate potential hardware-specific optimizations
+
 ## April 19, 2025 - Accumulator Implementations
 
 ### Completed Components
@@ -21,11 +75,6 @@ This document chronologically tracks key development decisions, challenges, and 
 - Resolved floating-point ambiguity in tests by using explicit type annotations
 - Fixed trait object extraction issues with improved test design
 - Handled GitHub Actions configuration for documentation deployment
-
-### Next Steps
-- Implement reordering strategies (fine-level and coarse-level)
-- Integrate accumulators with the main SpGEMM function
-- Add parallel execution support
 
 ## April 18, 2025 - Project Initialization
 

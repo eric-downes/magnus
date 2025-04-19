@@ -333,57 +333,23 @@ fn sort_then_reduce<T: AddAssign + Copy>(
 }
 ```
 
-### Phase 2: Core MAGNUS Algorithm (8-10 weeks) - In Progress
+### Phase 2: Core MAGNUS Algorithm (8-10 weeks) ✅
 
 > Implement the core MAGNUS algorithm components with focus on correctness over performance
 
-1. **Fine-Level Algorithm** (Weeks 1-3) - Next Steps
-   - Implement the histogram computation (Algorithm 3, lines 2-6)
-   - Implement basic prefix sum
-   - Implement the reordering step (Algorithm 3, lines 11-17)
-   - Connect all components with extensive testing
+1. **Fine-Level Algorithm** (Weeks 1-3) ✅
+   - Implement the histogram computation (Algorithm 3, lines 2-6) ✅
+   - Implement basic prefix sum ✅
+   - Implement the reordering step (Algorithm 3, lines 11-17) ✅
+   - Connect all components with extensive testing ✅
 
-2. **GPU Acceleration Investigation** (Week 4)
-   - Research potential for GPU acceleration of sorting and accumulation
-   - Evaluate CUDA or ROCm integration points
-   - Document findings for future implementation
+2. **Coarse-Level Algorithm** (Weeks 4-6) ✅
+   - Implement basic AˆCSC construction (Gap 1) ✅
+   - Implement simple batching strategy (Gap 3) ✅
+   - Implement coarse-level reordering ✅
+   - Integrate with fine-level components ✅
 
-```rust
-fn fine_level_histogram(col_indices: &[usize], metadata: &ChunkMetadata) -> Vec<usize> {
-    let mut counts = vec![0; metadata.n_chunks];
-    for &col in col_indices {
-        let chunk = col >> metadata.shift_bits;
-        counts[chunk] += 1;
-    }
-    counts
-}
-
-fn fine_level_reorder<T: Copy>(
-    col_indices: &[usize], 
-    values: &[T],
-    offsets: &[usize],
-    metadata: &ChunkMetadata,
-) -> (Vec<usize>, Vec<T>) {
-    // Implement memory-efficient reordering
-    // Use the bitshift-based mapping for performance
-}
-
-fn process_fine_level<T: AddAssign + Copy>(
-    col_indices: &[usize],
-    values: &[T],
-    config: &MagnusConfig,
-) -> (Vec<usize>, Vec<T>) {
-    // Full implementation of Algorithm 3
-}
-```
-
-3. **Coarse-Level Algorithm** (Weeks 5-7)
-   - Implement basic AˆCSC construction (Gap 1)
-   - Implement simple batching strategy (Gap 3)
-   - Implement coarse-level reordering
-   - Integrate with fine-level components
-
-4. **Integration and Advanced Features** (Weeks 8-10)
+3. **Integration and Advanced Features** (Weeks 7-8) - Next Steps
    - Connect all algorithms by row category
    - Implement parallel execution (basic thread utilization)
    - Test with larger matrices
@@ -418,6 +384,11 @@ fn process_coarse_level<T: AddAssign + Copy>(
     // Full implementation of Algorithm 4
 }
 ```
+
+4. **GPU Acceleration Investigation** (Weeks 9-10)
+   - Research potential for GPU acceleration of sorting and accumulation
+   - Evaluate CUDA or ROCm integration points
+   - Document findings for future implementation
 
 ### Phase 3: Performance Optimization (8-12 weeks)
 
@@ -533,7 +504,7 @@ fn benchmark_accumulator_crossover(
 
 ## Part 4: Addressing the Implementation Gaps
 
-### Gap 1: Coarse-Level Algorithm Details
+### Gap 1: Coarse-Level Algorithm Details ✅
 
 ```rust
 // Detailed implementation for AˆCSC construction
@@ -623,7 +594,7 @@ fn determine_optimal_threshold(config: &MagnusConfig) -> usize {
 }
 ```
 
-### Gap 3: Coarse-Level Batch Size
+### Gap 3: Coarse-Level Batch Size ✅
 
 ```rust
 fn determine_coarse_batch_size(
@@ -783,13 +754,14 @@ fn generate_test_matrices() -> Vec<TestMatrix> {
 
 ### Overall Timeline (30-40 weeks part-time)
 
-1. **Phase 1: Minimum Viable Implementation** (8-10 weeks)
+1. **Phase 1: Minimum Viable Implementation** (8-10 weeks) ✅
    - Focus: Correct functionality, learning Rust, core data structures
    - Output: Working prototype that passes correctness tests
 
-2. **Phase 2: Core MAGNUS Algorithm** (8-10 weeks)
+2. **Phase 2: Core MAGNUS Algorithm** (8-10 weeks) ✅ (partial)
    - Focus: Implementing the key algorithmic components
    - Output: Complete implementation with all core features
+   - Current status: Fine and Coarse level reordering implementations complete
 
 3. **Phase 3: Performance Optimization** (8-12 weeks)
    - Focus: Improving performance, hardware-specific optimizations

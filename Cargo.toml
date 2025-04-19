@@ -28,3 +28,7 @@ proptest = "1.3"     # Property-based testing
 [[bench]]
 name = "matrix_multiply"
 harness = false
+
+[[bench]]
+name = "suitesparse"
+harness = false
