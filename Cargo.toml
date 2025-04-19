@@ -1,0 +1,34 @@
+[package]
+name = "magnus"
+version = "0.1.0"
+edition = "2021"
+description = "MAGNUS: Matrix Algebra for GPU and Multicore Systems - Sparse matrix multiplication algorithm"
+authors = ["Eric <noreply@example.com>"]
+license = "MIT"
+repository = "https://github.com/yourusername/magnus"
+readme = "README.md"
+
+[dependencies]
+# Core matrix libraries
+sprs = "0.11"        # Sparse matrix representations
+ndarray = "0.15"     # Dense array handling
+
+# Parallelism
+rayon = "1.8"        # Data-parallel operations
+
+# Utilities
+num-traits = "0.2"   # Generic numeric operations
+aligned-vec = "0.5"  # Aligned memory allocation
+num_cpus = "1.16"    # CPU core detection
+
+[dev-dependencies]
+criterion = "0.5"    # Benchmarking framework
+proptest = "1.3"     # Property-based testing
+
+[[bench]]
+name = "matrix_multiply"
+harness = false
+
+[[bench]]
+name = "suitesparse"
+harness = false
