@@ -358,7 +358,7 @@ version = "0.1.0"
 dependencies = [
  "aligned-vec",
  "criterion",
- "ndarray 0.15.6",
+ "ndarray",
  "num-traits",
  "num_cpus",
  "proptest",
@@ -381,19 +381,6 @@ name = "memchr"
 version = "2.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
-
-[[package]]
-name = "ndarray"
-version = "0.15.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "adb12d4e967ec485a5f71c6311fe28158e9d6f4bc4a447b474184d0f91a8fa32"
-dependencies = [
- "matrixmultiply",
- "num-complex 0.4.6",
- "num-integer",
- "num-traits",
- "rawpointer",
-]
 
 [[package]]
 name = "ndarray"
@@ -757,7 +744,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8bff8419009a08f6cb7519a602c5590241fbff1446bcc823c07af15386eb801b"
 dependencies = [
  "alga",
- "ndarray 0.16.1",
+ "ndarray",
  "num-complex 0.4.6",
  "num-traits",
  "num_cpus",

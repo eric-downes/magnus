@@ -11,7 +11,7 @@ readme = "README.md"
 [dependencies]
 # Core matrix libraries
 sprs = "0.11"        # Sparse matrix representations
-ndarray = "0.15"     # Dense array handling
+ndarray = "0.16"     # Dense array handling
 
 # Parallelism
 rayon = "1.8"        # Data-parallel operations
