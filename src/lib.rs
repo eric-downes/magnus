@@ -35,8 +35,8 @@
 //! use magnus::{SparseMatrixCSR, MagnusConfig, magnus_spgemm};
 //!
 //! // Create matrices (implementation details omitted)
-//! # let a = SparseMatrixCSR::new(1, 1, vec![0, 0], vec![], vec![]);
-//! # let b = SparseMatrixCSR::new(1, 1, vec![0, 0], vec![], vec![]);
+//! # let a = SparseMatrixCSR::<f64>::new(1, 1, vec![0, 0], vec![], vec![]);
+//! # let b = SparseMatrixCSR::<f64>::new(1, 1, vec![0, 0], vec![], vec![]);
 //! let config = MagnusConfig::default();
 //!
 //! // Multiply matrices using MAGNUS
@@ -48,8 +48,8 @@
 //! ```
 //! use magnus::{SparseMatrixCSR, reference_spgemm};
 //!
-//! # let a = SparseMatrixCSR::new(1, 1, vec![0, 0], vec![], vec![]);
-//! # let b = SparseMatrixCSR::new(1, 1, vec![0, 0], vec![], vec![]);
+//! # let a = SparseMatrixCSR::<f64>::new(1, 1, vec![0, 0], vec![], vec![]);
+//! # let b = SparseMatrixCSR::<f64>::new(1, 1, vec![0, 0], vec![], vec![]);
 //! let c = reference_spgemm(&a, &b);
 //! ```
 
@@ -63,6 +63,7 @@ pub use matrix::{SparseMatrixCSR, SparseMatrixCSC, reference_spgemm};
 pub use matrix::{categorize_rows, analyze_categorization, CategorizationSummary};
 pub use matrix::config::{MagnusConfig, SystemParameters, Architecture, RowCategory, SortMethod};
 pub use utils::{to_sprs_csr, to_sprs_csc, from_sprs_csr, from_sprs_csc};
+pub use accumulator::{Accumulator, create_accumulator, multiply_row_dense};
 
 /// Performs sparse general matrix-matrix multiplication (SpGEMM)
 /// using the MAGNUS algorithm.
@@ -85,6 +86,12 @@ pub use utils::{to_sprs_csr, to_sprs_csc, from_sprs_csr, from_sprs_csc};
 /// use magnus::{SparseMatrixCSR, magnus_spgemm, MagnusConfig};
 ///
 /// // Example will be added when implementation is complete
+/// # fn test_without_calling() {
+/// #     let a = SparseMatrixCSR::<f64>::new(1, 1, vec![0, 0], vec![], vec![]);
+/// #     let b = SparseMatrixCSR::<f64>::new(1, 1, vec![0, 0], vec![], vec![]);
+/// #     let config = MagnusConfig::default();
+/// #     // Uncomment when implemented: let c = magnus_spgemm(&a, &b, &config);
+/// # }
 /// ```
 pub fn magnus_spgemm<T>(
     _a: &matrix::SparseMatrixCSR<T>,

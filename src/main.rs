@@ -1,5 +1,5 @@
 use magnus::{SparseMatrixCSR, MagnusConfig, reference_spgemm};
-use magnus::{categorize_rows, analyze_categorization};
+use magnus::{categorize_rows, analyze_categorization, multiply_row_dense};
 
 fn main() {
     println!("MAGNUS: Matrix Algebra for GPU and Multicore Systems");
@@ -52,8 +52,15 @@ fn main() {
     println!("  Fine-level: {}", summary.fine_level_count);
     println!("  Coarse-level: {}", summary.coarse_level_count);
     
-    // Use the reference implementation for now
-    println!("\nUsing reference implementation:");
+    // Demonstrate dense accumulator for row multiplication
+    println!("\nUsing dense accumulator to multiply row 0:");
+    let (cols, vals) = multiply_row_dense(0, &a, &b);
+    println!("  Result row has {} non-zeros", cols.len());
+    println!("  Columns: {:?}", cols);
+    println!("  Values: {:?}", vals);
+    
+    // Also use the reference implementation
+    println!("\nUsing reference implementation for full matrix multiplication:");
     let result = reference_spgemm(&a, &b);
     println!("{:?}", result);
     
