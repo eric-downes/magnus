@@ -9,6 +9,7 @@ pub mod utils;
 // Re-export primary components
 pub use matrix::{SparseMatrixCSR, SparseMatrixCSC, reference_spgemm};
 pub use matrix::config::{MagnusConfig, SystemParameters, Architecture};
+pub use utils::{to_sprs_csr, to_sprs_csc, from_sprs_csr, from_sprs_csc};
 
 /// Performs sparse general matrix-matrix multiplication (SpGEMM)
 /// using the MAGNUS algorithm.

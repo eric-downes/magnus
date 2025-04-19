@@ -1,7 +1,9 @@
 //! Utility functions and helpers
 
-// This is a placeholder for now.
-// Will be expanded as needed during implementation.
+pub mod formats;
+
+// Re-export commonly used utilities
+pub use formats::{to_sprs_csr, to_sprs_csc, from_sprs_csr, from_sprs_csc};
 
 /// Computes an exclusive prefix sum (scan) for a vector
 pub fn exclusive_scan(input: &[usize]) -> Vec<usize> {

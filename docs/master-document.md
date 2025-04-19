@@ -36,7 +36,9 @@ This document serves as the central reference for all project documentation. It 
 ### Documentation Guidelines
 
 1. **Update Frequency**: 
-   - This master document will be updated at the start of each development session
+   - This master document will be checked at the start of each development session
+   - This master document will be updated at the end of each development session.
+     - and at the start if discrepancies arise.
    - Development journal entries will be added after significant progress or decisions
 
 2. **Document Structure**:
