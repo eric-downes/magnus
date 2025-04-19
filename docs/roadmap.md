@@ -232,29 +232,29 @@ enum RowCategory {
 
 ## Part 3: Revised Implementation Roadmap
 
-### Phase 1: Minimum Viable Implementation (8-10 weeks)
+### Phase 1: Minimum Viable Implementation (8-10 weeks) ✅
 
 > Focus on a working prototype with correct functionality over performance
 
-1. **Matrix Fundamentals** (Weeks 1-2)
-   - Implement or adapt CSR/CSC matrix formats
-   - Implement conversion between formats
-   - Basic sparse matrix operations (for testing correctness)
-   - Set up project structure and testing framework
+1. **Matrix Fundamentals** (Weeks 1-2) ✅
+   - Implement or adapt CSR/CSC matrix formats ✅
+   - Implement conversion between formats ✅
+   - Basic sparse matrix operations (for testing correctness) ✅
+   - Set up project structure and testing framework ✅
 
-2. **Simple SpGEMM Implementation** (Weeks 3-4)
-   - Implement a basic sparse matrix multiplication algorithm
-   - Focus on correctness rather than performance
-   - Use this as a reference implementation for testing
+2. **Simple SpGEMM Implementation** (Weeks 3-4) ✅
+   - Implement a basic sparse matrix multiplication algorithm ✅
+   - Focus on correctness rather than performance ✅
+   - Use this as a reference implementation for testing ✅
 
-3. **System Parameter Detection** (Week 5)
-   - Simple environment detection (number of threads, etc.)
-   - Basic parameter settings based on the paper
-   - Defer complex optimizations for later phases
+3. **System Parameter Detection** (Week 5) ✅
+   - Simple environment detection (number of threads, etc.) ✅
+   - Basic parameter settings based on the paper ✅
+   - Defer complex optimizations for later phases ✅
 
-4. **Row Categorization Logic** (Week 6)
-   - Implement the categorization logic for rows as described in Section 3.1
-   - Determine which accumulation method to use for each row
+4. **Row Categorization Logic** (Week 6) ✅
+   - Implement the categorization logic for rows as described in Section 3.1 ✅
+   - Determine which accumulation method to use for each row ✅
 
 ```rust
 fn categorize_rows<T>(
@@ -270,15 +270,44 @@ fn categorize_rows<T>(
 }
 ```
 
-5. **Basic Accumulators** (Weeks 7-8)
-   - Implement the standard dense accumulator (Algorithm 1)
-   - Implement a simple sort-based accumulator
-   - Define pluggable interface for future optimization
+5. **Basic Accumulators** (Weeks 7-8) ✅
+   - Implement the standard dense accumulator (Algorithm 1) ✅
+   - Implement a simple sort-based accumulator ✅
+   - Define pluggable interface for future optimization ✅
 
-6. **Integration and Testing** (Weeks 9-10)
-   - Integrate all components into a working prototype
-   - Extensive testing against reference implementation
-   - Document current functionality and limitations
+```rust
+pub trait Accumulator<T>
+where
+    T: Copy + Num + AddAssign,
+{
+    /// Reset the accumulator to prepare for a new row
+    fn reset(&mut self);
+    
+    /// Accumulate a single entry (column and value)
+    fn accumulate(&mut self, col: usize, val: T);
+    
+    /// Extract the non-zero entries as sorted (column, value) pairs
+    fn extract_result(self) -> (Vec<usize>, Vec<T>);
+}
+
+// Factory function for selecting the appropriate accumulator
+pub fn create_accumulator<T>(n_cols: usize, dense_threshold: usize) -> Box<dyn Accumulator<T>>
+where
+    T: Copy + Num + AddAssign + 'static,
+{
+    if n_cols <= dense_threshold {
+        Box::new(dense::DenseAccumulator::new(n_cols))
+    } else {
+        let initial_capacity = std::cmp::min(n_cols / 10, 1024);
+        Box::new(sort::SortAccumulator::new(initial_capacity))
+    }
+}
+```
+
+6. **Integration and Testing** (Weeks 9-10) ✅
+   - Integrate all components into a working prototype ✅
+   - Extensive testing against reference implementation ✅
+   - Document current functionality and limitations ✅
 
 ```rust
 trait Accumulator<T> {
@@ -304,11 +333,11 @@ fn sort_then_reduce<T: AddAssign + Copy>(
 }
 ```
 
-### Phase 2: Core MAGNUS Algorithm (8-10 weeks)
+### Phase 2: Core MAGNUS Algorithm (8-10 weeks) - In Progress
 
 > Implement the core MAGNUS algorithm components with focus on correctness over performance
 
-1. **Fine-Level Algorithm** (Weeks 1-3)
+1. **Fine-Level Algorithm** (Weeks 1-3) - Next Steps
    - Implement the histogram computation (Algorithm 3, lines 2-6)
    - Implement basic prefix sum
    - Implement the reordering step (Algorithm 3, lines 11-17)

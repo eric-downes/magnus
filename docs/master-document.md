@@ -1,6 +1,6 @@
 # MAGNUS Project Master Document
 
-*Last updated: April 18, 2025*
+*Last updated: April 19, 2025*
 
 ## Project Overview
 
@@ -12,15 +12,21 @@ performance.
 
 ## Current Status
 
-**Current Phase**: Preparation (Phase 0)
-- Established project roadmap
-- Created documentation structure
-- Planning initial implementation steps
+**Current Phase**: Core Implementation (Phase 1)
+- Established project roadmap and documentation
+- Set up Rust project structure with dependencies
+- Implemented basic matrix formats (CSR/CSC) with format conversion utilities
+- Created reference SpGEMM implementation for testing
+- Implemented row categorization logic
+- ✅ Implemented dense accumulator for SpGEMM
+- ✅ Implemented sort-based accumulator for SpGEMM
+- Set up rustdoc documentation with GitHub Actions
 
 **Next Steps**:
-- Set up Rust project structure and dependencies
-- Begin implementing basic matrix formats
-- Develop initial test suite
+- Implement reordering strategies (fine-level and coarse-level)
+- Create the main MAGNUS SpGEMM function with accumulator selection
+- Implement row-parallel execution
+- Conduct benchmarking against reference implementation
 
 ## Documentation Index
 

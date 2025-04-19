@@ -1,7 +1,8 @@
 //! Integration tests for accumulators
 
-use magnus::{SparseMatrixCSR, multiply_row_dense, create_accumulator, Accumulator};
+use magnus::{SparseMatrixCSR, multiply_row_dense, multiply_row_sort, create_accumulator, Accumulator};
 use magnus::accumulator::dense::DenseAccumulator;
+use magnus::accumulator::sort::SortAccumulator;
 
 #[test]
 fn test_dense_accumulator_with_sparse_matrices() {
@@ -56,66 +57,106 @@ fn test_dense_accumulator_with_sparse_matrices() {
 }
 
 #[test]
-fn test_dense_accumulator_trait_interface() {
-    // Create a concrete DenseAccumulator
+fn test_accumulator_trait_interfaces() {
+    // Create concrete accumulators
     let n_cols = 5;
-    let threshold = 256; // Default from paper
+    let _threshold = 256; // Default from paper
     
-    // Test using the direct implementation
+    // Test using the direct DenseAccumulator implementation
     let mut dense_acc = DenseAccumulator::new(n_cols);
     
     // Accumulate some values
-    dense_acc.accumulate(0, 1.0);
-    dense_acc.accumulate(2, 3.0);
-    dense_acc.accumulate(4, 5.0);
-    dense_acc.accumulate(2, 2.0); // Duplicate column should be accumulated
+    dense_acc.accumulate(0, 1.0f64);
+    dense_acc.accumulate(2, 3.0f64);
+    dense_acc.accumulate(4, 5.0f64);
+    dense_acc.accumulate(2, 2.0f64); // Duplicate column should be accumulated
     
     // Extract result directly
-    let (cols, vals) = dense_acc.extract_result();
+    let (cols_dense, vals_dense) = dense_acc.extract_result();
     
     // Verify results
-    assert_eq!(cols, vec![0, 2, 4]);
-    let diff1: f64 = (vals[0] - 1.0f64).abs();
-    let diff2: f64 = (vals[1] - 5.0f64).abs(); // 3.0 + 2.0
-    let diff3: f64 = (vals[2] - 5.0f64).abs();
+    assert_eq!(cols_dense, vec![0, 2, 4]);
+    let diff1: f64 = (vals_dense[0] - 1.0f64).abs();
+    let diff2: f64 = (vals_dense[1] - 5.0f64).abs(); // 3.0 + 2.0
+    let diff3: f64 = (vals_dense[2] - 5.0f64).abs();
     assert!(diff1 < 1.0e-10);
     assert!(diff2 < 1.0e-10);
     assert!(diff3 < 1.0e-10);
     
-    // Now test using the trait interface and factory function
-    {
-        // Create a new accumulator through the factory
-        let mut acc = create_accumulator::<f64>(n_cols, threshold);
-        
-        // Accumulate the same values
-        acc.accumulate(0, 1.0f64);
-        acc.accumulate(2, 3.0f64);
-        acc.accumulate(4, 5.0f64);
-        acc.accumulate(2, 2.0f64); // Duplicate column should be accumulated
-        
-        // Test reset works on the trait object
-        acc.reset();
-        
-        // Accumulate different values after reset
-        acc.accumulate(1, 10.0f64);
-        acc.accumulate(3, 30.0f64);
-        
-        // We can't directly extract results from a trait object due to Rust's 
-        // ownership rules. Instead, we drop the accumulator here and test
-        // extraction with concrete types below.
+    // Test using the SortAccumulator implementation with the same input
+    let mut sort_acc = SortAccumulator::new(n_cols);
+    
+    // Accumulate the same values but in a different order
+    sort_acc.accumulate(2, 3.0f64);
+    sort_acc.accumulate(0, 1.0f64);
+    sort_acc.accumulate(2, 2.0f64);
+    sort_acc.accumulate(4, 5.0f64);
+    
+    // Extract result
+    let (cols_sort, vals_sort) = sort_acc.extract_result();
+    
+    // Results should be identical to the dense accumulator, despite different insertion order
+    assert_eq!(cols_sort, cols_dense);
+    
+    for i in 0..cols_dense.len() {
+        let diff: f64 = (vals_sort[i] - vals_dense[i]).abs();
+        assert!(diff < 1.0e-10, "Values at index {} differ: {} vs {}", i, vals_sort[i], vals_dense[i]);
     }
     
-    // Test that the factory creates an accumulator that behaves correctly with extraction
-    let mut concrete_acc = DenseAccumulator::new(n_cols);
-    concrete_acc.accumulate(1, 10.0f64);
-    concrete_acc.accumulate(3, 30.0f64);
+    // Now test the factory function with thresholds
+    {
+        // Small matrix should use dense accumulator
+        let mut small_acc = create_accumulator::<f64>(n_cols, 10);
+        
+        // Accumulate some values
+        small_acc.accumulate(0, 1.0f64);
+        small_acc.accumulate(2, 3.0f64);
+        small_acc.reset();
+        
+        // Large matrix should use sort accumulator
+        let large_size = 1000;
+        let mut large_acc = create_accumulator::<f64>(large_size, 10);
+        
+        // Accumulate some values
+        large_acc.accumulate(0, 1.0f64);
+        large_acc.accumulate(999, 3.0f64);
+        large_acc.reset();
+    }
     
-    let (cols, vals) = concrete_acc.extract_result();
-    assert_eq!(cols, vec![1, 3]);
-    let diff4: f64 = (vals[0] - 10.0f64).abs();
-    let diff5: f64 = (vals[1] - 30.0f64).abs();
-    assert!(diff4 < 1.0e-10);
-    assert!(diff5 < 1.0e-10);
+    // Test that concrete accumulators handle reset properly
+    {
+        // Test reset with dense accumulator
+        let mut dense_acc = DenseAccumulator::new(n_cols);
+        dense_acc.accumulate(1, 10.0f64);
+        dense_acc.accumulate(3, 30.0f64);
+        dense_acc.reset();
+        
+        // Add new values after reset
+        dense_acc.accumulate(0, 5.0f64);
+        
+        // Extract and verify
+        let (cols, vals) = dense_acc.extract_result();
+        assert_eq!(cols, vec![0]);
+        let diff: f64 = (vals[0] - 5.0f64).abs();
+        assert!(diff < 1.0e-10);
+    }
+    
+    {
+        // Test reset with sort accumulator
+        let mut sort_acc = SortAccumulator::new(n_cols);
+        sort_acc.accumulate(1, 10.0f64);
+        sort_acc.accumulate(3, 30.0f64);
+        sort_acc.reset();
+        
+        // Add new values after reset
+        sort_acc.accumulate(0, 5.0f64);
+        
+        // Extract and verify
+        let (cols, vals) = sort_acc.extract_result();
+        assert_eq!(cols, vec![0]);
+        let diff: f64 = (vals[0] - 5.0f64).abs();
+        assert!(diff < 1.0e-10);
+    }
 }
 
 #[test]
@@ -135,12 +176,19 @@ fn test_accumulator_with_empty_row() {
         vec![7.0f64, 8.0, 9.0],
     );
     
-    // Test the accumulator operation on the empty row
+    // Test with dense accumulator
     let (cols_row0, vals_row0) = multiply_row_dense(0, &a, &b);
     
     // Result should be empty
     assert_eq!(cols_row0.len(), 0);
     assert_eq!(vals_row0.len(), 0);
+    
+    // Test with sort-based accumulator
+    let (cols_row0_sort, vals_row0_sort) = multiply_row_sort(0, &a, &b);
+    
+    // Result should be empty
+    assert_eq!(cols_row0_sort.len(), 0);
+    assert_eq!(vals_row0_sort.len(), 0);
 }
 
 #[test]
@@ -187,7 +235,7 @@ fn test_accumulator_with_larger_matrices() {
         b_values,
     );
     
-    // Multiply using dense accumulator - result should be diagonal with 6.0 on diagonal
+    // Test with dense accumulator - result should be diagonal with 6.0 on diagonal
     for i in 0..size {
         let (cols, vals) = multiply_row_dense(i, &a, &b);
         
@@ -195,5 +243,77 @@ fn test_accumulator_with_larger_matrices() {
         assert_eq!(cols[0], i);
         let diff: f64 = (vals[0] - 6.0f64).abs();
         assert!(diff < 1.0e-10); // 2.0 * 3.0
+    }
+    
+    // Test with sort-based accumulator - result should be identical
+    for i in 0..size {
+        let (cols, vals) = multiply_row_sort(i, &a, &b);
+        
+        assert_eq!(cols.len(), 1);
+        assert_eq!(cols[0], i);
+        let diff: f64 = (vals[0] - 6.0f64).abs();
+        assert!(diff < 1.0e-10); // 2.0 * 3.0
+    }
+}
+
+#[test]
+fn test_sort_accumulator_with_complex_matrix() {
+    // Create a matrix with repeated column indices in different rows
+    // This will test the sort-based accumulator's ability to merge duplicates
+    
+    // Matrix A: [2 1 0 0; 1 0 3 0; 0 2 1 1; 4 0 0 2]
+    let a = SparseMatrixCSR::new(
+        4, 4,
+        vec![0, 2, 4, 7, 9],
+        vec![0, 1, 0, 2, 1, 2, 3, 0, 3],
+        vec![2.0f64, 1.0, 1.0, 3.0, 2.0, 1.0, 1.0, 4.0, 2.0],
+    );
+    
+    // Matrix B: [1 0 2 3; 0 2 1 0; 3 2 0 1; 0 4 0 2]
+    let b = SparseMatrixCSR::new(
+        4, 4,
+        vec![0, 3, 6, 9, 11],
+        vec![0, 2, 3, 1, 2, 3, 0, 1, 3, 1, 3],
+        vec![1.0f64, 2.0, 3.0, 2.0, 1.0, 0.0, 3.0, 2.0, 1.0, 4.0, 2.0],
+    );
+    
+    // Test dense and sort-based accumulators on each row
+    for row in 0..4 {
+        let (cols_dense, vals_dense) = multiply_row_dense(row, &a, &b);
+        let (cols_sort, vals_sort) = multiply_row_sort(row, &a, &b);
+        
+        // Results should be identical between implementations
+        assert_eq!(cols_dense.len(), cols_sort.len(), "Row {} has different number of non-zeros", row);
+        assert_eq!(cols_dense, cols_sort, "Row {} has different column indices", row);
+        
+        for i in 0..cols_dense.len() {
+            let diff: f64 = (vals_dense[i] - vals_sort[i]).abs();
+            assert!(diff < 1.0e-10, "Row {}, col {} values differ: {} vs {}", 
+                  row, cols_dense[i], vals_dense[i], vals_sort[i]);
+        }
+        
+        // Additional verification for specific rows
+        match row {
+            0 => {
+                // Row 0: [2, 2, 5, 6]
+                assert_eq!(cols_dense, vec![0, 1, 2, 3]);
+                let expected = [2.0f64, 2.0, 5.0, 6.0];
+                for i in 0..4 {
+                    let diff: f64 = (vals_dense[i] - expected[i]).abs();
+                    assert!(diff < 1.0e-10);
+                }
+            },
+            1 => {
+                // Row 1: [10, 6, 2, 6]
+                assert_eq!(cols_dense, vec![0, 1, 2, 3]);
+                let expected = [10.0f64, 6.0, 2.0, 6.0];
+                for i in 0..4 {
+                    let diff: f64 = (vals_dense[i] - expected[i]).abs();
+                    assert!(diff < 1.0e-10);
+                }
+            },
+            // Add other row tests if needed
+            _ => {}
+        }
     }
 }

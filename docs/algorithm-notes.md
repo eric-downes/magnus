@@ -1,6 +1,6 @@
 # MAGNUS Algorithm Notes
 
-*Last updated: April 18, 2025*
+*Last updated: April 19, 2025*
 
 This document contains detailed notes on the MAGNUS algorithm and our implementation approach. It serves as a reference for key algorithmic components and implementation decisions.
 
@@ -56,25 +56,118 @@ Handles extremely large intermediate products:
 3. Process in batches for memory efficiency
 4. Apply fine-level reordering within each batch
 
+## Implementation Details
+
+### Dense Accumulator (Algorithm 1)
+
+We've implemented the dense accumulator as described in the paper:
+
+```rust
+pub struct DenseAccumulator<T> {
+    /// The dense accumulation array
+    values: Vec<T>,
+    
+    /// Flags to track which positions in the dense array are non-zero
+    occupied: Vec<bool>,
+    
+    /// Temporary storage for the column indices of non-zero elements
+    col_indices: Vec<usize>,
+}
+```
+
+Key features of our implementation:
+- Uses a dense array for value accumulation
+- Maintains a boolean flag array to track non-zero positions
+- Stores column indices of non-zeros for efficient extraction
+- Provides reset functionality to reuse allocated memory
+
+### Sort-based Accumulator (Algorithm 2)
+
+For sparse rows or when the dense array would be too large for cache, we've implemented the sort-based accumulator:
+
+```rust
+pub struct SortAccumulator<T> {
+    /// Temporary storage for column indices of intermediate products
+    col_indices: Vec<usize>,
+    
+    /// Temporary storage for values of intermediate products
+    values: Vec<T>,
+}
+```
+
+Key features of our implementation:
+- Stores column indices and values as unsorted pairs
+- Sorts indices and merges duplicate columns during extraction
+- More memory-efficient for sparse intermediate products
+- Provides functionality compatible with the Accumulator trait
+
+### Accumulator Trait Design
+
+We've designed a common trait interface for all accumulator types:
+
+```rust
+pub trait Accumulator<T>
+where
+    T: Copy + Num + AddAssign,
+{
+    /// Reset the accumulator to prepare for a new row
+    fn reset(&mut self);
+    
+    /// Accumulate a single entry (column and value)
+    fn accumulate(&mut self, col: usize, val: T);
+    
+    /// Extract the non-zero entries as sorted (column, value) pairs
+    fn extract_result(self) -> (Vec<usize>, Vec<T>);
+}
+```
+
+This design allows for:
+- Polymorphic behavior with different accumulator implementations
+- Factory function to select the appropriate accumulator type
+- Future extensibility for other accumulator strategies
+
+### Accumulator Selection Strategy
+
+We've implemented a factory function that selects the appropriate accumulator:
+
+```rust
+pub fn create_accumulator<T>(n_cols: usize, dense_threshold: usize) -> Box<dyn Accumulator<T>>
+where
+    T: Copy + Num + AddAssign + 'static,
+{
+    if n_cols <= dense_threshold {
+        Box::new(dense::DenseAccumulator::new(n_cols))
+    } else {
+        let initial_capacity = std::cmp::min(n_cols / 10, 1024);
+        Box::new(sort::SortAccumulator::new(initial_capacity))
+    }
+}
+```
+
+The selection is based on:
+- The number of columns in the output matrix
+- A configurable threshold (default 256, which is a typical L2 cache line count)
+- This aligns with the paper's recommendation to use dense accumulators when they fit in cache
+
 ## Implementation Gaps
 
-The paper leaves several implementation details unspecified:
+The paper leaves several implementation details that we still need to address:
 
 1. **Coarse-Level Details**: Exact method for constructing AˆCSC
-2. **Accumulator Switch Threshold**: When to switch between sort and dense accumulators
-3. **Coarse-Level Batch Size**: How to determine optimal batch size
-4. **AVX-512 Sort**: Implementation of the AVX-512 sort with accumulation
+2. **Coarse-Level Batch Size**: How to determine optimal batch size
+3. **AVX-512 Sort**: Implementation of the AVX-512 sort with accumulation
+4. **Parameter Tuning**: Finding optimal thresholds for different architectures
 
 ## Our Implementation Approach
 
-We will implement the algorithm in phases:
+We are implementing the algorithm in phases:
 
-1. **Phase 1**: Basic implementation with focus on correctness
-   - Implement core data structures (CSR/CSC)
-   - Simple row categorization
-   - Basic accumulator implementations
+1. **Phase 1**: Basic implementation with focus on correctness ✅
+   - Implement core data structures (CSR/CSC) ✅
+   - Simple row categorization ✅
+   - Basic accumulator implementations (dense and sort-based) ✅
 
-2. **Phase 2**: Complete MAGNUS algorithm
+2. **Phase 2**: Complete MAGNUS algorithm (in progress)
    - Fine-level reordering algorithm
    - Coarse-level reordering algorithm
    - Integrated SpGEMM implementation

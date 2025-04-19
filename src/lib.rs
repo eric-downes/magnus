@@ -63,7 +63,7 @@ pub use matrix::{SparseMatrixCSR, SparseMatrixCSC, reference_spgemm};
 pub use matrix::{categorize_rows, analyze_categorization, CategorizationSummary};
 pub use matrix::config::{MagnusConfig, SystemParameters, Architecture, RowCategory, SortMethod};
 pub use utils::{to_sprs_csr, to_sprs_csc, from_sprs_csr, from_sprs_csc};
-pub use accumulator::{Accumulator, create_accumulator, multiply_row_dense};
+pub use accumulator::{Accumulator, create_accumulator, multiply_row_dense, multiply_row_sort};
 
 /// Performs sparse general matrix-matrix multiplication (SpGEMM)
 /// using the MAGNUS algorithm.

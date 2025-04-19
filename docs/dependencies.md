@@ -1,6 +1,6 @@
 # MAGNUS Dependencies
 
-*Last updated: April 18, 2025*
+*Last updated: April 19, 2025*
 
 This document lists and explains the external dependencies used in the MAGNUS implementation.
 
@@ -25,6 +25,18 @@ This document lists and explains the external dependencies used in the MAGNUS im
 |------------|---------|-------------|-------|
 | `num-traits` | 0.2 | Numeric traits for generic programming | Generic matrix implementations |
 | `aligned-vec` | 0.5 | Aligned memory allocation | SIMD-friendly memory allocation |
+| `num_cpus` | 1.16 | CPU core detection | System parameter detection |
+
+### Implemented Components
+
+1. **Matrix Formats**
+   - Implemented custom CSR/CSC formats with conversion utilities
+   - Added interoperability with sprs library
+
+2. **Accumulators**
+   - Dense Accumulator (Algorithm 1) - Complete ✅ 
+   - Sort-based Accumulator (Algorithm 2) - Complete ✅
+   - Accumulator Trait for polymorphic behavior - Complete ✅
 
 ## Development Dependencies
 
