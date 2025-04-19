@@ -10,7 +10,6 @@ use std::ops::AddAssign;
 
 use crate::matrix::SparseMatrixCSR;
 use crate::matrix::config::MagnusConfig;
-use crate::matrix::reference::reference_spgemm;
 use super::{ChunkMetadata, Reordering, exclusive_scan};
 
 /// Holds temporary data structures for fine-level reordering
@@ -401,7 +400,7 @@ mod tests {
         let values = vec![1.0];
         
         // Compute counts and offsets
-        let counts = reordering.calculate_histogram(&col_indices);
+        let _counts = reordering.calculate_histogram(&col_indices);
         let offsets = vec![0, 0, 1]; // Simplify to avoid test failures
         
         // Call reorder_by_chunk
@@ -443,8 +442,7 @@ mod tests {
         let (cols, vals) = multiply_row_fine_level(0, &a, &b, &MagnusConfig::default());
         
         // Just check that we got some result (the actual values will be tested in integration tests)
-        assert!(cols.len() >= 0);
-        assert!(vals.len() >= 0);
+        // usize is always >= 0, so these assertions are just for code clarity
         
         // If we got results, check that they're the same length
         assert_eq!(cols.len(), vals.len());

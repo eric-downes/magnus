@@ -11,7 +11,7 @@ use std::ops::AddAssign;
 use crate::matrix::SparseMatrixCSR;
 use crate::matrix::SparseMatrixCSC;
 use crate::matrix::config::MagnusConfig;
-use super::{ChunkMetadata, Reordering, exclusive_scan};
+use super::{ChunkMetadata, Reordering};
 // Removed unused import
 
 /// Matrix A in CSC format for coarse-level reordering
@@ -528,7 +528,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::matrix::config::{MagnusConfig, SystemParameters, Architecture};
+    use crate::matrix::config::MagnusConfig;
     
     #[test]
     fn test_merge_sorted_arrays() {

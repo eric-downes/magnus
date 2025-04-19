@@ -4,8 +4,6 @@
 //! using Rayon for parallel processing of matrix rows.
 
 use rayon::prelude::*;
-use num_traits::Num;
-use std::ops::AddAssign;
 
 use crate::matrix;
 use crate::accumulator;
@@ -146,9 +144,6 @@ where
     // This is a placeholder for future optimization
     let results = reordering::process_coarse_level_rows(a, b, coarse_rows, config);
     
-    // Convert to the expected format
-    coarse_rows.iter()
-        .zip(results.into_iter())
-        .map(|(&row_idx, (col_indices, values))| (row_idx, col_indices, values))
-        .collect()
+    // Convert to the expected format - each result is already (row_idx, col_indices, values)
+    results
 }
