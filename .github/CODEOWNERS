@@ -1,0 +1,9 @@
+# Default owners for everything in the repo
+* @eric
+
+# Specific ownership for critical parts
+/src/lib.rs @eric
+/src/matrix/ @eric
+/src/accumulator/ @eric
+/src/reordering/ @eric
+/src/parallel.rs @eric
