@@ -1,7 +1,33 @@
-//! Row categorization logic for the MAGNUS algorithm
+//! # Row Categorization for the MAGNUS Algorithm
 //!
 //! This module implements the logic for categorizing rows based on
-//! computational characteristics as described in Section 3.1 of the paper.
+//! computational characteristics as described in Section 3.1 of the MAGNUS paper.
+//!
+//! ## Categorization Logic
+//!
+//! The MAGNUS algorithm categorizes each row of matrix A into one of four categories
+//! based on its computational characteristics:
+//!
+//! 1. **Sort**: When the intermediate product has a small number of non-zeros.
+//!    - The intermediate nnz is less than or equal to `dense_accum_threshold`
+//!    - Uses a sort-based accumulation approach
+//!
+//! 2. **DenseAccumulation**: When the dense accumulation array fits in L2 cache.
+//!    - The dense array size (num_cols * sizeof(value)) is less than or equal to L2 cache size
+//!    - Uses a dense array-based accumulation
+//!
+//! 3. **FineLevel**: When fine-level reordering structures fit in L2 cache.
+//!    - Histogram + prefix sum + reordered cols/vals fit in L2 cache
+//!    - Uses chunked column-major ordering for improved locality
+//!
+//! 4. **CoarseLevel**: When structures don't fit in L2 cache.
+//!    - Combines coarse-level batching with fine-level reordering
+//!    - Can be disabled via config (falling back to FineLevel)
+//!
+//! The categorization process takes into account:
+//! - Matrix structure and density
+//! - Hardware parameters (cache size)
+//! - User configuration
 
 use num_traits::Num;
 use std::ops::AddAssign;

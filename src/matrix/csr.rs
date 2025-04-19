@@ -20,8 +20,8 @@ pub struct SparseMatrixCSR<T> {
     pub n_cols: usize,
     
     /// Row pointers (size: n_rows + 1)
-    /// row_ptr[i] is the index in col_idx and values where row i starts
-    /// row_ptr[n_rows] is equal to nnz
+    /// row_ptr\[i\] is the index in col_idx and values where row i starts
+    /// row_ptr\[n_rows\] is equal to nnz
     pub row_ptr: Vec<usize>,
     
     /// Column indices (size: nnz)
@@ -50,7 +50,7 @@ where
     /// Panics if the input arrays are inconsistent:
     /// - row_ptr.len() must be n_rows + 1
     /// - col_idx.len() must equal values.len()
-    /// - row_ptr[n_rows] must equal col_idx.len()
+    /// - row_ptr\[n_rows\] must equal col_idx.len()
     pub fn new(
         n_rows: usize,
         n_cols: usize,

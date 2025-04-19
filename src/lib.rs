@@ -1,5 +1,57 @@
-// MAGNUS: Matrix Algebra for GPU and Multicore Systems
-// Sparse matrix multiplication implementation
+//! # MAGNUS: Matrix Algebra for GPU and Multicore Systems
+//!
+//! MAGNUS is a high-performance algorithm for multiplying large sparse matrices,
+//! as described in [this paper](https://arxiv.org/pdf/2501.07056).
+//!
+//! ## Overview
+//!
+//! This library implements the MAGNUS algorithm in Rust, with a focus on:
+//!
+//! - Hardware-agnostic implementation with architecture-specific optimizations
+//! - Adaptive approach that chooses different strategies based on row properties
+//! - Memory-efficient operations through improved data locality
+//! - High performance through vectorization and parallelization
+//!
+//! ## Algorithm Components
+//!
+//! The MAGNUS algorithm consists of several key components:
+//!
+//! 1. **Row Categorization**: Analyzing the computational requirements of each row
+//!    and categorizing it into one of four categories.
+//!
+//! 2. **Accumulation Methods**:
+//!    - **Sort-based**: For small intermediate products
+//!    - **Dense**: For intermediate products that fit in L2 cache
+//!
+//! 3. **Reordering Strategies**:
+//!    - **Fine-level**: For larger intermediate products
+//!    - **Coarse-level**: For extremely large intermediate products
+//!
+//! ## Usage
+//!
+//! Basic matrix multiplication:
+//!
+//! ```
+//! use magnus::{SparseMatrixCSR, MagnusConfig, magnus_spgemm};
+//!
+//! // Create matrices (implementation details omitted)
+//! # let a = SparseMatrixCSR::new(1, 1, vec![0, 0], vec![], vec![]);
+//! # let b = SparseMatrixCSR::new(1, 1, vec![0, 0], vec![], vec![]);
+//! let config = MagnusConfig::default();
+//!
+//! // Multiply matrices using MAGNUS
+//! // let c = magnus_spgemm(&a, &b, &config); // Currently in progress
+//! ```
+//!
+//! For now, a reference implementation is available:
+//!
+//! ```
+//! use magnus::{SparseMatrixCSR, reference_spgemm};
+//!
+//! # let a = SparseMatrixCSR::new(1, 1, vec![0, 0], vec![], vec![]);
+//! # let b = SparseMatrixCSR::new(1, 1, vec![0, 0], vec![], vec![]);
+//! let c = reference_spgemm(&a, &b);
+//! ```
 
 pub mod matrix;
 pub mod accumulator;

@@ -1,0 +1,53 @@
+name: Generate and Deploy Rustdoc
+
+on:
+  push:
+    branches: [main, hw-agnostic]  # Update with your default branch names
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Build documentation
+        run: |
+          cargo doc --no-deps
+          
+          # Create an index.html file in the root of the docs directory
+          echo '<meta http-equiv="refresh" content="0; url=magnus/index.html">' > target/doc/index.html
+          
+          # Copy readme to docs directory
+          cp README.md target/doc/
+          
+          # Create .nojekyll file to disable Jekyll processing
+          touch target/doc/.nojekyll
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: './target/doc'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
