@@ -27,8 +27,8 @@ pub struct SystemParameters {
 impl Default for SystemParameters {
     fn default() -> Self {
         Self {
-            cache_line_size: 64,    // Common cache line size
-            l2_cache_size: 256_000, // 256KB L2 cache (conservative default)
+            cache_line_size: 64,        // Common cache line size
+            l2_cache_size: 256_000,     // 256KB L2 cache (conservative default)
             n_threads: num_cpus::get(), // Use all available cores
         }
     }
@@ -61,20 +61,20 @@ pub enum RowCategory {
 pub struct MagnusConfig {
     /// System parameters for performance tuning
     pub system_params: SystemParameters,
-    
+
     /// Threshold to switch from sort to dense accumulation
     pub dense_accum_threshold: usize,
-    
+
     /// Method for sorting and accumulating
     pub sort_method: SortMethod,
-    
+
     /// Whether to enable coarse-level reordering
     pub enable_coarse_level: bool,
-    
+
     /// Batch size for coarse-level reordering
     /// If None, a heuristic based on available memory and cache size is used
     pub coarse_batch_size: Option<usize>,
-    
+
     /// Target architecture for optimization
     pub architecture: Architecture,
 }
@@ -86,7 +86,7 @@ impl Default for MagnusConfig {
             dense_accum_threshold: 256, // Default from paper
             sort_method: SortMethod::SortThenReduce,
             enable_coarse_level: true,
-            coarse_batch_size: None,    // Use heuristic by default
+            coarse_batch_size: None, // Use heuristic by default
             architecture: detect_architecture(),
         }
     }
@@ -102,12 +102,12 @@ fn detect_architecture() -> Architecture {
         // In a real implementation, we'd use CPUID or similar
         Architecture::X86WithoutAVX512
     }
-    
+
     #[cfg(target_arch = "aarch64")]
     {
         Architecture::ArmNeon
     }
-    
+
     #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
     {
         Architecture::Generic

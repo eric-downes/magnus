@@ -22,10 +22,10 @@ where
 {
     /// Reset the accumulator to prepare for a new row
     fn reset(&mut self);
-    
+
     /// Accumulate a single entry (column and value)
     fn accumulate(&mut self, col: usize, val: T);
-    
+
     /// Extract the non-zero entries as sorted (column, value) pairs
     ///
     /// Returns a tuple of `(col_indices, values)` with entries sorted by column index.
@@ -97,46 +97,52 @@ pub use sort::multiply_row_sort;
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_create_accumulator_selection() {
         // Let's test selection behavior instead of type checking
-        
+
         // Test behavior with small matrix, should use dense accumulator
         let n_cols_small = 100;
         let dense_threshold = 256;
         let mut acc_small = create_accumulator::<f64>(n_cols_small, dense_threshold);
-        
+
         // Accumulate and test typical dense accumulator behaviors
         acc_small.accumulate(10, 1.0);
         acc_small.accumulate(50, 2.0);
         acc_small.reset();
-        
+
         // Test behavior with large matrix, should use sort-based accumulator
         let n_cols_large = 1000;
         let small_threshold = 100;
         let mut acc_large = create_accumulator::<f64>(n_cols_large, small_threshold);
-        
+
         // Accumulate and test typical sort accumulator behaviors
         acc_large.accumulate(10, 1.0);
         acc_large.accumulate(500, 2.0);
         acc_large.reset();
-        
+
         // Make sure accumulators are used correctly
-        assert!(n_cols_small <= dense_threshold, "Small n_cols should be <= dense_threshold");
-        assert!(n_cols_large > small_threshold, "Large n_cols should be > threshold");
+        assert!(
+            n_cols_small <= dense_threshold,
+            "Small n_cols should be <= dense_threshold"
+        );
+        assert!(
+            n_cols_large > small_threshold,
+            "Large n_cols should be > threshold"
+        );
     }
-    
+
     #[test]
     fn test_explicit_accumulator_creation() {
         // Test that we can create and use specific accumulator types
-        
+
         // Test DenseAccumulator behavior
         let mut dense_acc = create_dense_accumulator::<f64>(100);
         dense_acc.accumulate(10, 1.0);
         dense_acc.accumulate(50, 2.0);
         dense_acc.reset();
-        
+
         // Test SortAccumulator behavior
         let mut sort_acc = create_sort_accumulator::<f64>(50);
         sort_acc.accumulate(10, 1.0);
