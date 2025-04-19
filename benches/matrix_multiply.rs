@@ -180,7 +180,7 @@ fn bench_matrix_multiply(c: &mut Criterion) {
                         black_box(c)
                     })
                 },
-            )
+            );
         }
     }
 

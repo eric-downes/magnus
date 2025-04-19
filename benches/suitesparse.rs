@@ -98,7 +98,7 @@ fn bench_suitesparse(c: &mut Criterion) {
 
 /// The type of row to select for benchmarking
 enum RowType {
-    Small,  // Few intermediate products
+    // Small variant removed as it's not currently used
     Medium, // Medium number of intermediate products
     Large,  // Many intermediate products
 }
@@ -123,11 +123,6 @@ fn select_representative_row(a: &SparseMatrixCSR<f64>, row_type: RowType) -> Opt
 
     // Select a row based on the requested type
     match row_type {
-        RowType::Small => {
-            // Pick a row in the bottom 20% by non-zeros
-            let idx = n_rows / 5;
-            Some(row_nnz[idx].0)
-        }
         RowType::Medium => {
             // Pick a row in the middle by non-zeros
             let idx = n_rows / 2;
