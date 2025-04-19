@@ -79,7 +79,7 @@ pub use matrix::config::{MagnusConfig, SystemParameters, Architecture, RowCatego
 pub use utils::{to_sprs_csr, to_sprs_csc, from_sprs_csr, from_sprs_csc};
 pub use accumulator::{Accumulator, create_accumulator, multiply_row_dense, multiply_row_sort};
 pub use reordering::{multiply_row_fine_level, multiply_row_coarse_level, process_coarse_level_rows};
-pub use parallel::magnus_spgemm_parallel;
+pub use parallel::{magnus_spgemm_parallel, process_coarse_level_rows_parallel};
 
 /// Performs sparse general matrix-matrix multiplication (SpGEMM)
 /// using the MAGNUS algorithm.

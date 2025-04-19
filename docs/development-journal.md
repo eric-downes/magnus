@@ -2,6 +2,33 @@
 
 This document chronologically tracks key development decisions, challenges, and milestones.
 
+## April 22, 2025 - Parallel Processing for Coarse-Level Reordering
+
+### Completed Components
+- **Parallel Coarse-Level Reordering**: Implemented parallel processing for coarse-level reordering batches
+- **Chunk-Level Parallelism**: Used Rayon's parallel iterators to process chunks in parallel
+- **Thread-Safe Accumulation**: Implemented mutex-protected sharing of results across threads
+- **Improved Configuration**: Added coarse_batch_size parameter to MagnusConfig for tuning
+- **Benchmarking**: Added specific benchmarks for parallel vs sequential coarse-level processing
+
+### Key Decisions
+- **Two-Level Parallelism**: Implemented parallelism at both the row level and the chunk level
+- **Arc<Mutex<>>**: Used atomic reference counting and mutex protection for thread-safe data sharing
+- **Configurable Batch Size**: Made batch size user-configurable with reasonable defaults
+- **Safety Checks**: Added additional bounds checking for robust parallel execution
+
+### Challenges Overcome
+- Designed a thread-safe approach to accumulate results from multiple parallel tasks
+- Managed parallel execution of fine-grained operations while maintaining performance
+- Balanced memory usage and parallelism via configurable batch size
+- Ensured correct synchronization between parallel threads
+
+### Next Steps
+- Conduct comprehensive performance analysis with different matrix types and hardware
+- Implement hardware-specific optimizations for AVX-512 and ARM NEON
+- Explore advanced parallel execution strategies based on workload characteristics
+- Consider integrating GPU acceleration for specific operations
+
 ## April 21, 2025 - Parallelization of MAGNUS SpGEMM
 
 ### Completed Components
@@ -23,8 +50,8 @@ This document chronologically tracks key development decisions, challenges, and 
 - Extended benchmark suite to properly evaluate parallel performance
 
 ### Next Steps
+- ✅ Implement parallel processing for coarse-level reordering batches
 - Optimize parallel execution for different hardware architectures
-- Implement parallel processing for coarse-level reordering batches
 - Conduct comprehensive performance analysis with different matrix types
 - Investigate potential GPU acceleration for specific components
 

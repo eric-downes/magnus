@@ -349,11 +349,13 @@ fn sort_then_reduce<T: AddAssign + Copy>(
    - Implement coarse-level reordering ✅
    - Integrate with fine-level components ✅
 
-3. **Integration and Advanced Features** (Weeks 7-8) - Next Steps
-   - Connect all algorithms by row category
-   - Implement parallel execution (basic thread utilization)
-   - Test with larger matrices
-   - Benchmark against simple implementation
+3. **Integration and Advanced Features** (Weeks 7-8) ✅
+   - Connect all algorithms by row category ✅
+   - Implement parallel execution (basic thread utilization) ✅
+     - Row-level parallelism for SpGEMM ✅
+     - Chunk-level parallelism for coarse-level reordering ✅
+   - Test with larger matrices ✅
+   - Benchmark against simple implementation ✅
 
 ```rust
 // Gap 1: AˆCSC Construction

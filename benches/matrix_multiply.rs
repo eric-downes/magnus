@@ -11,6 +11,8 @@ use magnus::{
     multiply_row_coarse_level,
     multiply_row_dense,
     multiply_row_sort,
+    process_coarse_level_rows_parallel,
+    reordering,
 };
 
 /// Benchmark row multiplication operations
@@ -89,6 +91,51 @@ fn bench_row_multiply(c: &mut Criterion) {
                 );
                 black_box((cols, vals))
             })
+        );
+    }
+    
+    group.finish();
+}
+
+/// Benchmark coarse-level processing
+fn bench_coarse_level_processing(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Coarse Level Processing");
+    
+    // Create test matrices of different sizes
+    let sizes = [100, 500];
+    
+    for &size in &sizes {
+        // Create dense matrices for coarse-level testing
+        let a = create_random_matrix(size, size, 0.5); // Higher density
+        let b = create_random_matrix(size, size, 0.5);
+        
+        // Create a sample of rows to process
+        let rows: Vec<usize> = (0..std::cmp::min(size, 20)).collect();
+        
+        let config = MagnusConfig::default();
+        
+        // Benchmark sequential coarse-level processing
+        group.bench_with_input(
+            BenchmarkId::new(format!("coarse_sequential_{}", size), size), 
+            &size,
+            |bench, _| {
+                bench.iter(|| {
+                    let results = reordering::process_coarse_level_rows(&a, &b, &rows, &config);
+                    black_box(results)
+                })
+            }
+        );
+        
+        // Benchmark parallel coarse-level processing
+        group.bench_with_input(
+            BenchmarkId::new(format!("coarse_parallel_{}", size), size), 
+            &size,
+            |bench, _| {
+                bench.iter(|| {
+                    let results = process_coarse_level_rows_parallel(&a, &b, &rows, &config);
+                    black_box(results)
+                })
+            }
         );
     }
     
@@ -249,5 +296,5 @@ fn create_matrix_with_test_row(cols: usize, density: f64) -> SparseMatrixCSR<f64
     SparseMatrixCSR::new(1, cols, row_ptr, col_indices, values)
 }
 
-criterion_group!(benches, bench_row_multiply, bench_matrix_multiply);
+criterion_group!(benches, bench_row_multiply, bench_matrix_multiply, bench_coarse_level_processing);
 criterion_main!(benches);

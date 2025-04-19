@@ -19,6 +19,13 @@ pub struct FineLevelReordering {
 }
 
 impl FineLevelReordering {
+    /// Get the chunk metadata
+    pub fn get_metadata(&self) -> &ChunkMetadata {
+        &self.metadata
+    }
+}
+
+impl FineLevelReordering {
     /// Create a new fine-level reordering instance
     ///
     /// # Arguments
@@ -339,6 +346,7 @@ mod tests {
             dense_accum_threshold: 256,
             sort_method: crate::matrix::config::SortMethod::SortThenReduce,
             enable_coarse_level: true,
+            coarse_batch_size: None,
             architecture: Architecture::Generic,
         };
         

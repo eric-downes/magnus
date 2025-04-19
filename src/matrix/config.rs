@@ -71,6 +71,10 @@ pub struct MagnusConfig {
     /// Whether to enable coarse-level reordering
     pub enable_coarse_level: bool,
     
+    /// Batch size for coarse-level reordering
+    /// If None, a heuristic based on available memory and cache size is used
+    pub coarse_batch_size: Option<usize>,
+    
     /// Target architecture for optimization
     pub architecture: Architecture,
 }
@@ -82,6 +86,7 @@ impl Default for MagnusConfig {
             dense_accum_threshold: 256, // Default from paper
             sort_method: SortMethod::SortThenReduce,
             enable_coarse_level: true,
+            coarse_batch_size: None,    // Use heuristic by default
             architecture: detect_architecture(),
         }
     }

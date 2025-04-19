@@ -1,7 +1,8 @@
 //! Tests for parallel implementation of MAGNUS SpGEMM
 
 use magnus::{
-    SparseMatrixCSR, MagnusConfig, magnus_spgemm, magnus_spgemm_parallel, reference_spgemm
+    SparseMatrixCSR, MagnusConfig, magnus_spgemm, magnus_spgemm_parallel, reference_spgemm,
+    process_coarse_level_rows_parallel
 };
 
 // Helper function to compare CSR matrices for approximate equality
@@ -212,6 +213,50 @@ fn test_parallel_large_random_matrices() {
 }
 
 // Test that directly compares the performance of parallel vs sequential
+#[test]
+fn test_parallel_coarse_level_processing() {
+    // Create a test case with diagonal matrices
+    let a = SparseMatrixCSR::new(
+        4, 4,
+        vec![0, 1, 2, 3, 4],  // Four rows with one non-zero each
+        vec![0, 1, 2, 3],     // Each row has one entry on the diagonal
+        vec![1.0, 1.0, 1.0, 1.0], // All ones
+    );
+    
+    let b = SparseMatrixCSR::new(
+        4, 4,
+        vec![0, 1, 2, 3, 4],  // Four rows with one non-zero each
+        vec![0, 1, 2, 3],     // Each row has one entry on the diagonal
+        vec![2.0, 3.0, 4.0, 5.0], // Different values
+    );
+    
+    let config = MagnusConfig::default();
+    
+    // Process all rows in parallel
+    let rows = vec![0, 1, 2, 3];
+    let parallel_results = process_coarse_level_rows_parallel(&a, &b, &rows, &config);
+    
+    // Verify we got results for all rows
+    assert_eq!(parallel_results.len(), 4);
+    
+    // Check that the results match what we expect (diagonal values product)
+    for i in 0..rows.len() {
+        let (row_idx, col_indices, values) = &parallel_results[i];
+        
+        // Row index should match
+        assert_eq!(*row_idx, i);
+        
+        // One non-zero per row
+        assert_eq!(col_indices.len(), 1);
+        
+        // Column index should match row (diagonal)
+        assert_eq!(col_indices[0], i);
+        
+        // Value should be product of diagonal entries
+        assert_eq!(values[0], (i + 2) as f64);
+    }
+}
+
 // This test is commented out as it's not meant to be run in CI,
 // but can be uncommented for local benchmarking
 /*
