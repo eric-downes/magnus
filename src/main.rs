@@ -1,4 +1,5 @@
 use magnus::{SparseMatrixCSR, MagnusConfig, reference_spgemm};
+use magnus::{categorize_rows, analyze_categorization};
 
 fn main() {
     println!("MAGNUS: Matrix Algebra for GPU and Multicore Systems");
@@ -35,8 +36,24 @@ fn main() {
     println!("    Threads: {}", config.system_params.n_threads);
     println!("    L2 cache size: {} bytes", config.system_params.l2_cache_size);
     
+    // Categorize rows
+    let categories = categorize_rows(&a, &b, &config);
+    let summary = analyze_categorization(&a, &b, &config);
+    
+    println!("\nRow categorization:");
+    for (i, category) in categories.iter().enumerate() {
+        println!("  Row {}: {:?}", i, category);
+    }
+    
+    println!("\nCategorization summary:");
+    println!("  Total rows: {}", summary.total_rows);
+    println!("  Sort-based: {}", summary.sort_count);
+    println!("  Dense accumulation: {}", summary.dense_count);
+    println!("  Fine-level: {}", summary.fine_level_count);
+    println!("  Coarse-level: {}", summary.coarse_level_count);
+    
     // Use the reference implementation for now
-    println!("\nUsing reference implementation (sprs):");
+    println!("\nUsing reference implementation:");
     let result = reference_spgemm(&a, &b);
     println!("{:?}", result);
     
