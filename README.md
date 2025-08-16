@@ -24,7 +24,7 @@ Add MAGNUS to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-magnus = { git = "https://github.com/eric/magnus" }
+magnus = { git = "https://github.com/eric-downes/magnuspp" }
 ```
 
 ## Usage
