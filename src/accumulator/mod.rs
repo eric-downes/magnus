@@ -6,6 +6,7 @@
 //! characteristics of each row.
 
 pub mod dense;
+pub mod simd;
 pub mod sort;
 
 use num_traits::Num;
@@ -92,6 +93,11 @@ where
 
 // Re-export key functions for convenient access
 pub use dense::multiply_row_dense;
+pub use simd::{
+    create_simd_accelerator, create_simd_accelerator_f32, FallbackAccumulator, SimdAccelerator,
+};
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub use simd::NeonAccumulator;
 pub use sort::multiply_row_sort;
 
 #[cfg(test)]

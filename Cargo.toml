@@ -24,6 +24,7 @@ num_cpus = "1.17"    # CPU core detection
 [dev-dependencies]
 criterion = "0.7"    # Benchmarking framework
 proptest = "1.7"     # Property-based testing
+rand = "0.8"         # Random number generation for benchmarks
 
 [[bench]]
 name = "matrix_multiply"
@@ -31,4 +32,8 @@ harness = false
 
 [[bench]]
 name = "suitesparse"
+harness = false
+
+[[bench]]
+name = "arm_optimization"
 harness = false
