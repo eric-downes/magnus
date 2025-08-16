@@ -1,23 +1,21 @@
-use magnus::matrix::config::{Architecture, detect_architecture};
+use magnus::matrix::config::{detect_architecture, Architecture};
 
 #[test]
 fn test_architecture_detection() {
     let arch = detect_architecture();
-    
+
     // On Apple Silicon, we should detect ARM NEON
     #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
     {
         assert_eq!(arch, Architecture::ArmNeon);
     }
-    
+
     // On x86_64, we should detect either with or without AVX-512
     #[cfg(target_arch = "x86_64")]
     {
-        assert!(
-            arch == Architecture::X86WithAVX512 || arch == Architecture::X86WithoutAVX512
-        );
+        assert!(arch == Architecture::X86WithAVX512 || arch == Architecture::X86WithoutAVX512);
     }
-    
+
     // On other platforms, we should get Generic
     #[cfg(not(any(
         all(target_arch = "aarch64", target_os = "macos"),
@@ -31,7 +29,7 @@ fn test_architecture_detection() {
 #[test]
 fn test_architecture_capabilities() {
     let arch = detect_architecture();
-    
+
     // Test that each architecture reports correct capabilities
     match arch {
         Architecture::ArmNeon => {
@@ -60,7 +58,7 @@ fn test_architecture_capabilities() {
 #[test]
 fn test_architecture_vector_width() {
     let arch = detect_architecture();
-    
+
     // Test expected vector widths for different architectures
     match arch {
         Architecture::ArmNeon => {
@@ -85,10 +83,10 @@ fn test_architecture_vector_width() {
 #[test]
 fn test_architecture_optimal_chunk_size() {
     let arch = detect_architecture();
-    
+
     // Each architecture should provide reasonable chunk sizes
     let chunk_size = arch.optimal_chunk_size();
-    
+
     match arch {
         Architecture::ArmNeon => {
             // For ARM NEON, expect chunk sizes that fit well in cache
@@ -112,11 +110,11 @@ fn test_architecture_optimal_chunk_size() {
 #[test]
 fn test_architecture_accumulator_threshold() {
     let arch = detect_architecture();
-    
+
     // Different architectures should have different thresholds
     // for switching between sort and dense accumulators
     let threshold = arch.dense_accumulator_threshold();
-    
+
     match arch {
         Architecture::ArmNeon => {
             // ARM typically has different cache characteristics

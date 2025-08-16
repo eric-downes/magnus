@@ -5,15 +5,15 @@
 //! The MAGNUS algorithm uses different accumulators based on the
 //! characteristics of each row.
 
-pub mod dense;
-#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
-pub mod neon;
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod accelerate;
+pub mod dense;
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod metal;
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod metal_impl;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub mod neon;
 pub mod simd;
 pub mod sort;
 
@@ -100,14 +100,14 @@ where
 }
 
 // Re-export key functions for convenient access
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub use accelerate::AccelerateAccumulator;
 pub use dense::multiply_row_dense;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub use neon::NeonAccumulator;
 pub use simd::{
     create_simd_accelerator, create_simd_accelerator_f32, FallbackAccumulator, SimdAccelerator,
 };
-#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
-pub use simd::NeonAccumulator;
-#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
-pub use accelerate::AccelerateAccumulator;
 pub use sort::multiply_row_sort;
 
 #[cfg(test)]

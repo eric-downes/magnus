@@ -1,10 +1,10 @@
 //! Benchmark comparing Accelerate framework vs pure NEON implementation
 
-use criterion::{criterion_group, criterion_main, Criterion, BenchmarkId};
-use std::hint::black_box;
-use magnus::accumulator::{NeonAccumulator, AccelerateAccumulator, SimdAccelerator};
-use rand::Rng;
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use magnus::accumulator::{AccelerateAccumulator, NeonAccumulator, SimdAccelerator};
 use rand::seq::SliceRandom;
+use rand::Rng;
+use std::hint::black_box;
 
 fn generate_test_data(size: usize, num_unique: usize) -> (Vec<usize>, Vec<f32>) {
     let mut rng = rand::thread_rng();
@@ -18,7 +18,7 @@ fn bench_comparison(c: &mut Criterion) {
     // Test different sizes to see where each implementation excels
     let test_cases = [
         (4, 4, "size_4"),
-        (8, 6, "size_8"), 
+        (8, 6, "size_8"),
         (16, 12, "size_16"),
         (32, 20, "size_32"),
         (64, 40, "size_64"),
@@ -27,27 +27,23 @@ fn bench_comparison(c: &mut Criterion) {
         (512, 300, "size_512"),
         (1024, 600, "size_1024"),
     ];
-    
+
     for (size, num_unique, name) in test_cases {
         let mut group = c.benchmark_group(format!("accumulator_{}", name));
         let (indices, values) = generate_test_data(size, num_unique);
-        
+
         // Benchmark NEON
         group.bench_function("NEON", |b| {
             let acc = NeonAccumulator::new();
-            b.iter(|| {
-                black_box(acc.sort_and_accumulate(&indices, &values))
-            });
+            b.iter(|| black_box(acc.sort_and_accumulate(&indices, &values)));
         });
-        
+
         // Benchmark Accelerate
         group.bench_function("Accelerate", |b| {
             let acc = AccelerateAccumulator::new();
-            b.iter(|| {
-                black_box(acc.sort_and_accumulate(&indices, &values))
-            });
+            b.iter(|| black_box(acc.sort_and_accumulate(&indices, &values)));
         });
-        
+
         group.finish();
     }
 }
@@ -59,29 +55,25 @@ fn bench_large_sizes(c: &mut Criterion) {
         (4096, 2400, "size_4k"),
         (8192, 4800, "size_8k"),
     ];
-    
+
     for (size, num_unique, name) in test_cases {
         let mut group = c.benchmark_group(format!("large_{}", name));
         group.sample_size(10); // Fewer samples for large sizes
-        
+
         let (indices, values) = generate_test_data(size, num_unique);
-        
+
         // Benchmark NEON
         group.bench_function("NEON", |b| {
             let acc = NeonAccumulator::new();
-            b.iter(|| {
-                black_box(acc.sort_and_accumulate(&indices, &values))
-            });
+            b.iter(|| black_box(acc.sort_and_accumulate(&indices, &values)));
         });
-        
+
         // Benchmark Accelerate
         group.bench_function("Accelerate", |b| {
             let acc = AccelerateAccumulator::new();
-            b.iter(|| {
-                black_box(acc.sort_and_accumulate(&indices, &values))
-            });
+            b.iter(|| black_box(acc.sort_and_accumulate(&indices, &values)));
         });
-        
+
         group.finish();
     }
 }
@@ -89,32 +81,37 @@ fn bench_large_sizes(c: &mut Criterion) {
 // Also test the edge cases where we transition between implementations
 fn bench_transition_sizes(c: &mut Criterion) {
     let mut group = c.benchmark_group("transition_points");
-    
+
     // Test around the 32-element boundary (where Accelerate switches from NEON)
     for size in [30, 31, 32, 33, 34, 35] {
         let (indices, values) = generate_test_data(size, size * 3 / 4);
-        
+
         group.bench_with_input(
             BenchmarkId::new("NEON", size),
             &(indices.clone(), values.clone()),
             |b, (idx, val)| {
                 let acc = NeonAccumulator::new();
                 b.iter(|| black_box(acc.sort_and_accumulate(idx, val)));
-            }
+            },
         );
-        
+
         group.bench_with_input(
             BenchmarkId::new("Accelerate", size),
             &(indices, values),
             |b, (idx, val)| {
                 let acc = AccelerateAccumulator::new();
                 b.iter(|| black_box(acc.sort_and_accumulate(idx, val)));
-            }
+            },
         );
     }
-    
+
     group.finish();
 }
 
-criterion_group!(benches, bench_comparison, bench_large_sizes, bench_transition_sizes);
+criterion_group!(
+    benches,
+    bench_comparison,
+    bench_large_sizes,
+    bench_transition_sizes
+);
 criterion_main!(benches);

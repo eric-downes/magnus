@@ -2,15 +2,15 @@
 //!
 //! This module provides GPU-accelerated sorting and accumulation for large
 //! sparse matrices using Apple's Metal Performance Shaders and custom kernels.
-//! 
+//!
 //! Metal is used for matrices larger than a configurable threshold (default 10,000 elements)
 //! to leverage the massive parallelism of Apple Silicon GPUs.
 
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
 use super::SimdAccelerator;
-use std::sync::Once;
 use std::os::raw::c_void;
+use std::sync::Once;
 
 // Metal Framework bindings
 #[link(name = "Metal", kind = "framework")]
@@ -59,29 +59,29 @@ impl MetalAccelerator {
             if device_ptr.is_null() {
                 return None;
             }
-            
+
             // Check if device supports required features
             // Family 7 = Apple7 (M1), Family 8 = Apple8 (M2), etc.
             if !MTLDeviceSupportsFamily(device_ptr, 7) {
                 return None;
             }
-            
+
             // In production, would create command queue and compile shaders
             // For now, return None as we need proper Metal bindings
             None
         }
     }
-    
+
     /// Check if Metal acceleration should be used for this size
     pub fn should_use_metal(size: usize) -> bool {
         size >= METAL_THRESHOLD && Self::is_available()
     }
-    
+
     /// Check if Metal is available on this system
     pub fn is_available() -> bool {
         static mut AVAILABLE: Option<bool> = None;
         static INIT: Once = Once::new();
-        
+
         unsafe {
             INIT.call_once(|| {
                 AVAILABLE = Some(!MTLCreateSystemDefaultDevice().is_null());
@@ -89,15 +89,19 @@ impl MetalAccelerator {
             AVAILABLE.unwrap_or(false)
         }
     }
-    
+
     /// Sort and accumulate using Metal GPU
-    fn metal_sort_accumulate(&self, col_indices: &[usize], values: &[f32]) -> (Vec<usize>, Vec<f32>) {
+    fn metal_sort_accumulate(
+        &self,
+        col_indices: &[usize],
+        values: &[f32],
+    ) -> (Vec<usize>, Vec<f32>) {
         // This would:
         // 1. Create Metal buffers for input data
         // 2. Dispatch compute kernels for sorting
         // 3. Dispatch kernels for accumulation
         // 4. Copy results back to CPU
-        
+
         // For now, fall back to CPU implementation
         super::accelerate::accelerate_sort_pairs(col_indices, values)
     }
@@ -106,7 +110,7 @@ impl MetalAccelerator {
 impl SimdAccelerator<f32> for MetalAccelerator {
     fn sort_and_accumulate(&self, col_indices: &[usize], values: &[f32]) -> (Vec<usize>, Vec<f32>) {
         let size = col_indices.len();
-        
+
         if size < METAL_THRESHOLD {
             // For smaller sizes, use CPU implementations
             if size <= 32 {
@@ -114,7 +118,8 @@ impl SimdAccelerator<f32> for MetalAccelerator {
                 super::neon::NeonAccumulator::new().sort_and_accumulate(col_indices, values)
             } else {
                 // Use Accelerate for medium sizes
-                super::accelerate::AccelerateAccumulator::new().sort_and_accumulate(col_indices, values)
+                super::accelerate::AccelerateAccumulator::new()
+                    .sort_and_accumulate(col_indices, values)
             }
         } else {
             // Use Metal for large sizes
@@ -159,20 +164,20 @@ pub fn spgemm_metal(
     if !MetalAccelerator::is_available() {
         return Err(MetalError::NotAvailable);
     }
-    
+
     // Check if problem size warrants GPU acceleration
     let total_ops = a_row_ptr[a_rows];
     if total_ops < METAL_THRESHOLD {
         return Err(MetalError::SizeTooSmall);
     }
-    
+
     // In production, this would:
     // 1. Create Metal device and command queue
     // 2. Allocate GPU buffers
     // 3. Copy data to GPU
     // 4. Dispatch SpGEMM kernels
     // 5. Copy results back
-    
+
     Err(MetalError::NotImplemented)
 }
 
@@ -205,24 +210,24 @@ impl std::error::Error for MetalError {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_metal_availability() {
         // Should detect Metal availability on Apple Silicon
         let available = MetalAccelerator::is_available();
         println!("Metal available: {}", available);
-        
+
         // On M1/M2/M3 Macs, this should be true
         #[cfg(target_arch = "aarch64")]
         assert!(available);
     }
-    
+
     #[test]
     fn test_threshold_logic() {
         assert!(!MetalAccelerator::should_use_metal(100));
         assert!(!MetalAccelerator::should_use_metal(1000));
         assert!(!MetalAccelerator::should_use_metal(9999));
-        
+
         // These would use Metal if available
         if MetalAccelerator::is_available() {
             assert!(MetalAccelerator::should_use_metal(10000));

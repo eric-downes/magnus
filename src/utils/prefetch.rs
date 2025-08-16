@@ -3,7 +3,6 @@
 //! This module provides architecture-specific prefetch hints to improve
 //! memory access patterns in sparse matrix operations.
 
-
 /// Prefetch strategy for memory access optimization
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PrefetchStrategy {
@@ -48,7 +47,7 @@ impl PrefetchConfig {
             memory_threshold: 0,
         }
     }
-    
+
     /// Create conservative prefetch configuration
     pub fn conservative() -> Self {
         Self {
@@ -58,7 +57,7 @@ impl PrefetchConfig {
             memory_threshold: 2 * 1024 * 1024 * 1024, // 2GB
         }
     }
-    
+
     /// Create moderate prefetch configuration
     pub fn moderate() -> Self {
         Self {
@@ -68,7 +67,7 @@ impl PrefetchConfig {
             memory_threshold: 4 * 1024 * 1024 * 1024, // 4GB
         }
     }
-    
+
     /// Create aggressive prefetch configuration
     pub fn aggressive() -> Self {
         Self {
@@ -78,7 +77,7 @@ impl PrefetchConfig {
             memory_threshold: 8 * 1024 * 1024 * 1024, // 8GB
         }
     }
-    
+
     /// Auto-detect optimal configuration based on system
     pub fn auto_detect() -> Self {
         // Check environment variable first
@@ -91,14 +90,14 @@ impl PrefetchConfig {
                 _ => Self::default_for_system(),
             };
         }
-        
+
         Self::default_for_system()
     }
-    
+
     /// Get default configuration based on system memory
     fn default_for_system() -> Self {
         let total_memory = get_system_memory();
-        
+
         if total_memory < 4 * 1024 * 1024 * 1024 {
             // Less than 4GB: Conservative or none
             Self::conservative()
@@ -117,21 +116,19 @@ fn get_system_memory() -> usize {
     #[cfg(target_os = "macos")]
     {
         use std::process::Command;
-        
-        if let Ok(output) = Command::new("sysctl")
-            .args(&["-n", "hw.memsize"])
-            .output() {
+
+        if let Ok(output) = Command::new("sysctl").args(&["-n", "hw.memsize"]).output() {
             let mem_str = String::from_utf8_lossy(&output.stdout);
             mem_str.trim().parse().unwrap_or(8 * 1024 * 1024 * 1024)
         } else {
             8 * 1024 * 1024 * 1024
         }
     }
-    
+
     #[cfg(target_os = "linux")]
     {
         use std::fs;
-        
+
         if let Ok(meminfo) = fs::read_to_string("/proc/meminfo") {
             for line in meminfo.lines() {
                 if line.starts_with("MemTotal:") {
@@ -145,7 +142,7 @@ fn get_system_memory() -> usize {
         }
         8 * 1024 * 1024 * 1024
     }
-    
+
     #[cfg(not(any(target_os = "macos", target_os = "linux")))]
     {
         8 * 1024 * 1024 * 1024 // Default to 8GB
@@ -168,13 +165,13 @@ pub fn prefetch_read_l1<T>(ptr: *const T) {
             options(nostack, preserves_flags)
         );
     }
-    
+
     #[cfg(target_arch = "x86_64")]
     unsafe {
         // T0 hint: Prefetch into all cache levels
         std::arch::x86_64::_mm_prefetch(ptr as *const i8, std::arch::x86_64::_MM_HINT_T0);
     }
-    
+
     #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
     {
         // No-op on unsupported architectures
@@ -195,13 +192,13 @@ pub fn prefetch_read_l2<T>(ptr: *const T) {
             options(nostack, preserves_flags)
         );
     }
-    
+
     #[cfg(target_arch = "x86_64")]
     unsafe {
         // T1 hint: Prefetch into L2 and above
         std::arch::x86_64::_mm_prefetch(ptr as *const i8, std::arch::x86_64::_MM_HINT_T1);
     }
-    
+
     #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
     {
         let _ = ptr;
@@ -221,13 +218,13 @@ pub fn prefetch_write<T>(ptr: *mut T) {
             options(nostack, preserves_flags)
         );
     }
-    
+
     #[cfg(target_arch = "x86_64")]
     unsafe {
         // x86 doesn't have separate write prefetch, use T0
         std::arch::x86_64::_mm_prefetch(ptr as *const i8, std::arch::x86_64::_MM_HINT_T0);
     }
-    
+
     #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
     {
         let _ = ptr;
@@ -247,13 +244,13 @@ pub fn prefetch_non_temporal<T>(ptr: *const T) {
             options(nostack, preserves_flags)
         );
     }
-    
+
     #[cfg(target_arch = "x86_64")]
     unsafe {
         // NTA hint: Non-temporal, bypass cache if possible
         std::arch::x86_64::_mm_prefetch(ptr as *const i8, std::arch::x86_64::_MM_HINT_NTA);
     }
-    
+
     #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
     {
         let _ = ptr;
@@ -266,7 +263,7 @@ pub fn prefetch_range<T>(start_ptr: *const T, count: usize, stride: usize) {
     let cache_line_size = 64; // Typical cache line size
     let element_size = std::mem::size_of::<T>();
     let elements_per_line = cache_line_size / element_size.max(1);
-    
+
     for i in (0..count).step_by(elements_per_line) {
         unsafe {
             let ptr = start_ptr.add(i * stride);
@@ -290,7 +287,7 @@ impl AccessPatternAnalyzer {
             total_accesses: 0,
         }
     }
-    
+
     /// Record a memory access (simplified - real implementation would use perf counters)
     pub fn record_access(&mut self, was_hit: bool) {
         self.total_accesses += 1;
@@ -300,7 +297,7 @@ impl AccessPatternAnalyzer {
             self.misses += 1;
         }
     }
-    
+
     /// Get cache hit rate
     pub fn hit_rate(&self) -> f64 {
         if self.total_accesses == 0 {
@@ -309,11 +306,11 @@ impl AccessPatternAnalyzer {
             self.hits as f64 / self.total_accesses as f64
         }
     }
-    
+
     /// Recommend prefetch strategy based on observed patterns
     pub fn recommend_strategy(&self) -> PrefetchStrategy {
         let hit_rate = self.hit_rate();
-        
+
         if hit_rate > 0.9 {
             // Excellent cache behavior, minimal prefetch needed
             PrefetchStrategy::Conservative
@@ -330,36 +327,36 @@ impl AccessPatternAnalyzer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_prefetch_config() {
         let config = PrefetchConfig::conservative();
         assert!(config.enabled);
         assert_eq!(config.strategy, PrefetchStrategy::Conservative);
-        
+
         let config = PrefetchConfig::none();
         assert!(!config.enabled);
     }
-    
+
     #[test]
     fn test_prefetch_instructions() {
         // Just ensure they compile and don't crash
         let data = vec![1, 2, 3, 4, 5];
         let ptr = data.as_ptr();
-        
+
         prefetch_read_l1(ptr);
         prefetch_read_l2(ptr);
         prefetch_non_temporal(ptr);
-        
+
         let mut data_mut = vec![1, 2, 3, 4, 5];
         let ptr_mut = data_mut.as_mut_ptr();
         prefetch_write(ptr_mut);
     }
-    
+
     #[test]
     fn test_pattern_analyzer() {
         let mut analyzer = AccessPatternAnalyzer::new();
-        
+
         // Simulate good cache behavior (90% hit rate)
         for _ in 0..90 {
             analyzer.record_access(true); // hit
@@ -367,7 +364,7 @@ mod tests {
         for _ in 0..10 {
             analyzer.record_access(false); // miss
         }
-        
+
         assert!(analyzer.hit_rate() > 0.85);
         // With 90% hit rate, the strategy should be Moderate (hit_rate > 0.7 but <= 0.9)
         assert_eq!(analyzer.recommend_strategy(), PrefetchStrategy::Moderate);

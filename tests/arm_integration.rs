@@ -129,7 +129,7 @@ fn test_arm_vs_reference_implementation() {
     // Compare structure
     assert_eq!(result_magnus.n_rows, result_reference.n_rows);
     assert_eq!(result_magnus.n_cols, result_reference.n_cols);
-    
+
     // The number of non-zeros might differ slightly due to:
     // 1. Different handling of numerical zeros
     // 2. Different accumulation strategies
@@ -139,8 +139,10 @@ fn test_arm_vs_reference_implementation() {
     let max_nnz = result_magnus.nnz().max(result_reference.nnz());
     assert!(
         nnz_diff <= (max_nnz as i32 / 10).max(3),
-        "Large difference in non-zeros: {} vs {} (diff: {})", 
-        result_magnus.nnz(), result_reference.nnz(), nnz_diff
+        "Large difference in non-zeros: {} vs {} (diff: {})",
+        result_magnus.nnz(),
+        result_reference.nnz(),
+        nnz_diff
     );
 
     // Create maps for easier comparison (handle potential reordering within rows)
@@ -177,18 +179,22 @@ fn test_arm_vs_reference_implementation() {
                 assert!(
                     val.abs() < 1e-10,
                     "MAGNUS has non-zero value {} at ({}, {}) not in reference",
-                    val, row, col
+                    val,
+                    row,
+                    col
                 );
             }
         }
-        
+
         // Check that reference doesn't have significant values MAGNUS missed
         for (col, ref_val) in &reference_entries {
             if !magnus_entries.contains_key(col) {
                 assert!(
                     ref_val.abs() < 1e-10,
                     "Reference has non-zero value {} at ({}, {}) not in MAGNUS",
-                    ref_val, row, col
+                    ref_val,
+                    row,
+                    col
                 );
             }
         }
@@ -206,9 +212,7 @@ fn test_arm_row_categorization() {
     let categories = magnus::categorize_rows(&a, &b, &config);
 
     // Should have all four categories represented
-    let has_sort = categories
-        .iter()
-        .any(|&c| c == magnus::RowCategory::Sort);
+    let has_sort = categories.iter().any(|&c| c == magnus::RowCategory::Sort);
     let has_dense = categories
         .iter()
         .any(|&c| c == magnus::RowCategory::DenseAccumulation);
@@ -216,13 +220,19 @@ fn test_arm_row_categorization() {
         .iter()
         .any(|&c| c == magnus::RowCategory::FineLevel);
 
-    assert!(has_sort || has_dense || has_fine, "Should have at least one category");
+    assert!(
+        has_sort || has_dense || has_fine,
+        "Should have at least one category"
+    );
 
     // Verify categorization is consistent
     let summary = magnus::analyze_categorization(&a, &b, &config);
     assert_eq!(summary.total_rows, n);
     assert_eq!(
-        summary.sort_count + summary.dense_count + summary.fine_level_count + summary.coarse_level_count,
+        summary.sort_count
+            + summary.dense_count
+            + summary.fine_level_count
+            + summary.coarse_level_count,
         n
     );
 }
@@ -254,13 +264,13 @@ fn test_arm_neon_accelerator_used() {
     use magnus::create_simd_accelerator_f32;
 
     let accelerator = create_simd_accelerator_f32();
-    
+
     // Test with some data
     let col_indices = vec![5, 2, 8, 2, 5, 1];
     let values = vec![1.0f32, 2.0, 3.0, 4.0, 5.0, 6.0];
-    
+
     let (result_cols, result_vals) = accelerator.sort_and_accumulate(&col_indices, &values);
-    
+
     // Verify correctness
     assert_eq!(result_cols, vec![1, 2, 5, 8]);
     assert_eq!(result_vals, vec![6.0, 6.0, 6.0, 3.0]);

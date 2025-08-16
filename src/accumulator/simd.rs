@@ -36,7 +36,7 @@ where
             .zip(values.iter())
             .map(|(&idx, &val)| (idx, val))
             .collect();
-        
+
         pairs.sort_by_key(|&(idx, _)| idx);
 
         // Accumulate duplicates
@@ -69,7 +69,6 @@ where
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub use super::neon::NeonAccumulator;
 
-
 /// AVX-512 accelerated implementation (placeholder)
 #[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
 pub struct Avx512Accumulator;
@@ -97,7 +96,7 @@ where
 pub fn create_simd_accelerator_f32() -> Box<dyn SimdAccelerator<f32>> {
     use crate::matrix::config::detect_architecture;
     use crate::matrix::config::Architecture;
-    
+
     match detect_architecture() {
         #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
         Architecture::ArmNeon => {
@@ -107,7 +106,7 @@ pub fn create_simd_accelerator_f32() -> Box<dyn SimdAccelerator<f32>> {
                     return Box::new(metal_acc);
                 }
             }
-            
+
             // Default to Accelerate framework on Apple Silicon
             // Users can opt-out by setting MAGNUS_DISABLE_ACCELERATE=1
             if std::env::var("MAGNUS_DISABLE_ACCELERATE").is_ok() {
@@ -115,7 +114,7 @@ pub fn create_simd_accelerator_f32() -> Box<dyn SimdAccelerator<f32>> {
             } else {
                 Box::new(super::accelerate::AccelerateAccumulator::new())
             }
-        },
+        }
         #[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
         Architecture::X86WithAVX512 => Box::new(Avx512Accumulator::new()),
         _ => Box::new(FallbackAccumulator::new()),
@@ -125,7 +124,8 @@ pub fn create_simd_accelerator_f32() -> Box<dyn SimdAccelerator<f32>> {
 /// Create a Metal-accelerated accumulator if available
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub fn create_metal_accelerator() -> Option<Box<dyn SimdAccelerator<f32>>> {
-    super::metal_impl::MetalAccumulator::new().map(|acc| Box::new(acc) as Box<dyn SimdAccelerator<f32>>)
+    super::metal_impl::MetalAccumulator::new()
+        .map(|acc| Box::new(acc) as Box<dyn SimdAccelerator<f32>>)
 }
 
 /// Create an appropriate SIMD accelerator for the current architecture

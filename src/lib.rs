@@ -74,11 +74,11 @@ pub mod utils;
 
 // Re-export primary components
 pub use accumulator::{
-    create_accumulator, create_simd_accelerator, create_simd_accelerator_f32,
-    multiply_row_dense, multiply_row_sort, Accumulator, FallbackAccumulator, SimdAccelerator,
+    create_accumulator, create_simd_accelerator, create_simd_accelerator_f32, multiply_row_dense,
+    multiply_row_sort, Accumulator, FallbackAccumulator, SimdAccelerator,
 };
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
-pub use accumulator::NeonAccumulator;
+pub use accumulator::{AccelerateAccumulator, NeonAccumulator};
 pub use matrix::config::{
     detect_architecture, Architecture, MagnusConfig, RowCategory, SortMethod, SystemParameters,
 };

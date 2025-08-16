@@ -18,43 +18,43 @@ impl Architecture {
     pub fn has_simd_support(&self) -> bool {
         !matches!(self, Architecture::Generic)
     }
-    
+
     /// Check if this architecture has AVX-512 support
     pub fn has_avx512(&self) -> bool {
         matches!(self, Architecture::X86WithAVX512)
     }
-    
+
     /// Check if this architecture has ARM NEON support
     pub fn has_neon(&self) -> bool {
         matches!(self, Architecture::ArmNeon)
     }
-    
+
     /// Get the vector width in bytes for this architecture
     pub fn vector_width_bytes(&self) -> usize {
         match self {
-            Architecture::X86WithAVX512 => 64,  // 512 bits
-            Architecture::X86WithoutAVX512 => 32,  // 256 bits (AVX2)
-            Architecture::ArmNeon => 16,  // 128 bits
-            Architecture::Generic => 8,  // Scalar
+            Architecture::X86WithAVX512 => 64,    // 512 bits
+            Architecture::X86WithoutAVX512 => 32, // 256 bits (AVX2)
+            Architecture::ArmNeon => 16,          // 128 bits
+            Architecture::Generic => 8,           // Scalar
         }
     }
-    
+
     /// Get optimal chunk size for this architecture
     pub fn optimal_chunk_size(&self) -> usize {
         match self {
             Architecture::X86WithAVX512 => 2048,
             Architecture::X86WithoutAVX512 => 1024,
-            Architecture::ArmNeon => 512,  // Tuned for Apple Silicon cache
+            Architecture::ArmNeon => 512, // Tuned for Apple Silicon cache
             Architecture::Generic => 256,
         }
     }
-    
+
     /// Get the threshold for switching to dense accumulator
     pub fn dense_accumulator_threshold(&self) -> usize {
         match self {
-            Architecture::X86WithAVX512 => 256,  // From paper
+            Architecture::X86WithAVX512 => 256, // From paper
             Architecture::X86WithoutAVX512 => 256,
-            Architecture::ArmNeon => 192,  // Tuned for Apple Silicon
+            Architecture::ArmNeon => 192, // Tuned for Apple Silicon
             Architecture::Generic => 256,
         }
     }
@@ -161,7 +161,7 @@ pub fn detect_architecture() -> Architecture {
         // Apple Silicon always has NEON
         return Architecture::ArmNeon;
     }
-    
+
     #[cfg(target_arch = "x86_64")]
     {
         // Check for AVX-512 support using is_x86_feature_detected macro
@@ -179,13 +179,13 @@ pub fn detect_architecture() -> Architecture {
             }
         }
     }
-    
+
     #[cfg(all(target_arch = "aarch64", not(target_os = "macos")))]
     {
         // Other ARM platforms with NEON
         return Architecture::ArmNeon;
     }
-    
+
     // Fallback for other architectures
     #[allow(unreachable_code)]
     Architecture::Generic
