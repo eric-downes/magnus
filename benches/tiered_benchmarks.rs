@@ -203,7 +203,7 @@ fn bench_tier2_standard(c: &mut Criterion) {
 /// Used for finding performance limits and real-world validation
 fn bench_tier3_stress(c: &mut Criterion) {
     let mut group = c.benchmark_group("tier3_stress");
-    group.sample_size(3); // Very few samples for large matrices
+    group.sample_size(10); // Few samples for large matrices
     group.measurement_time(std::time::Duration::from_secs(30));
 
     println!("📊 TIER 3: Stress Tests (large matrices, may take 10+ minutes)");

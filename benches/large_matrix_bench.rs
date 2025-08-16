@@ -147,7 +147,7 @@ fn bench_large_matrices(c: &mut Criterion) {
 fn bench_scaling_study(c: &mut Criterion) {
     let mut group = c.benchmark_group("scaling_study");
     group.measurement_time(Duration::from_secs(20));
-    group.sample_size(5);
+    group.sample_size(10);
 
     // Keep nnz/row constant, vary matrix size
     let sizes = vec![10_000, 20_000, 30_000, 40_000, 50_000];
@@ -176,7 +176,7 @@ fn bench_scaling_study(c: &mut Criterion) {
 fn bench_density_study(c: &mut Criterion) {
     let mut group = c.benchmark_group("density_study");
     group.measurement_time(Duration::from_secs(20));
-    group.sample_size(5);
+    group.sample_size(10);
 
     // Fixed size, vary density
     let size = 25_000;
