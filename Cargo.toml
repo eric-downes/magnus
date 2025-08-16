@@ -18,7 +18,7 @@ rayon = "1.8"        # Data-parallel operations
 
 # Utilities
 num-traits = "0.2"   # Generic numeric operations
-aligned-vec = "0.5"  # Aligned memory allocation
+aligned-vec = "0.6"  # Aligned memory allocation
 num_cpus = "1.17"    # CPU core detection
 
 [dev-dependencies]
