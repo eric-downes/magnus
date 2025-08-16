@@ -1,9 +1,9 @@
 //! Quick benchmark to test the new optimizations
 
 use criterion::{criterion_group, criterion_main, Criterion};
-use magnus::accumulator::{
-    AccelerateAccumulator, FallbackAccumulator, NeonAccumulator, SimdAccelerator,
-};
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+use magnus::accumulator::{AccelerateAccumulator, NeonAccumulator};
+use magnus::accumulator::{FallbackAccumulator, SimdAccelerator};
 use rand::Rng;
 use std::hint::black_box;
 
