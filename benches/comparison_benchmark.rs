@@ -37,12 +37,24 @@ fn generate_test_matrix(rows: usize, cols: usize, density: f64, seed: u64) -> Sp
 
 /// Convert MAGNUS matrix to sprs format
 fn to_sprs(matrix: &SparseMatrixCSR<f64>) -> sprs::CsMat<f64> {
-    sprs::CsMat::new(
+    // Create from triplets to ensure proper sorting and deduplication
+    let mut triplets = Vec::new();
+    for i in 0..matrix.n_rows {
+        let start = matrix.row_ptr[i];
+        let end = matrix.row_ptr[i + 1];
+        for j in start..end {
+            triplets.push((i, matrix.col_idx[j], matrix.values[j]));
+        }
+    }
+
+    sprs::TriMat::from_triplets(
         (matrix.n_rows, matrix.n_cols),
-        matrix.row_ptr.clone(),
-        matrix.col_idx.clone(),
-        matrix.values.clone(),
+        triplets
+            .into_iter()
+            .map(|(i, j, v)| (i, j, v))
+            .collect::<Vec<_>>(),
     )
+    .to_csr()
 }
 
 /// Benchmark group comparing small matrices (< 1000 non-zeros)
