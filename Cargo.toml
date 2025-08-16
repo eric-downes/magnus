@@ -22,8 +22,8 @@ aligned-vec = "0.5"  # Aligned memory allocation
 num_cpus = "1.17"    # CPU core detection
 
 [dev-dependencies]
-criterion = "0.5"    # Benchmarking framework
-proptest = "1.3"     # Property-based testing
+criterion = "0.7"    # Benchmarking framework
+proptest = "1.7"     # Property-based testing
 
 [[bench]]
 name = "matrix_multiply"
