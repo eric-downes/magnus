@@ -2,6 +2,13 @@
 //! 
 //! This module provides sorting using Apple's highly optimized Accelerate
 //! framework, which is specifically tuned for each Apple Silicon generation.
+//! 
+//! This is the DEFAULT implementation on Apple Silicon. The framework provides:
+//! - Hardware-specific optimizations for each M-series chip
+//! - Automatic performance scaling across different Apple Silicon variants
+//! - Smart hybrid approach: uses NEON for small sizes (≤32) where it excels
+//! 
+//! To disable and use pure NEON implementation: set MAGNUS_DISABLE_ACCELERATE=1
 
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 

@@ -21,6 +21,11 @@ num-traits = "0.2"   # Generic numeric operations
 aligned-vec = "0.6"  # Aligned memory allocation
 num_cpus = "1.17"    # CPU core detection
 
+# Metal GPU support (Apple Silicon)
+[target.'cfg(all(target_arch = "aarch64", target_os = "macos"))'.dependencies]
+metal = "0.27"       # Metal API bindings
+objc = "0.2"         # Objective-C runtime
+
 [dev-dependencies]
 criterion = "0.7"    # Benchmarking framework
 proptest = "1.7"     # Property-based testing
@@ -56,4 +61,8 @@ harness = false
 
 [[bench]]
 name = "optimization_test"
+harness = false
+
+[[bench]]
+name = "accelerate_vs_neon"
 harness = false

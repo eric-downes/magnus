@@ -9,6 +9,7 @@ MAGNUS (Matrix Algebra for Gigantic NUmerical Systems) is a high-performance Rus
 - **Efficient Sparse Matrix Multiplication (SpGEMM)**: Optimized for large-scale sparse matrices
 - **Adaptive Algorithm Selection**: Automatically chooses the best strategy based on matrix characteristics
 - **Architecture-Specific Optimizations**: Detects and utilizes CPU features (AVX-512, ARM NEON)
+- **Apple Accelerate Framework**: Automatically uses Apple's optimized libraries on macOS
 - **Parallel Execution**: Multi-threaded processing using Rayon
 - **Memory-Efficient**: Fine and coarse-level reordering for improved cache locality
 
@@ -189,10 +190,19 @@ MAGNUS automatically detects and optimizes for your CPU:
 
 | Architecture | Detection | Optimizations |
 |-------------|-----------|---------------|
-| Apple Silicon (M1/M2/M3) | ✅ Automatic | ARM NEON, tuned thresholds |
+| Apple Silicon (M1/M2/M3) | ✅ Automatic | Accelerate framework (default), ARM NEON, tuned thresholds |
 | Intel x86 with AVX-512 | ✅ Automatic | AVX-512 sorting |
 | Intel x86 without AVX-512 | ✅ Automatic | AVX2 optimizations |
 | Generic | ✅ Fallback | Portable implementation |
+
+#### Apple Silicon Optimization
+
+On Apple Silicon, MAGNUS defaults to using Apple's Accelerate framework for optimal performance. To use pure NEON implementation instead:
+
+```bash
+# Disable Accelerate and use NEON-only implementation
+MAGNUS_DISABLE_ACCELERATE=1 cargo run --release
+```
 
 ### Performance Tips
 

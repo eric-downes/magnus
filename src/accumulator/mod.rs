@@ -10,6 +10,10 @@ pub mod dense;
 pub mod neon;
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod accelerate;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub mod metal;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub mod metal_impl;
 pub mod simd;
 pub mod sort;
 

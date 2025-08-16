@@ -101,17 +101,31 @@ pub fn create_simd_accelerator_f32() -> Box<dyn SimdAccelerator<f32>> {
     match detect_architecture() {
         #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
         Architecture::ArmNeon => {
-            // Use environment variable to optionally select Accelerate framework
-            if std::env::var("MAGNUS_USE_ACCELERATE").is_ok() {
-                Box::new(super::accelerate::AccelerateAccumulator::new())
-            } else {
+            // Check if Metal is available and enabled for very large operations
+            if std::env::var("MAGNUS_USE_METAL").is_ok() {
+                if let Some(metal_acc) = super::metal_impl::MetalAccumulator::new() {
+                    return Box::new(metal_acc);
+                }
+            }
+            
+            // Default to Accelerate framework on Apple Silicon
+            // Users can opt-out by setting MAGNUS_DISABLE_ACCELERATE=1
+            if std::env::var("MAGNUS_DISABLE_ACCELERATE").is_ok() {
                 Box::new(super::neon::NeonAccumulator::new())
+            } else {
+                Box::new(super::accelerate::AccelerateAccumulator::new())
             }
         },
         #[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
         Architecture::X86WithAVX512 => Box::new(Avx512Accumulator::new()),
         _ => Box::new(FallbackAccumulator::new()),
     }
+}
+
+/// Create a Metal-accelerated accumulator if available
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub fn create_metal_accelerator() -> Option<Box<dyn SimdAccelerator<f32>>> {
+    super::metal_impl::MetalAccumulator::new().map(|acc| Box::new(acc) as Box<dyn SimdAccelerator<f32>>)
 }
 
 /// Create an appropriate SIMD accelerator for the current architecture
