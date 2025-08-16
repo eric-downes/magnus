@@ -41,3 +41,11 @@ harness = false
 [[bench]]
 name = "quick_performance"
 harness = false
+
+[[bench]]
+name = "tiered_benchmarks"
+harness = false
+
+[[bench]]
+name = "neon_diagnosis"
+harness = false
