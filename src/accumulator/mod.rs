@@ -16,6 +16,13 @@ pub mod metal;
 pub mod metal_impl;
 pub mod simd;
 pub mod sort;
+pub mod duplicate_prediction;
+pub mod fused;
+pub mod adaptive_sort;
+
+// Re-export key types for easier use
+pub use adaptive_sort::{AdaptiveSortAccumulator, create_adaptive_accumulator};
+pub use duplicate_prediction::{DuplicateContext, AccumulationStrategy};
 
 use num_traits::Num;
 use std::ops::AddAssign;

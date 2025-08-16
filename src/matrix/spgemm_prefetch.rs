@@ -293,12 +293,12 @@ mod tests {
     
     #[test]
     fn test_prefetch_recommendation() {
-        // Dense matrices should get aggressive prefetch
+        // Dense matrices should get aggressive prefetch (>100 elements per row)
         let dense_a = SparseMatrixCSR::new(
-            100, 100,
-            (0..=100).collect(),
-            (0..10000).map(|i| i % 100).collect(),
-            vec![1.0; 10000],
+            90, 120,
+            (0..=90).map(|i| i * 120).collect(),  // Each row has 120 elements
+            (0..10800).map(|i| i % 120).collect(),
+            vec![1.0; 10800],
         );
         
         let strategy = analyze_and_recommend(&dense_a, &dense_a);

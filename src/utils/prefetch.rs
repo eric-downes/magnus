@@ -361,15 +361,15 @@ mod tests {
     fn test_pattern_analyzer() {
         let mut analyzer = AccessPatternAnalyzer::new();
         
-        // Simulate good cache behavior
-        for _ in 0..90 {
+        // Simulate excellent cache behavior (>90% hit rate)
+        for _ in 0..92 {
             analyzer.record_access(true); // hit
         }
-        for _ in 0..10 {
+        for _ in 0..8 {
             analyzer.record_access(false); // miss
         }
         
-        assert!(analyzer.hit_rate() > 0.85);
+        assert!(analyzer.hit_rate() > 0.9);
         assert_eq!(analyzer.recommend_strategy(), PrefetchStrategy::Conservative);
     }
 }
