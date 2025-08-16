@@ -1,6 +1,7 @@
 //! Utility functions and helpers
 
 pub mod formats;
+pub mod prefetch;
 
 // Re-export commonly used utilities
 pub use formats::{from_sprs_csc, from_sprs_csr, to_sprs_csc, to_sprs_csr};

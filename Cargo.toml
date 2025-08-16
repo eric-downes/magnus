@@ -66,3 +66,7 @@ harness = false
 [[bench]]
 name = "accelerate_vs_neon"
 harness = false
+
+[[bench]]
+name = "prefetch_benchmark"
+harness = false
