@@ -245,12 +245,7 @@ fn configure_criterion() -> Criterion {
 criterion_group! {
     name = benches;
     config = configure_criterion();
-    targets = match std::env::var("BENCH_TIER").unwrap_or_else(|_| "quick".to_string()).as_str() {
-        "quick" => bench_quick_sanity,
-        "large" => bench_large_matrices,
-        "full" => bench_quick_sanity, bench_large_matrices, bench_scaling_study, bench_density_study,
-        _ => bench_quick_sanity,
-    }
+    targets = bench_quick_sanity, bench_large_matrices, bench_scaling_study, bench_density_study
 }
 
 criterion_main!(benches);
