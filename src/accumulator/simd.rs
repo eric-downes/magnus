@@ -100,7 +100,14 @@ pub fn create_simd_accelerator_f32() -> Box<dyn SimdAccelerator<f32>> {
     
     match detect_architecture() {
         #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
-        Architecture::ArmNeon => Box::new(super::neon::NeonAccumulator::new()),
+        Architecture::ArmNeon => {
+            // Use environment variable to optionally select Accelerate framework
+            if std::env::var("MAGNUS_USE_ACCELERATE").is_ok() {
+                Box::new(super::accelerate::AccelerateAccumulator::new())
+            } else {
+                Box::new(super::neon::NeonAccumulator::new())
+            }
+        },
         #[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
         Architecture::X86WithAVX512 => Box::new(Avx512Accumulator::new()),
         _ => Box::new(FallbackAccumulator::new()),

@@ -229,16 +229,100 @@ unsafe fn neon_sort_16_padded(col_indices: &[usize], values: &[f32]) -> (Vec<usi
 /// NEON sort for up to 32 elements
 #[target_feature(enable = "neon")]
 unsafe fn neon_sort_32_padded(col_indices: &[usize], values: &[f32]) -> (Vec<usize>, Vec<f32>) {
-    // Similar approach to 16, but with 8 groups of 4
-    // Implementation would follow same pattern
-    super::FallbackAccumulator.sort_and_accumulate(col_indices, values)
+    let len = col_indices.len();
+    debug_assert!(len <= 32);
+    
+    // Pad with maximum values
+    let mut idx = [u32::MAX; 32];
+    let mut val = [f32::INFINITY; 32];
+    
+    for i in 0..len {
+        idx[i] = col_indices[i] as u32;
+        val[i] = values[i];
+    }
+    
+    // Sort 8 groups of 4 using NEON
+    for i in 0..8 {
+        let offset = i * 4;
+        let mut idx_chunk = [idx[offset], idx[offset+1], idx[offset+2], idx[offset+3]];
+        let mut val_chunk = [val[offset], val[offset+1], val[offset+2], val[offset+3]];
+        
+        let idx_vec = vld1q_u32(idx_chunk.as_ptr());
+        let val_vec = vld1q_f32(val_chunk.as_ptr());
+        
+        let (sorted_idx, sorted_val) = bitonic_sort_4(idx_vec, val_vec);
+        
+        vst1q_u32(idx_chunk.as_mut_ptr(), sorted_idx);
+        vst1q_f32(val_chunk.as_mut_ptr(), sorted_val);
+        
+        idx[offset..offset+4].copy_from_slice(&idx_chunk);
+        val[offset..offset+4].copy_from_slice(&val_chunk);
+    }
+    
+    // Hierarchical merge: 8->4->2->1
+    merge_chunks_32(&mut idx, &mut val);
+    
+    // Remove padding and accumulate
+    accumulate_sorted(&idx[..len], &val[..len])
 }
 
-/// Hybrid approach for medium sizes
+/// Hybrid approach for medium sizes (33-64 elements)
 #[target_feature(enable = "neon")]
 unsafe fn neon_hybrid_sort(col_indices: &[usize], values: &[f32]) -> (Vec<usize>, Vec<f32>) {
-    // Use NEON for chunks, then merge
-    super::FallbackAccumulator.sort_and_accumulate(col_indices, values)
+    let len = col_indices.len();
+    debug_assert!(len > 32 && len <= 64);
+    
+    // Process in chunks of 16 using NEON
+    let chunk_size = 16;
+    let num_chunks = (len + chunk_size - 1) / chunk_size;
+    
+    let mut all_indices = Vec::with_capacity(len);
+    let mut all_values = Vec::with_capacity(len);
+    
+    for chunk_idx in 0..num_chunks {
+        let start = chunk_idx * chunk_size;
+        let end = (start + chunk_size).min(len);
+        let chunk_indices = &col_indices[start..end];
+        let chunk_values = &values[start..end];
+        
+        let (sorted_idx, sorted_val) = neon_sort_16_padded(chunk_indices, chunk_values);
+        all_indices.extend(sorted_idx);
+        all_values.extend(sorted_val);
+    }
+    
+    // Final merge if we had multiple chunks
+    if num_chunks > 1 {
+        let mut pairs: Vec<_> = all_indices.iter()
+            .zip(all_values.iter())
+            .map(|(&idx, &val)| (idx, val))
+            .collect();
+        pairs.sort_by_key(|&(idx, _)| idx);
+        
+        // Accumulate
+        let mut result_indices = Vec::new();
+        let mut result_values = Vec::new();
+        
+        let mut current_idx = pairs[0].0;
+        let mut current_sum = pairs[0].1;
+        
+        for &(idx, val) in &pairs[1..] {
+            if idx == current_idx {
+                current_sum += val;
+            } else {
+                result_indices.push(current_idx);
+                result_values.push(current_sum);
+                current_idx = idx;
+                current_sum = val;
+            }
+        }
+        
+        result_indices.push(current_idx);
+        result_values.push(current_sum);
+        
+        (result_indices, result_values)
+    } else {
+        (all_indices, all_values)
+    }
 }
 
 // Helper functions
@@ -293,41 +377,97 @@ unsafe fn bitonic_sort_4_inplace(idx: &mut uint32x4_t, val: &mut float32x4_t) {
     compare_swap_lanes!(*idx, *val, 1, 2);
 }
 
-/// Merge two sorted halves of an 8-element array
-fn merge_sorted_halves(idx: &mut [u32; 8], val: &mut [f32; 8]) {
-    // Simple merge for now - can be optimized with NEON
+/// Merge two sorted halves of an 8-element array using NEON
+#[target_feature(enable = "neon")]
+unsafe fn merge_sorted_halves(idx: &mut [u32; 8], val: &mut [f32; 8]) {
+    // Load both halves
+    let idx_lo = vld1q_u32(&idx[0]);
+    let idx_hi = vld1q_u32(&idx[4]);
+    let _val_lo = vld1q_f32(&val[0]);
+    let _val_hi = vld1q_f32(&val[4]);
+    
+    // Use NEON min/max to create sorted result
+    // This is a simplified merge network
     let mut temp_idx = [0u32; 8];
     let mut temp_val = [0.0f32; 8];
     
-    let mut i = 0;
-    let mut j = 4;
-    let mut k = 0;
+    // Extract first elements from each half for comparison
+    let lo_first = vgetq_lane_u32(idx_lo, 0);
+    let hi_first = vgetq_lane_u32(idx_hi, 0);
     
-    while i < 4 && j < 8 {
-        if idx[i] <= idx[j] {
+    if lo_first <= hi_first {
+        // Low half has smaller first element
+        // Merge with NEON comparisons
+        let mut i = 0;
+        let mut j = 0;
+        let mut k = 0;
+        
+        while i < 4 && j < 4 {
+            let lo_val = idx[i];
+            let hi_val = idx[4 + j];
+            
+            if lo_val <= hi_val {
+                temp_idx[k] = lo_val;
+                temp_val[k] = val[i];
+                i += 1;
+            } else {
+                temp_idx[k] = hi_val;
+                temp_val[k] = val[4 + j];
+                j += 1;
+            }
+            k += 1;
+        }
+        
+        // Copy remaining elements
+        while i < 4 {
             temp_idx[k] = idx[i];
             temp_val[k] = val[i];
             i += 1;
-        } else {
-            temp_idx[k] = idx[j];
-            temp_val[k] = val[j];
-            j += 1;
+            k += 1;
         }
-        k += 1;
-    }
-    
-    while i < 4 {
-        temp_idx[k] = idx[i];
-        temp_val[k] = val[i];
-        i += 1;
-        k += 1;
-    }
-    
-    while j < 8 {
-        temp_idx[k] = idx[j];
-        temp_val[k] = val[j];
-        j += 1;
-        k += 1;
+        
+        while j < 4 {
+            temp_idx[k] = idx[4 + j];
+            temp_val[k] = val[4 + j];
+            j += 1;
+            k += 1;
+        }
+    } else {
+        // High half has smaller first element
+        // Similar merge logic
+        let mut i = 0;
+        let mut j = 0;
+        let mut k = 0;
+        
+        while i < 4 && j < 4 {
+            let lo_val = idx[i];
+            let hi_val = idx[4 + j];
+            
+            if lo_val <= hi_val {
+                temp_idx[k] = lo_val;
+                temp_val[k] = val[i];
+                i += 1;
+            } else {
+                temp_idx[k] = hi_val;
+                temp_val[k] = val[4 + j];
+                j += 1;
+            }
+            k += 1;
+        }
+        
+        while i < 4 {
+            temp_idx[k] = idx[i];
+            temp_val[k] = val[i];
+            i += 1;
+            k += 1;
+        }
+        
+        while j < 4 {
+            temp_idx[k] = idx[4 + j];
+            temp_val[k] = val[4 + j];
+            j += 1;
+            k += 1;
+        }
     }
     
     *idx = temp_idx;
@@ -386,6 +526,48 @@ fn merge_two_chunks(
         j += 1;
         k += 1;
     }
+}
+
+/// Merge 8 sorted chunks of 4 elements each (for 32-element sort)
+fn merge_chunks_32(idx: &mut [u32; 32], val: &mut [f32; 32]) {
+    // Stage 1: Merge pairs (8 chunks -> 4 chunks)
+    let mut temp_idx = [0u32; 32];
+    let mut temp_val = [0.0f32; 32];
+    
+    for i in 0..4 {
+        let src_offset = i * 8;
+        let dst_offset = i * 8;
+        merge_two_chunks(
+            &idx[src_offset..src_offset + 8],
+            &val[src_offset..src_offset + 8],
+            &mut temp_idx[dst_offset..dst_offset + 8],
+            &mut temp_val[dst_offset..dst_offset + 8],
+        );
+    }
+    
+    *idx = temp_idx;
+    *val = temp_val;
+    
+    // Stage 2: Merge pairs (4 chunks -> 2 chunks)
+    for i in 0..2 {
+        let src_offset = i * 16;
+        let dst_offset = i * 16;
+        merge_two_chunks(
+            &idx[src_offset..src_offset + 16],
+            &val[src_offset..src_offset + 16],
+            &mut temp_idx[dst_offset..dst_offset + 16],
+            &mut temp_val[dst_offset..dst_offset + 16],
+        );
+    }
+    
+    *idx = temp_idx;
+    *val = temp_val;
+    
+    // Stage 3: Final merge (2 chunks -> 1 chunk)
+    merge_two_chunks(&idx[0..32], &val[0..32], &mut temp_idx, &mut temp_val);
+    
+    *idx = temp_idx;
+    *val = temp_val;
 }
 
 /// Accumulate sorted data

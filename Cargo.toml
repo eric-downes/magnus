@@ -53,3 +53,7 @@ harness = false
 [[bench]]
 name = "neon_small_sizes"
 harness = false
+
+[[bench]]
+name = "optimization_test"
+harness = false
