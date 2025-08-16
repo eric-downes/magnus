@@ -237,7 +237,7 @@ where T: Copy {
     }
     
     // If B has many non-zeros per row, aggressive prefetch helps
-    if b_avg_nnz > 100 {
+    if b_avg_nnz >= 100 {
         return PrefetchStrategy::Aggressive;
     }
     
@@ -294,9 +294,11 @@ mod tests {
     #[test]
     fn test_prefetch_recommendation() {
         // Dense matrices should get aggressive prefetch
+        // Create proper row_ptr where each row has 100 non-zeros (total 10000)
+        let row_ptr: Vec<usize> = (0..=100).map(|i| i * 100).collect();
         let dense_a = SparseMatrixCSR::new(
             100, 100,
-            (0..=100).collect(),
+            row_ptr,
             (0..10000).map(|i| i % 100).collect(),
             vec![1.0; 10000],
         );

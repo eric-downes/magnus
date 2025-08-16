@@ -15,7 +15,9 @@ fn generate_test_vectors(size: usize) -> (Vec<usize>, Vec<f32>) {
     
     for i in 0..size {
         // Create data with ~25% duplicates
-        indices.push((i * 3) % (size * 3 / 4));
+        // Avoid division by zero for small sizes
+        let modulo = (size * 3 / 4).max(1);
+        indices.push((i * 3) % modulo);
         values.push(i as f32 * 0.1);
     }
     
