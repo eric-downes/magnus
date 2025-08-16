@@ -58,6 +58,15 @@ impl Default for NeonAccumulator {
 
 impl SimdAccelerator<f32> for NeonAccumulator {
     fn sort_and_accumulate(&self, col_indices: &[usize], values: &[f32]) -> (Vec<usize>, Vec<f32>) {
+        // Input validation
+        debug_assert_eq!(col_indices.len(), values.len(), "Mismatched input lengths");
+
+        // Check for potential overflow issues
+        if col_indices.iter().any(|&idx| idx > u32::MAX as usize) {
+            // Fall back to scalar implementation for large indices
+            return super::FallbackAccumulator.sort_and_accumulate(col_indices, values);
+        }
+
         let len = col_indices.len();
 
         // Dynamic strategy selection based on input size

@@ -14,6 +14,8 @@ pub mod metal;
 pub mod metal_impl;
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod neon;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub mod neon_safe;
 pub mod simd;
 pub mod sort;
 
