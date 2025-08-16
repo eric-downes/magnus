@@ -6,6 +6,8 @@
 //! characteristics of each row.
 
 pub mod dense;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub mod neon;
 pub mod simd;
 pub mod sort;
 

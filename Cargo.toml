@@ -49,3 +49,7 @@ harness = false
 [[bench]]
 name = "neon_diagnosis"
 harness = false
+
+[[bench]]
+name = "neon_small_sizes"
+harness = false
