@@ -1,11 +1,12 @@
 //! Benchmarks for sparse matrix multiplication
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use magnus::{
     magnus_spgemm, magnus_spgemm_parallel, multiply_row_coarse_level, multiply_row_dense,
     multiply_row_fine_level, multiply_row_sort, process_coarse_level_rows_parallel,
     reference_spgemm, reordering, MagnusConfig, SparseMatrixCSR,
 };
+use std::hint::black_box;
 
 /// Benchmark row multiplication operations
 fn bench_row_multiply(c: &mut Criterion) {

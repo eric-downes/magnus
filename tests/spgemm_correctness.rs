@@ -145,10 +145,8 @@ fn test_tridiagonal_multiplication() {
     }
 }
 
-// This test is marked as ignored because the MAGNUS implementation
-// is not complete yet. Once it's implemented, this test can be enabled.
+// Test that MAGNUS produces the same results as the reference implementation
 #[test]
-#[ignore]
 fn test_magnus_against_reference() {
     let a = create_tridiagonal_matrix(10);
     let b = create_diagonal_matrix(10, 2.0);

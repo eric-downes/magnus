@@ -73,8 +73,15 @@ pub mod reordering;
 pub mod utils;
 
 // Re-export primary components
-pub use accumulator::{create_accumulator, multiply_row_dense, multiply_row_sort, Accumulator};
-pub use matrix::config::{Architecture, MagnusConfig, RowCategory, SortMethod, SystemParameters};
+pub use accumulator::{
+    create_accumulator, create_simd_accelerator, create_simd_accelerator_f32, multiply_row_dense,
+    multiply_row_sort, Accumulator, FallbackAccumulator, SimdAccelerator,
+};
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub use accumulator::{AccelerateAccumulator, NeonAccumulator};
+pub use matrix::config::{
+    detect_architecture, Architecture, MagnusConfig, RowCategory, SortMethod, SystemParameters,
+};
 pub use matrix::{analyze_categorization, categorize_rows, CategorizationSummary};
 pub use matrix::{reference_spgemm, SparseMatrixCSC, SparseMatrixCSR};
 pub use parallel::{magnus_spgemm_parallel, process_coarse_level_rows_parallel};

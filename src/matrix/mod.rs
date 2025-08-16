@@ -6,6 +6,7 @@ pub mod conversion;
 pub mod csc;
 pub mod csr;
 pub mod reference;
+pub mod spgemm_prefetch;
 
 pub use categorization::{analyze_categorization, categorize_rows, CategorizationSummary};
 pub use config::{Architecture, MagnusConfig, RowCategory, SortMethod, SystemParameters};
