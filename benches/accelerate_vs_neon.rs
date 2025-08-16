@@ -105,5 +105,9 @@ fn bench_large_accumulator(_c: &mut Criterion) {
     // No-op on non-Apple platforms
 }
 
-criterion_group!(benches, bench_accumulator_comparison, bench_large_accumulator);
+criterion_group!(
+    benches,
+    bench_accumulator_comparison,
+    bench_large_accumulator
+);
 criterion_main!(benches);
