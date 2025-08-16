@@ -1,6 +1,6 @@
 //! Quick benchmark to test the new optimizations
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use magnus::accumulator::{NeonAccumulator, AccelerateAccumulator, FallbackAccumulator, SimdAccelerator};
 use rand::Rng;
 

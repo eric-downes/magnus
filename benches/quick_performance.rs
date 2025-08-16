@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use magnus::{
-    accumulator::{create_simd_accelerator_f32, FallbackAccumulator, SimdAccelerator},
+    accumulator::{FallbackAccumulator, SimdAccelerator},
     detect_architecture, magnus_spgemm, Architecture, MagnusConfig, SparseMatrixCSR,
 };
 

@@ -37,6 +37,7 @@ fn generate_sparse_matrix(rows: usize, cols: usize, density: f64) -> SparseMatri
 }
 
 /// Measure memory bandwidth utilization
+#[allow(dead_code)]
 fn measure_memory_bandwidth(size_mb: f64, time_secs: f64) -> f64 {
     size_mb / time_secs // MB/s
 }

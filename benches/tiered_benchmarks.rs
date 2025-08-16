@@ -5,7 +5,7 @@
 //! 2. STANDARD (< 5 minutes) - Medium matrices, parameter tuning
 //! 3. STRESS (10+ minutes) - Large matrices, real-world workloads
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{black_box, criterion_group, BenchmarkId, Criterion};
 use magnus::{magnus_spgemm, magnus_spgemm_parallel, MagnusConfig, SparseMatrixCSR};
 use std::time::Instant;
 

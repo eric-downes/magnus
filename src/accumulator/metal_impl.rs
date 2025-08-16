@@ -5,9 +5,9 @@
 
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
-use metal::{Device, DeviceRef, CommandQueue, CommandBuffer, ComputePipelineState};
-use metal::{Buffer, MTLResourceOptions, MTLSize};
-use metal::{Library, Function, ComputeCommandEncoder};
+use metal::{Device, CommandQueue, ComputePipelineState};
+use metal::{MTLResourceOptions, MTLSize};
+use metal::Library;
 use super::SimdAccelerator;
 use std::sync::{Arc, Once, Mutex};
 use std::mem;
@@ -20,6 +20,7 @@ static METAL_CONTEXT: Mutex<Option<Arc<MetalContext>>> = Mutex::new(None);
 static INIT: Once = Once::new();
 
 /// Shared Metal context containing device and compiled kernels
+#[allow(dead_code)]
 struct MetalContext {
     device: Device,
     command_queue: CommandQueue,
@@ -27,6 +28,7 @@ struct MetalContext {
     pipelines: ComputePipelines,
 }
 
+#[allow(dead_code)]
 struct ComputePipelines {
     bitonic_sort: ComputePipelineState,
     parallel_reduce: ComputePipelineState,
@@ -242,7 +244,7 @@ mod tests {
             let mut rng = rand::thread_rng();
             indices.shuffle(&mut rng);
             
-            let (sorted_idx, sorted_val) = acc.sort_and_accumulate(&indices, &values);
+            let (sorted_idx, _sorted_val) = acc.sort_and_accumulate(&indices, &values);
             
             // Verify sorted
             for window in sorted_idx.windows(2) {

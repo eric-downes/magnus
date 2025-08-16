@@ -70,3 +70,7 @@ harness = false
 [[bench]]
 name = "prefetch_benchmark"
 harness = false
+
+[[bench]]
+name = "comparison_benchmark"
+harness = false

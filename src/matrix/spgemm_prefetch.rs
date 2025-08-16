@@ -5,7 +5,7 @@
 
 use crate::matrix::SparseMatrixCSR;
 use crate::utils::prefetch::{
-    prefetch_read_l1, prefetch_read_l2, prefetch_write,
+    prefetch_read_l1, prefetch_read_l2,
     PrefetchConfig, PrefetchStrategy
 };
 use crate::accumulator::Accumulator;
