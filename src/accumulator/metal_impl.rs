@@ -245,7 +245,7 @@ mod tests {
             let mut rng = rand::thread_rng();
             indices.shuffle(&mut rng);
             
-            let (sorted_idx, sorted_val) = acc.sort_and_accumulate(&indices, &values);
+            let (sorted_idx, _sorted_val) = acc.sort_and_accumulate(&indices, &values);
             
             // Verify sorted
             for window in sorted_idx.windows(2) {

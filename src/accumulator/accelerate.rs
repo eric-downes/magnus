@@ -128,7 +128,7 @@ mod tests {
         }
         
         let acc = AccelerateAccumulator::new();
-        let (sorted_idx, sorted_val) = acc.sort_and_accumulate(&indices, &values);
+        let (sorted_idx, _sorted_val) = acc.sort_and_accumulate(&indices, &values);
         
         assert_eq!(sorted_idx.len(), 50); // Should have 50 unique indices
         assert!(sorted_idx.windows(2).all(|w| w[0] < w[1])); // Should be sorted

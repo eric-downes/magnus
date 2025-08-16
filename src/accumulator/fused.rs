@@ -227,7 +227,7 @@ mod tests {
         
         let (shuffled_indices, shuffled_values): (Vec<_>, Vec<_>) = combined.into_iter().unzip();
         
-        let (sorted_idx, sorted_val) = fused_sort_accumulate(shuffled_indices, shuffled_values);
+        let (sorted_idx, _sorted_val) = fused_sort_accumulate(shuffled_indices, shuffled_values);
         
         // Should have exactly 200 unique indices
         assert_eq!(sorted_idx.len(), unique_values);

@@ -221,7 +221,7 @@ fn generate_clustered_matrix(rows: usize, cols: usize, density: f64) -> SparseMa
     for i in 0..rows {
         // Create clusters around diagonal
         let start_col = (i as i32 - cluster_size / 2).max(0) as usize;
-        let end_col = (i + cluster_size / 2).min(cols);
+        let end_col = ((i as i32 + cluster_size / 2) as usize).min(cols);
         
         let mut cols_in_row = Vec::new();
         for _ in 0..nnz_per_row {

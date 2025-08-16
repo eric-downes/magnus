@@ -5,7 +5,7 @@
 //! 2. STANDARD (< 5 minutes) - Medium matrices, parameter tuning
 //! 3. STRESS (10+ minutes) - Large matrices, real-world workloads
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{black_box, BenchmarkId, Criterion};
 use magnus::{magnus_spgemm, magnus_spgemm_parallel, MagnusConfig, SparseMatrixCSR};
 use std::time::Instant;
 
@@ -234,25 +234,6 @@ fn bench_tier3_stress(c: &mut Criterion) {
     group.finish();
 }
 
-// Define benchmark groups based on feature flags or environment variables
-criterion_group! {
-    name = quick;
-    config = Criterion::default();
-    targets = bench_tier1_quick
-}
-
-criterion_group! {
-    name = standard;
-    config = Criterion::default();
-    targets = bench_tier2_standard
-}
-
-criterion_group! {
-    name = stress;
-    config = Criterion::default();
-    targets = bench_tier3_stress
-}
-
 // Main entry point - selects which tier to run based on environment
 fn main() {
     let tier = std::env::var("BENCH_TIER").unwrap_or_else(|_| "quick".to_string());
@@ -263,25 +244,29 @@ fn main() {
     match tier.as_str() {
         "quick" | "1" => {
             println!("Running TIER 1 (Quick) benchmarks...\n");
-            quick();
+            let mut c = Criterion::default();
+            bench_tier1_quick(&mut c);
         }
         "standard" | "2" => {
             println!("Running TIER 2 (Standard) benchmarks...\n");
             println!("⚠️  This will take several minutes\n");
-            standard();
+            let mut c = Criterion::default();
+            bench_tier2_standard(&mut c);
         }
         "stress" | "3" => {
             println!("Running TIER 3 (Stress) benchmarks...\n");
             println!("⚠️  WARNING: This will take 10+ minutes and use significant memory!\n");
             println!("Press Ctrl+C to cancel if not intended.\n");
             std::thread::sleep(std::time::Duration::from_secs(3));
-            stress();
+            let mut c = Criterion::default();
+            bench_tier3_stress(&mut c);
         }
         "all" => {
             println!("Running ALL tiers (this will take a long time)...\n");
-            quick();
-            standard();
-            stress();
+            let mut c = Criterion::default();
+            bench_tier1_quick(&mut c);
+            bench_tier2_standard(&mut c);
+            bench_tier3_stress(&mut c);
         }
         _ => {
             eprintln!("Unknown tier: {}", tier);

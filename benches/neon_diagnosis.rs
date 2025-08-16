@@ -220,6 +220,7 @@ fn generate_clustered_pattern(size: usize) -> (Vec<usize>, Vec<f32>) {
 }
 
 /// Print diagnostic information
+#[allow(dead_code)]
 fn print_diagnostics() {
     println!("\n=== NEON Diagnostic Information ===");
     
