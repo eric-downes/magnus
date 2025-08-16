@@ -20,6 +20,9 @@ pub mod neon_safe;
 pub mod simd;
 pub mod sort;
 
+#[cfg(target_arch = "x86_64")]
+pub mod avx512;
+
 use crate::constants::{INITIAL_CAPACITY_DIVISOR, MAX_SORT_ACCUMULATOR_CAPACITY};
 use num_traits::Num;
 use std::ops::AddAssign;

@@ -1,203 +1,211 @@
-/// AVX-512 optimized accumulator for x86-64 processors
-/// 
-/// This module implements high-performance sort-based accumulation using
-/// AVX-512 SIMD instructions for Intel processors.
+//! AVX512-optimized accumulator for sparse matrix multiplication
+//!
+//! This module provides AVX512-accelerated sorting and accumulation
+//! for intermediate products in sparse matrix multiplication.
 
-#[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
-use std::arch::x86_64::*;
+#![cfg(target_arch = "x86_64")]
 
-/// Check if AVX-512 is available at runtime
+use super::Accumulator;
+use aligned_vec::AVec;
+
+/// Check if AVX512 is available at runtime
 pub fn is_avx512_available() -> bool {
-    #[cfg(target_arch = "x86_64")]
+    #[cfg(target_feature = "avx512f")]
     {
-        is_x86_feature_detected!("avx512f") &&
-        is_x86_feature_detected!("avx512dq") &&
-        is_x86_feature_detected!("avx512bw") &&
-        is_x86_feature_detected!("avx512vl")
+        true
     }
-    #[cfg(not(target_arch = "x86_64"))]
+    #[cfg(not(target_feature = "avx512f"))]
     {
-        false
+        is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512cd")
     }
 }
 
-/// AVX-512 optimized sort and accumulate for 32-bit integers
-/// 
-/// This uses AVX-512 instructions to sort column indices and accumulate
-/// values for duplicate columns, which is critical for SpGEMM performance.
-#[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
-pub unsafe fn avx512_sort_accumulate_i32(
-    col_indices: &[u32],
-    values: &[f32],
-) -> (Vec<u32>, Vec<f32>) {
-    if col_indices.len() != values.len() || col_indices.is_empty() {
-        return (Vec::new(), Vec::new());
-    }
-    
-    // For small arrays, use scalar fallback
-    if col_indices.len() < 32 {
-        return sort_accumulate_scalar(col_indices, values);
-    }
-    
-    // Process in chunks of 16 (AVX-512 register width)
-    let mut result_cols = Vec::with_capacity(col_indices.len());
-    let mut result_vals = Vec::with_capacity(col_indices.len());
-    
-    // TODO: Implement AVX-512 sorting network
-    // For now, use a hybrid approach:
-    // 1. Use AVX-512 to process chunks
-    // 2. Merge sorted chunks
-    
-    // Temporary: Use scalar implementation
-    sort_accumulate_scalar(col_indices, values)
+/// AVX512-accelerated accumulator for sorting and accumulating sparse products
+pub struct Avx512Accumulator {
+    /// Storage for column indices (AVec provides alignment)
+    col_indices: AVec<u32>,
+    /// Storage for values (AVec provides alignment)
+    values: AVec<f32>,
+    /// Current number of accumulated entries
+    size: usize,
+    /// Allocated capacity
+    capacity: usize,
 }
 
-/// Scalar fallback for sort and accumulate
-fn sort_accumulate_scalar(
-    col_indices: &[u32],
-    values: &[f32],
-) -> (Vec<u32>, Vec<f32>) {
-    let mut pairs: Vec<(u32, f32)> = col_indices.iter()
-        .zip(values.iter())
-        .map(|(&col, &val)| (col, val))
-        .collect();
-    
-    pairs.sort_unstable_by_key(|&(col, _)| col);
-    
-    if pairs.is_empty() {
-        return (Vec::new(), Vec::new());
-    }
-    
-    let mut result_cols = Vec::with_capacity(pairs.len());
-    let mut result_vals = Vec::with_capacity(pairs.len());
-    
-    let mut current_col = pairs[0].0;
-    let mut current_val = pairs[0].1;
-    
-    for &(col, val) in &pairs[1..] {
-        if col == current_col {
-            current_val += val;
-        } else {
-            result_cols.push(current_col);
-            result_vals.push(current_val);
-            current_col = col;
-            current_val = val;
+impl Avx512Accumulator {
+    /// Create a new AVX512 accumulator with the given initial capacity
+    pub fn new(initial_capacity: usize) -> Self {
+        // Round up to multiple of 16 (AVX512 processes 16 x 32-bit elements)
+        let aligned_capacity = ((initial_capacity + 15) / 16) * 16;
+        
+        Self {
+            col_indices: AVec::from_iter(64, (0..aligned_capacity).map(|_| 0u32)),
+            values: AVec::from_iter(64, (0..aligned_capacity).map(|_| 0.0f32)),
+            size: 0,
+            capacity: aligned_capacity,
         }
     }
-    
-    result_cols.push(current_col);
-    result_vals.push(current_val);
-    
-    (result_cols, result_vals)
-}
 
-/// AVX-512 bitonic sort network for 16 elements
-#[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
-unsafe fn bitonic_sort_16_i32(indices: __m512i, values: __m512) -> (__m512i, __m512) {
-    // This is a placeholder for the actual bitonic sorting network
-    // Implementation requires careful design of compare-exchange operations
-    // with accumulation for equal keys
-    
-    // TODO: Implement full bitonic network with these stages:
-    // 1. Stage 1: Compare pairs (0,1), (2,3), ..., (14,15)
-    // 2. Stage 2: Compare pairs (0,2), (1,3), ..., (13,15)
-    // 3. Continue through all log2(16) = 4 stages
-    // 4. Handle equal keys by accumulating values
-    
-    (indices, values)
-}
-
-/// AVX-512 merge of two sorted sequences with accumulation
-#[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
-unsafe fn merge_sorted_with_accumulation(
-    cols1: &[u32], vals1: &[f32],
-    cols2: &[u32], vals2: &[f32],
-) -> (Vec<u32>, Vec<f32>) {
-    let mut result_cols = Vec::with_capacity(cols1.len() + cols2.len());
-    let mut result_vals = Vec::with_capacity(vals1.len() + vals2.len());
-    
-    let mut i = 0;
-    let mut j = 0;
-    
-    while i < cols1.len() && j < cols2.len() {
-        if cols1[i] < cols2[j] {
-            result_cols.push(cols1[i]);
-            result_vals.push(vals1[i]);
-            i += 1;
-        } else if cols1[i] > cols2[j] {
-            result_cols.push(cols2[j]);
-            result_vals.push(vals2[j]);
-            j += 1;
-        } else {
-            // Equal columns - accumulate
-            result_cols.push(cols1[i]);
-            result_vals.push(vals1[i] + vals2[j]);
-            i += 1;
-            j += 1;
+    /// Ensure we have enough capacity for additional elements
+    fn ensure_capacity(&mut self, additional: usize) {
+        let required = self.size + additional;
+        if required > self.capacity {
+            let new_capacity = ((required * 2 + 15) / 16) * 16;
+            
+            let mut new_indices = AVec::from_iter(64, (0..new_capacity).map(|_| 0u32));
+            let mut new_values = AVec::from_iter(64, (0..new_capacity).map(|_| 0.0f32));
+            
+            new_indices[..self.size].copy_from_slice(&self.col_indices[..self.size]);
+            new_values[..self.size].copy_from_slice(&self.values[..self.size]);
+            
+            self.col_indices = new_indices;
+            self.values = new_values;
+            self.capacity = new_capacity;
         }
     }
-    
-    // Append remaining elements
-    while i < cols1.len() {
-        result_cols.push(cols1[i]);
-        result_vals.push(vals1[i]);
-        i += 1;
+
+    /// Sort and accumulate using AVX512 instructions
+    /// 
+    /// # Safety
+    /// This function uses AVX512 intrinsics which require proper CPU support
+    #[target_feature(enable = "avx512f")]
+    unsafe fn sort_and_accumulate_avx512(&self) -> (Vec<u32>, Vec<f32>) {
+        if self.size == 0 {
+            return (vec![], vec![]);
+        }
+
+        // For now, use fallback scalar implementation
+        // TODO: Implement actual AVX512 sorting
+        self.sort_and_accumulate_scalar()
     }
-    
-    while j < cols2.len() {
-        result_cols.push(cols2[j]);
-        result_vals.push(vals2[j]);
-        j += 1;
+
+    /// Fallback scalar implementation for sorting and accumulation
+    fn sort_and_accumulate_scalar(&self) -> (Vec<u32>, Vec<f32>) {
+        if self.size == 0 {
+            return (vec![], vec![]);
+        }
+
+        // Create pairs and sort by column index
+        let mut pairs: Vec<(u32, f32)> = self.col_indices[..self.size]
+            .iter()
+            .zip(self.values[..self.size].iter())
+            .map(|(&idx, &val)| (idx, val))
+            .collect();
+
+        pairs.sort_unstable_by_key(|&(idx, _)| idx);
+
+        // Accumulate duplicates
+        let mut result_indices = Vec::with_capacity(self.size);
+        let mut result_values = Vec::with_capacity(self.size);
+
+        let mut current_idx = pairs[0].0;
+        let mut current_val = pairs[0].1;
+
+        for &(idx, val) in &pairs[1..] {
+            if idx == current_idx {
+                current_val += val;
+            } else {
+                result_indices.push(current_idx);
+                result_values.push(current_val);
+                current_idx = idx;
+                current_val = val;
+            }
+        }
+
+        result_indices.push(current_idx);
+        result_values.push(current_val);
+
+        (result_indices, result_values)
     }
-    
-    (result_cols, result_vals)
+}
+
+impl Accumulator<f32> for Avx512Accumulator {
+    fn reset(&mut self) {
+        self.size = 0;
+    }
+
+    fn accumulate(&mut self, col: usize, val: f32) {
+        if val == 0.0 {
+            return;
+        }
+
+        self.ensure_capacity(1);
+        self.col_indices[self.size] = col as u32;
+        self.values[self.size] = val;
+        self.size += 1;
+    }
+
+    fn extract_result(self) -> (Vec<usize>, Vec<f32>) {
+        if self.size == 0 {
+            return (vec![], vec![]);
+        }
+
+        // Use AVX512 if available, otherwise fall back to scalar
+        let (indices_u32, values) = if is_avx512_available() {
+            unsafe { self.sort_and_accumulate_avx512() }
+        } else {
+            self.sort_and_accumulate_scalar()
+        };
+
+        // Convert u32 indices to usize
+        let indices = indices_u32.into_iter().map(|idx| idx as usize).collect();
+
+        (indices, values)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
-    fn test_avx512_availability() {
+    fn test_avx512_detection() {
+        // This test just checks that detection runs without crashing
         let available = is_avx512_available();
-        println!("AVX-512 available: {}", available);
-        
-        #[cfg(target_arch = "x86_64")]
-        {
-            println!("AVX-512F: {}", is_x86_feature_detected!("avx512f"));
-            println!("AVX-512DQ: {}", is_x86_feature_detected!("avx512dq"));
-            println!("AVX-512BW: {}", is_x86_feature_detected!("avx512bw"));
-            println!("AVX-512VL: {}", is_x86_feature_detected!("avx512vl"));
-        }
+        println!("AVX512 available: {}", available);
     }
-    
+
     #[test]
-    fn test_scalar_sort_accumulate() {
-        let cols = vec![3, 1, 2, 1, 3, 2];
-        let vals = vec![10.0, 20.0, 30.0, 40.0, 50.0, 60.0];
+    fn test_basic_accumulation() {
+        let mut acc = Avx512Accumulator::new(10);
         
-        let (result_cols, result_vals) = sort_accumulate_scalar(&cols, &vals);
+        acc.accumulate(5, 1.0);
+        acc.accumulate(3, 2.0);
+        acc.accumulate(5, 3.0);  // Duplicate column
+        acc.accumulate(1, 4.0);
         
-        assert_eq!(result_cols, vec![1, 2, 3]);
-        assert_eq!(result_vals, vec![60.0, 90.0, 60.0]);
+        let (indices, values) = acc.extract_result();
+        
+        assert_eq!(indices, vec![1, 3, 5]);
+        assert_eq!(values, vec![4.0, 2.0, 4.0]);  // 5 appears twice: 1.0 + 3.0 = 4.0
     }
-    
+
     #[test]
-    #[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
-    fn test_avx512_sort_accumulate() {
-        if !is_avx512_available() {
-            println!("Skipping AVX-512 test - not available");
-            return;
+    fn test_capacity_growth() {
+        let mut acc = Avx512Accumulator::new(2);
+        
+        // Add more elements than initial capacity
+        for i in 0..100 {
+            acc.accumulate(i, i as f32);
         }
         
-        let cols = vec![3, 1, 2, 1, 3, 2];
-        let vals = vec![10.0, 20.0, 30.0, 40.0, 50.0, 60.0];
+        let (indices, values) = acc.extract_result();
+        assert_eq!(indices.len(), 100);
+        assert_eq!(values.len(), 100);
+    }
+
+    #[test]
+    fn test_zero_values() {
+        let mut acc = Avx512Accumulator::new(10);
         
-        let (result_cols, result_vals) = unsafe {
-            avx512_sort_accumulate_i32(&cols, &vals)
-        };
+        acc.accumulate(5, 0.0);  // Should be ignored
+        acc.accumulate(3, 2.0);
+        acc.accumulate(5, 0.0);  // Should be ignored
+        acc.accumulate(1, 4.0);
         
-        assert_eq!(result_cols, vec![1, 2, 3]);
-        assert_eq!(result_vals, vec![60.0, 90.0, 60.0]);
+        let (indices, values) = acc.extract_result();
+        
+        assert_eq!(indices, vec![1, 3]);
+        assert_eq!(values, vec![4.0, 2.0]);
     }
 }

@@ -49,7 +49,6 @@ harness = false
 name = "quick_performance"
 harness = false
 
-
 [[bench]]
 name = "neon_diagnosis"
 harness = false
@@ -84,6 +83,10 @@ harness = false
 
 [[bench]]
 name = "unified_benchmark"
+harness = false
+
+[[bench]]
+name = "avx512_performance"
 harness = false
 
 [[bin]]

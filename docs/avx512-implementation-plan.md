@@ -2,106 +2,176 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive plan for implementing AVX512-specific optimizations for the MAGNUS sparse matrix multiplication algorithm. The optimizations focus on the sort-based accumulator component, which is critical for performance when handling sparse intermediate products.
+This document outlines a comprehensive plan for implementing
+AVX512-specific optimizations for the MAGNUS sparse matrix
+multiplication algorithm. Following the successful ARM/Apple Silicon
+implementation pattern, we'll extend the existing SIMD framework to
+support Intel AVX512.
 
-### Phases
+### Updated Context (Post Apple-Silicon Merge)
 
-0. Architecture Design: Module structure for AVX512 components
-1. TDD Phase: Write Tests for all critical and high-level functionality for 2-5
-2. Sort-then-reduce implementation using AVX512 intrinsics
-3. Modified compare-exchange with in-place accumulation
-4. Integration with existing framework and adaptive strategy selection
-5. Comprehensive testing and benchmarking suite (weeks 10-12)
+The project now has a mature SIMD architecture with:
+- **Complete ARM Implementation**: NEON, Apple Accelerate, and Metal GPU support
+- **Established Patterns**: Size-specific dispatch, safety documentation, comprehensive testing
+- **AVX512 Placeholder**: Already exists in `simd.rs`, ready for implementation
+- **Performance Baselines**: ARM achieves 2-4x speedup; AVX512 should exceed this
+
+### Implementation Phases
+
+0. **Architecture Review**: ✅ Completed - Existing framework supports AVX512 integration
+1. **TDD Phase**: Write tests for critical features following ARM test patterns
+2. **Sort Implementation**: AVX512 sort-then-reduce for 16, 32, 64 element batches  
+3. **Compare-Exchange**: Modified bitonic sort with in-place accumulation
+4. **Integration**: Plug into existing `SimdAccelerator` trait and dispatcher
+5. **Testing and Benchmarking**: Ensure Comprehensive Testing and
+   Performance validation against ARM and fallback implementations
 
 ## Current State Analysis
 
 ### Completed Components
-- **Core Algorithm**: Full MAGNUS implementation with row categorization, fine/coarse reordering
+- **Core Algorithm**: Full MAGNUS implementation with row categorization,
+  fine/coarse reordering
 - **Accumulator Framework**: Trait-based design supporting dense and sort accumulators
 - **Test Infrastructure**: Comprehensive test suite validating correctness
 - **Parallel Execution**: Rayon-based parallelization for row-level processing
 
 ### Gap Analysis
-The primary gap is in hardware-specific optimization for the sort accumulator, specifically:
+The primary gap is in hardware-specific optimization for the sort accumulator,
+specifically:
 1. AVX512 vectorized sorting for column indices
 2. Accumulation during or after sorting for duplicate column indices
 3. Integration with existing accumulator trait interface
 
 ## Implementation Notes
 
-### Module Structure
+### Current Architecture After Apple-Silicon Merge
+
+The project now has a sophisticated tiered architecture with ARM/Apple
+optimizations:
 
 ```
 src/
 ├── accumulator/
-│   ├── mod.rs              # Trait definition and factory
+│   ├── mod.rs              # Central dispatcher with conditional compilation
 │   ├── dense.rs            # Dense accumulator
-│   ├── sort.rs             # Generic sort accumulator
-│   └── avx512/             # NEW: AVX512 optimizations
-│       ├── mod.rs          # AVX512 feature detection and dispatch
-│       ├── sort_reduce.rs  # Sort-then-reduce implementation
-│       ├── bitonic.rs      # Modified compare-exchange
-│       └── intrinsics.rs   # Low-level AVX512 operations
+│   ├── sort.rs             # Generic sort accumulator  
+│   ├── simd.rs             # SIMD trait and fallback (has AVX512 placeholder)
+│   ├── neon.rs             # ARM NEON implementation (complete)
+│   ├── accelerate.rs       # Apple Accelerate framework
+│   ├── metal_impl.rs       # Metal GPU acceleration
+│   └── avx512.rs           # NEW: AVX512 implementation (to be created)
 ```
 
-### Feature Detection and Runtime Dispatch
+### Key Learnings from ARM Implementation
+
+1. **Size-Specific Dispatch**: ARM uses different algorithms for 4, 8, 16, 32, 64 elems
+2. **Padding Strategy**: Uses sentinel values (u32::MAX, f32::INFINITY)
+   for power-of-2 alignment
+3. **Hybrid Approach**: SIMD for small sizes, framework libraries for large sizes
+4. **Safety Documentation**: All unsafe intrinsics have comprehensive safety comments
+5. **Testing Strategy**: Architecture-specific tests with conditional compilation
+
+### Integration with Existing SIMD Framework
+
+The existing `simd.rs` already has AVX512 placeholder structure that we'll extend:
 
 ```rust
-// src/accumulator/avx512/mod.rs
+// src/accumulator/avx512.rs (NEW FILE)
 
 use std::arch::x86_64::*;
+use super::simd::SimdAccelerator;
+use aligned_vec::{AVec, avec};
 
-pub struct Avx512Features {
-    pub has_avx512f: bool,   // Foundation
-    pub has_avx512dq: bool,  // Double/Quad operations
-    pub has_avx512cd: bool,  // Conflict Detection
-    pub has_avx512bw: bool,  // Byte/Word operations
+/// AVX512 feature detection following ARM pattern
+pub fn is_avx512_available() -> bool {
+    is_x86_feature_detected!("avx512f") && 
+    is_x86_feature_detected!("avx512cd")  // Conflict detection for duplicates
 }
 
-impl Avx512Features {
-    pub fn detect() -> Self {
-        if is_x86_feature_detected!("avx512f") {
-            Self {
-                has_avx512f: true,
-                has_avx512dq: is_x86_feature_detected!("avx512dq"),
-                has_avx512cd: is_x86_feature_detected!("avx512cd"),
-                has_avx512bw: is_x86_feature_detected!("avx512bw"),
-            }
-        } else {
-            Self {
-                has_avx512f: false,
-                has_avx512dq: false,
-                has_avx512cd: false,
-                has_avx512bw: false,
-            }
+/// Size-specific dispatch similar to ARM NEON implementation
+pub struct Avx512Accumulator {
+    // Runtime feature flags
+    has_avx512cd: bool,  // Conflict detection
+    has_avx512dq: bool,  // Double/Quad operations
+}
+
+impl Avx512Accumulator {
+    pub fn new() -> Self {
+        Self {
+            has_avx512cd: is_x86_feature_detected!("avx512cd"),
+            has_avx512dq: is_x86_feature_detected!("avx512dq"),
+        }
+    }
+    
+    /// Size-specific dispatch following ARM pattern
+    unsafe fn sort_and_accumulate_sized(
+        &self,
+        col_indices: &[u32],
+        values: &[f32],
+    ) -> (Vec<u32>, Vec<f32>) {
+        match col_indices.len() {
+            0 => (vec![], vec![]),
+            1..=15 => self.sort_small(col_indices, values),
+            16 => self.sort_16_exact(col_indices, values),
+            17..=32 => self.sort_32_padded(col_indices, values),
+            33..=64 => self.sort_64_padded(col_indices, values),
+            _ => self.sort_large(col_indices, values),
         }
     }
 }
+```
 
-// Factory function with runtime dispatch
-pub fn create_avx512_accumulator<T>(
-    initial_capacity: usize,
-    features: &Avx512Features,
-) -> Box<dyn Accumulator<T>> 
-where
-    T: Copy + Num + AddAssign + 'static,
-{
-    if features.has_avx512f && features.has_avx512cd {
-        Box::new(Avx512SortAccumulator::new(initial_capacity))
-    } else {
-        Box::new(sort::SortAccumulator::new(initial_capacity))
+## 1. TDD Phase: Test-Driven Development
+
+Following the successful ARM pattern, we'll write comprehensive tests first:
+
+```rust
+// tests/avx512_tests.rs
+
+#[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
+mod avx512_tests {
+    use magnus::accumulator::avx512::*;
+    
+    #[test]
+    fn test_size_dispatch() {
+        // Test each size category gets correct algorithm
+        test_exact_16_elements();
+        test_padded_32_elements();
+        test_padded_64_elements();
+        test_large_arrays();
+    }
+    
+    #[test] 
+    fn test_duplicate_accumulation() {
+        // Verify correct accumulation of duplicate indices
+        let indices = vec![5, 2, 8, 2, 5, 1, 8, 3];
+        let values = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+        // Expected: [1, 2, 3, 5, 8] with [6.0, 6.0, 8.0, 6.0, 10.0]
+    }
+    
+    #[test]
+    fn test_conflict_detection() {
+        // Test AVX512CD conflict detection intrinsics
+        if !is_x86_feature_detected!("avx512cd") {
+            eprintln!("Skipping - AVX512CD not available");
+            return;
+        }
+        // Test _mm512_conflict_epi32 functionality
+    }
+    
+    #[test]
+    fn test_performance_thresholds() {
+        // Verify AVX512 is faster than fallback for target sizes
+        benchmark_crossover_point();
     }
 }
 ```
-
-## 1. TDD Phase
-
-TBD
 
 ## 2. Sort Phase: AVX512 Sort-Then-Reduce Implementation
 
 ### Objective
-Implement a vectorized sort-then-reduce accumulator using AVX512 instructions for improved performance on Intel processors.
+Implement a vectorized sort-then-reduce accumulator using AVX512 instructions for
+improved performance on Intel processors.
 
 ### 2.1 Data Layout and Alignment
 
@@ -254,7 +324,8 @@ Debug etc
 ## Phase 2: Modified Compare-Exchange Implementation (Weeks 4-6)
 
 ### Objective
-Implement a bitonic sorting network that performs accumulation during compare-exchange operations, potentially reducing memory bandwidth requirements.
+Implement a bitonic sorting network that performs accumulation during compare-exchange
+operations, potentially reducing memory bandwidth requirements.
 
 ### 3.1 Modified Compare-Exchange Network
 
@@ -380,35 +451,34 @@ unsafe fn avx512_compare_exchange_16(
 
 ### 4.1 Integration with Existing Framework
 
-```rust
-// src/accumulator/mod.rs
+The integration follows the existing pattern in `simd.rs`:
 
-pub fn create_accumulator<T>(
-    n_cols: usize, 
-    dense_threshold: usize,
-    config: &MagnusConfig,
-) -> Box<dyn Accumulator<T>>
+```rust
+// Update src/accumulator/simd.rs to use real AVX512 implementation
+
+#[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]
+impl<T> SimdAccelerator<T> for Avx512Accumulator
 where
-    T: Copy + Num + AddAssign + 'static,
+    T: Copy + Num + AddAssign,
 {
-    if n_cols <= dense_threshold {
-        Box::new(dense::DenseAccumulator::new(n_cols))
-    } else {
-        // Check for AVX512 support
-        #[cfg(target_arch = "x86_64")]
-        {
-            let features = avx512::Avx512Features::detect();
-            if features.has_avx512f && config.enable_avx512 {
-                return avx512::create_avx512_accumulator(
-                    std::cmp::min(n_cols / 10, 1024),
-                    &features,
-                );
-            }
+    fn sort_and_accumulate(&self, col_indices: &[usize], values: &[T]) -> (Vec<usize>, Vec<T>) {
+        // Convert to u32/f32 for SIMD operations (following ARM pattern)
+        // Call size-specific AVX512 implementation
+        // Convert back to original types
+    }
+}
+
+// Update src/accumulator/mod.rs dispatcher
+
+pub fn create_simd_accelerator() -> Box<dyn SimdAccelerator<f32>> {
+    match detect_architecture() {
+        Architecture::X86WithAVX512 => {
+            Box::new(avx512::Avx512Accumulator::new())
         }
-        
-        // Fallback to generic sort accumulator
-        let initial_capacity = std::cmp::min(n_cols / 10, 1024);
-        Box::new(sort::SortAccumulator::new(initial_capacity))
+        Architecture::ArmNeon => {
+            // Existing ARM logic
+        }
+        _ => Box::new(FallbackAccumulator::new())
     }
 }
 ```
@@ -680,8 +750,42 @@ Based on the MAGNUS paper and AVX512 capabilities:
 
 ## Next Steps
 
-1. Set up AVX512 development environment with appropriate hardware
-2. Implement basic AVX512 sort kernel
-3. Create microbenchmarks for algorithm validation
-4. Begin integration with existing accumulator framework
-5. Iterate based on performance measurements
+### Immediate Actions (Week 1)
+
+1. **Create AVX512 module structure**:
+   ```bash
+   touch src/accumulator/avx512.rs
+   echo "pub mod avx512;" >> src/accumulator/mod.rs
+   ```
+
+2. **Write initial test suite**:
+   ```bash
+   touch tests/avx512_tests.rs
+   cargo test --features avx512 # Verify compilation
+   ```
+
+3. **Implement feature detection**:
+   - Update `src/matrix/config.rs` to properly detect AVX512
+   - Add AVX512-specific thresholds (256 for dense, 2048 for chunks)
+
+4. **Create benchmarking infrastructure**:
+   ```bash
+   touch benches/avx512_performance.rs
+   ```
+
+### Development Priorities
+
+1. **Start with 16-element exact sort** (AVX512 native vector size)
+2. **Add padding strategies** for 32 and 64 elements
+3. **Implement conflict detection** for duplicate accumulation
+4. **Integrate with existing dispatcher** in `simd.rs`
+5. **Benchmark against ARM and fallback** implementations
+
+### Testing Strategy
+
+- Use conditional compilation:
+  ```#[cfg(all(target_arch = "x86_64", target_feature = "avx512f"))]```
+- Provide CI runners with AVX512 support or use emulation for basic correctness
+- Focus on correctness first, performance optimization second
+- Maintain feature parity with ARM implementation
+
