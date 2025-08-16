@@ -19,7 +19,7 @@ rayon = "1.8"        # Data-parallel operations
 # Utilities
 num-traits = "0.2"   # Generic numeric operations
 aligned-vec = "0.5"  # Aligned memory allocation
-num_cpus = "1.16"    # CPU core detection
+num_cpus = "1.17"    # CPU core detection
 
 [dev-dependencies]
 criterion = "0.7"    # Benchmarking framework
