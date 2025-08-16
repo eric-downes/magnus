@@ -189,9 +189,6 @@ where
     Box::new(acc)
 }
 
-// We need to import TypeId
-use std::any::TypeId;
-
 #[cfg(test)]
 mod tests {
     use super::*;

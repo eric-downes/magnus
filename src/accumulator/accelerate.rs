@@ -13,7 +13,7 @@
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
 use super::SimdAccelerator;
-use std::os::raw::{c_void, c_float, c_int};
+use std::os::raw::{c_float, c_int};
 
 // External Accelerate framework functions
 #[link(name = "Accelerate", kind = "framework")]
@@ -22,15 +22,6 @@ extern "C" {
     #[allow(dead_code)]
     fn vDSP_vsort(
         c: *mut c_float,      // Data to sort
-        n: c_int,             // Number of elements
-        direction: c_int,     // 1 for ascending, -1 for descending
-    );
-    
-    // vDSP_vsorti - Sort with index array
-    fn vDSP_vsorti(
-        c: *mut c_float,      // Data to sort
-        i: *mut c_int,        // Index array (will be rearranged)
-        tmp: *mut c_void,     // Temporary storage (can be null)
         n: c_int,             // Number of elements
         direction: c_int,     // 1 for ascending, -1 for descending
     );

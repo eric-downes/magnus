@@ -3,7 +3,6 @@
 //! This module provides architecture-specific prefetch hints to improve
 //! memory access patterns in sparse matrix operations.
 
-use std::ptr;
 
 /// Prefetch strategy for memory access optimization
 #[derive(Debug, Clone, Copy, PartialEq)]

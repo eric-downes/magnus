@@ -5,9 +5,9 @@
 
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
-use metal::{Device, DeviceRef, CommandQueue, CommandBuffer, ComputePipelineState};
-use metal::{Buffer, MTLResourceOptions, MTLSize};
-use metal::{Library, Function, ComputeCommandEncoder};
+use metal::{Device, CommandQueue, ComputePipelineState};
+use metal::{MTLResourceOptions, MTLSize};
+use metal::Library;
 use super::SimdAccelerator;
 use std::sync::{Arc, Once, Mutex};
 use std::mem;
@@ -23,12 +23,15 @@ static INIT: Once = Once::new();
 struct MetalContext {
     device: Device,
     command_queue: CommandQueue,
+    #[allow(dead_code)]
     library: Library,
+    #[allow(dead_code)]
     pipelines: ComputePipelines,
 }
 
 struct ComputePipelines {
     bitonic_sort: ComputePipelineState,
+    #[allow(dead_code)]
     parallel_reduce: ComputePipelineState,
 }
 

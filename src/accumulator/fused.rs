@@ -3,7 +3,6 @@
 //! This module provides a specialized implementation that combines sorting
 //! and accumulation in a single pass, optimized for cases with >75% duplicates.
 
-use std::cmp::Ordering;
 
 /// Fused sort and accumulate for high-duplicate scenarios
 /// 

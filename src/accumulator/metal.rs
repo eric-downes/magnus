@@ -10,8 +10,7 @@
 
 use super::SimdAccelerator;
 use std::sync::Once;
-use std::ptr;
-use std::os::raw::{c_void, c_char};
+use std::os::raw::c_void;
 
 // Metal Framework bindings
 #[link(name = "Metal", kind = "framework")]
@@ -26,6 +25,8 @@ extern "C" {
 const METAL_THRESHOLD: usize = 10_000;
 
 /// Metal accelerator for large sparse matrix operations
+/// Note: This is a stub implementation. The actual Metal GPU code is in metal_impl.rs
+#[allow(dead_code)]
 pub struct MetalAccelerator {
     device: MetalDevice,
     command_queue: MetalCommandQueue,
@@ -33,8 +34,11 @@ pub struct MetalAccelerator {
 }
 
 // Wrapper types for Metal objects
+#[allow(dead_code)]
 struct MetalDevice(*mut c_void);
+#[allow(dead_code)]
 struct MetalCommandQueue(*mut c_void);
+#[allow(dead_code)]
 struct MetalPipelines {
     sort_accumulate: *mut c_void,
     bitonic_sort: *mut c_void,
@@ -140,16 +144,28 @@ impl Default for MetalConfig {
 }
 
 /// High-level interface for Metal-accelerated SpGEMM
+/// 
+/// **NOTE**: This is a stub implementation that returns `NotImplemented`.
+/// The actual Metal GPU acceleration is implemented in `metal_impl.rs` and used
+/// through the `MetalAccumulator` type for sort+accumulate operations.
+/// 
+/// Full SpGEMM on GPU would require:
+/// 1. GPU kernels for the entire sparse matrix multiplication
+/// 2. Dynamic memory allocation on GPU for unpredictable output sizes
+/// 3. Complex synchronization between GPU compute passes
+/// 
+/// Currently, Metal acceleration is used only for the sort+accumulate phase
+/// when processing >10,000 elements, which provides the best performance/complexity tradeoff.
 pub fn spgemm_metal(
     a_rows: usize,
-    a_cols: usize,
+    _a_cols: usize,
     a_row_ptr: &[usize],
-    a_col_idx: &[usize],
-    a_values: &[f32],
-    b_cols: usize,
-    b_row_ptr: &[usize],
-    b_col_idx: &[usize],
-    b_values: &[f32],
+    _a_col_idx: &[usize],
+    _a_values: &[f32],
+    _b_cols: usize,
+    _b_row_ptr: &[usize],
+    _b_col_idx: &[usize],
+    _b_values: &[f32],
 ) -> Result<(Vec<usize>, Vec<usize>, Vec<f32>), MetalError> {
     // Check if Metal is available
     if !MetalAccelerator::is_available() {
