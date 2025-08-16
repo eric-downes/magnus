@@ -3,7 +3,8 @@
 //! This provides a principled comparison of MAGNUS SpGEMM performance against
 //! the sprs crate, which is the standard Rust sparse matrix library.
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use criterion::{criterion_group, BenchmarkId, Criterion, Throughput};
+use std::hint::black_box;
 use magnus::{magnus_spgemm, MagnusConfig, SparseMatrixCSR};
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use std::time::Duration;

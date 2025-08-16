@@ -1,6 +1,7 @@
 //! Benchmark comparing Accelerate framework vs pure NEON implementation
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use criterion::{criterion_group, criterion_main, Criterion, BenchmarkId};
+use std::hint::black_box;
 use magnus::accumulator::{NeonAccumulator, AccelerateAccumulator, SimdAccelerator};
 use rand::Rng;
 use rand::seq::SliceRandom;

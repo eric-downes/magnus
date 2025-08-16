@@ -1,6 +1,7 @@
 //! Benchmarks with SuiteSparse Matrix Collection
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::hint::black_box;
 use magnus::{
     multiply_row_coarse_level, multiply_row_fine_level, reference_spgemm, MagnusConfig,
     SparseMatrixCSR,

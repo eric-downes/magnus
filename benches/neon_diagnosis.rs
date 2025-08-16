@@ -2,7 +2,8 @@
 //! 
 //! This helps identify exactly where the performance issues are
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::hint::black_box;
 use magnus::accumulator::{FallbackAccumulator, SimdAccelerator};
 
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]

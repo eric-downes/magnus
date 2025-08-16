@@ -3,7 +3,8 @@
 //! This benchmark suite measures the impact of different prefetching strategies
 //! on sparse matrix multiplication performance.
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use criterion::{criterion_group, criterion_main, Criterion, BenchmarkId};
+use std::hint::black_box;
 use magnus::{SparseMatrixCSR, magnus_spgemm, MagnusConfig};
 use rand::Rng;
 use std::time::Instant;
