@@ -48,18 +48,35 @@ case $TIER in
         ;;
     
     test)
-        echo "Running large matrix correctness tests..."
-        cargo test --test large_matrix --release
+        echo "Running quick large matrix tests (for TDD, <10 seconds)..."
+        cargo test --test large_matrix_quick --release
+        ;;
+    
+    test-large)
+        echo "Running full large matrix correctness tests (2+ minutes)..."
+        echo "This includes 1M, 2M, 5M, and 10M+ nnz tests."
+        cargo test --test large_matrix --release -- --ignored
         ;;
     
     test-all)
-        echo "Running all tests including memory-intensive ones..."
-        cargo test --test large_matrix --release -- --ignored
+        echo "Running ALL tests (quick + large + memory intensive)..."
+        cargo test --test large_matrix_quick --release
+        cargo test --test large_matrix --release -- --ignored --include-ignored
         ;;
     
     *)
         echo "Unknown tier: $TIER"
-        echo "Valid options: quick, standard, large, full, test, test-all"
+        echo ""
+        echo "Benchmark tiers:"
+        echo "  quick    - 30s sanity check"
+        echo "  standard - 2-3 min normal tests"
+        echo "  large    - 5 min large matrix focus"
+        echo "  full     - 10+ min everything"
+        echo ""
+        echo "Test tiers:"
+        echo "  test       - Quick tests for TDD (<10s)"
+        echo "  test-large - Full large matrix tests (2+ min)"
+        echo "  test-all   - Everything including stress tests"
         exit 1
         ;;
 esac

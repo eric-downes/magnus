@@ -123,6 +123,7 @@ fn generate_power_law_matrix(
 
 /// Test correctness on a moderately large matrix (>1M nnz)
 #[test]
+#[ignore] // Run with --ignored flag, takes ~2 seconds
 fn test_large_matrix_correctness_1m() {
     // Create a 10,000 x 10,000 matrix with ~1% density = ~1M non-zeros
     let a = generate_large_sparse_matrix(10_000, 10_000, 0.01, 42);
@@ -162,6 +163,7 @@ fn test_large_matrix_correctness_1m() {
 
 /// Test parallel execution on large matrices
 #[test]
+#[ignore] // Run with --ignored flag, takes ~5 seconds
 fn test_large_matrix_parallel_2m() {
     // Create larger matrices with ~2M non-zeros
     let a = generate_large_sparse_matrix(15_000, 15_000, 0.009, 44);
@@ -220,6 +222,7 @@ fn test_large_matrix_parallel_2m() {
 
 /// Test power-law matrices (common in graph applications)
 #[test]
+#[ignore] // Run with --ignored flag, takes ~30 seconds
 fn test_power_law_matrix_5m() {
     // Create a 50,000 node graph with average degree 100 = ~5M edges
     let a = generate_power_law_matrix(50_000, 100, 46);
@@ -250,6 +253,7 @@ fn test_power_law_matrix_5m() {
 
 /// Test extremely sparse matrix (stress test for sort accumulator)
 #[test]
+#[ignore] // Run with --ignored flag, takes ~1 minute
 fn test_ultra_sparse_10m() {
     // 100,000 x 100,000 with 0.1% density = 10M non-zeros
     let a = generate_large_sparse_matrix(100_000, 100_000, 0.001, 48);
@@ -267,10 +271,16 @@ fn test_ultra_sparse_10m() {
     assert_eq!(c.n_rows, a.n_rows);
     assert_eq!(c.n_cols, a.n_cols);
     
-    // For ultra-sparse matrices, the result should still be quite sparse
+    // For squaring, significant fill-in is expected
+    // Each non-zero in a row of A can interact with all non-zeros in corresponding columns of A
     let density = c.col_idx.len() as f64 / (c.n_rows * c.n_cols) as f64;
+    let fill_factor = c.col_idx.len() as f64 / nnz as f64;
     println!("Result density: {:.6}%", density * 100.0);
-    assert!(density < 0.01, "Result too dense for ultra-sparse input");
+    println!("Fill factor: {:.1}x", fill_factor);
+    
+    // More realistic check: fill factor should be reasonable
+    assert!(fill_factor > 1.0, "No fill-in occurred");
+    assert!(fill_factor < 200.0, "Excessive fill-in");
 }
 
 /// Test memory usage patterns with very large matrices

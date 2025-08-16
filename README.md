@@ -111,9 +111,10 @@ for different use cases.
 
 TLDR: fast script!
 ```bash
-./bench.sh           # Quick 30s sanity check
-./bench.sh large     # 5min workout, large matrix focus
-./bench.sh test      # Run correctness tests
+./bench.sh test      # ~3s Run minimal correctness tests
+./bench.sh           # ~30s standard sanity checks
+./bench.sh large     # ~5 min workout, large matrix focus
+./bench.sh standard  # good practice before commit
 ```
 
 ### Large Matrix Benching
