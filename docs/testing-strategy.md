@@ -29,7 +29,7 @@ Integration tests verify that components work together correctly:
 - **End-to-End SpGEMM Tests**: Test full matrix multiplication
 - **Algorithm Integration Tests**: Verify fine/coarse level algorithm integration
 - **Cross-Component Tests**: Test interaction between different modules
-
+  
 ### 3. Property-Based Tests
 
 Property-based tests verify mathematical properties and invariants:

@@ -1,8 +1,12 @@
-# MAGNUS
+# MAGNUS++
 
 ![Rust CI](https://github.com/eric/magnus/actions/workflows/rust-ci.yml/badge.svg)
 
-MAGNUS (Matrix Algebra for Gigantic NUmerical Systems) is a high-performance Rust implementation of the sparse matrix multiplication algorithm described in [this paper](https://arxiv.org/pdf/2501.07056).
+MAGNUS++ (Matrix Algebra for Gigantic NUmerical Systems Plus-Plus) is
+a high-performance Rust implementation of the sparse matrix
+multiplication algorithm described in [Pou, Laukemann, & Patrini
+(2025)](https://arxiv.org/pdf/2501.07056) with additions (mostly GPU
+stuff) as described [here](./docs/additions_to_magnus.md).
 
 ## Features
 
@@ -12,6 +16,7 @@ MAGNUS (Matrix Algebra for Gigantic NUmerical Systems) is a high-performance Rus
 - **Apple Accelerate Framework**: Automatically uses Apple's optimized libraries on macOS
 - **Parallel Execution**: Multi-threaded processing using Rayon
 - **Memory-Efficient**: Fine and coarse-level reordering for improved cache locality
+- **Large Sparse Support**: As of Aug 2025, nnz ~ 57M working.
 
 ## Installation
 
@@ -101,11 +106,37 @@ cargo test --release
 
 ## Benchmarking
 
-MAGNUS includes a comprehensive benchmarking suite with multiple tiers for different use cases.
+MAGNUS includes a comprehensive benchmarking suite with multiple tiers
+for different use cases.
+
+TLDR: fast script!
+```bash
+./bench.sh           # Quick 30s sanity check
+./bench.sh large     # 5min workout, large matrix focus
+./bench.sh test      # Run correctness tests
+```
+
+### Large Matrix Benching
+
+Before making changes
+```bash
+BENCH_TIER=quick cargo bench --bench tiered_benchmark --save-baseline before
+```
+
+After changes - compare
+```
+BENCH_TIER=quick cargo bench --bench tiered_benchmark --baseline before
+```
+
+When optimizing for production -- hit yout PR!
+```
+BENCH_TIER=large cargo bench --bench tiered_benchmark
+```
 
 ### Tiered Benchmark System
 
-The benchmark system has three tiers to balance between quick feedback and comprehensive testing:
+The benchmark system has three tiers to balance between quick feedback
+and comprehensive testing:
 
 #### Tier 1: Quick Benchmarks (< 30 seconds)
 For rapid development feedback and CI/CD:
@@ -197,7 +228,9 @@ MAGNUS automatically detects and optimizes for your CPU:
 
 #### Apple Silicon Optimization
 
-On Apple Silicon, MAGNUS defaults to using Apple's Accelerate framework for optimal performance. To use pure NEON implementation instead:
+On Apple Silicon, MAGNUS defaults to using Apple's Accelerate
+framework for optimal performance. To use pure NEON implementation
+instead:
 
 ```bash
 # Disable Accelerate and use NEON-only implementation
@@ -213,7 +246,7 @@ MAGNUS_DISABLE_ACCELERATE=1 cargo run --release
 
 ## Algorithm Details
 
-MAGNUS uses an adaptive approach with four strategies based on row characteristics:
+MAGNUS uses one of four strategies based on row characteristics:
 
 1. **Sort-based**: For small intermediate products
 2. **Dense Accumulation**: When intermediate products fit in L2 cache
@@ -228,7 +261,7 @@ The algorithm automatically selects the optimal strategy for each matrix row.
 
 ```bash
 # Clone the repository
-git clone https://github.com/eric/magnus
+git clone https://github.com/eric-downes/magnuspp
 cd magnus
 
 # Build in release mode
@@ -255,16 +288,3 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
-
-## Citation
-
-If you use MAGNUS in your research, please cite:
-
-```bibtex
-@article{magnus2025,
-  title={MAGNUS: Matrix Algebra for Gigantic Numerical Systems},
-  author={...},
-  journal={arXiv preprint arXiv:2501.07056},
-  year={2025}
-}
-```
