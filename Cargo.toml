@@ -37,3 +37,7 @@ harness = false
 [[bench]]
 name = "arm_optimization"
 harness = false
+
+[[bench]]
+name = "quick_performance"
+harness = false
