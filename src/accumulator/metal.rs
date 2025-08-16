@@ -14,6 +14,8 @@ use std::sync::Once;
 
 // Metal Framework bindings
 #[link(name = "Metal", kind = "framework")]
+extern "C" {}
+
 #[link(name = "MetalPerformanceShaders", kind = "framework")]
 extern "C" {
     // Simplified bindings - in production would use metal-rs crate

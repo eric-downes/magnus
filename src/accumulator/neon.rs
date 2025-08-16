@@ -50,6 +50,12 @@ impl NeonAccumulator {
     }
 }
 
+impl Default for NeonAccumulator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SimdAccelerator<f32> for NeonAccumulator {
     fn sort_and_accumulate(&self, col_indices: &[usize], values: &[f32]) -> (Vec<usize>, Vec<f32>) {
         let len = col_indices.len();

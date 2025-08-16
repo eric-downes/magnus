@@ -47,6 +47,12 @@ impl AccelerateAccumulator {
     }
 }
 
+impl Default for AccelerateAccumulator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SimdAccelerator<f32> for AccelerateAccumulator {
     fn sort_and_accumulate(&self, col_indices: &[usize], values: &[f32]) -> (Vec<usize>, Vec<f32>) {
         if col_indices.is_empty() {

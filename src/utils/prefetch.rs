@@ -258,17 +258,20 @@ pub fn prefetch_non_temporal<T>(ptr: *const T) {
 }
 
 /// Prefetch multiple cache lines ahead
+///
+/// # Safety
+///
+/// The caller must ensure that `start_ptr` is valid and that accessing
+/// `start_ptr.add(i * stride)` for all `i` in the range is safe.
 #[inline(always)]
-pub fn prefetch_range<T>(start_ptr: *const T, count: usize, stride: usize) {
+pub unsafe fn prefetch_range<T>(start_ptr: *const T, count: usize, stride: usize) {
     let cache_line_size = 64; // Typical cache line size
     let element_size = std::mem::size_of::<T>();
     let elements_per_line = cache_line_size / element_size.max(1);
 
     for i in (0..count).step_by(elements_per_line) {
-        unsafe {
-            let ptr = start_ptr.add(i * stride);
-            prefetch_read_l1(ptr);
-        }
+        let ptr = start_ptr.add(i * stride);
+        prefetch_read_l1(ptr);
     }
 }
 

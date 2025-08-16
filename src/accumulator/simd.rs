@@ -21,6 +21,12 @@ impl FallbackAccumulator {
     }
 }
 
+impl Default for FallbackAccumulator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> SimdAccelerator<T> for FallbackAccumulator
 where
     T: Copy + Num + AddAssign,
