@@ -8,6 +8,8 @@
 pub mod dense;
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod neon;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub mod accelerate;
 pub mod simd;
 pub mod sort;
 
@@ -100,6 +102,8 @@ pub use simd::{
 };
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub use simd::NeonAccumulator;
+#[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+pub use accelerate::AccelerateAccumulator;
 pub use sort::multiply_row_sort;
 
 #[cfg(test)]
