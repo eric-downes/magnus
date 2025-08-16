@@ -13,6 +13,53 @@ pub enum Architecture {
     Generic,
 }
 
+impl Architecture {
+    /// Check if this architecture has SIMD support
+    pub fn has_simd_support(&self) -> bool {
+        !matches!(self, Architecture::Generic)
+    }
+    
+    /// Check if this architecture has AVX-512 support
+    pub fn has_avx512(&self) -> bool {
+        matches!(self, Architecture::X86WithAVX512)
+    }
+    
+    /// Check if this architecture has ARM NEON support
+    pub fn has_neon(&self) -> bool {
+        matches!(self, Architecture::ArmNeon)
+    }
+    
+    /// Get the vector width in bytes for this architecture
+    pub fn vector_width_bytes(&self) -> usize {
+        match self {
+            Architecture::X86WithAVX512 => 64,  // 512 bits
+            Architecture::X86WithoutAVX512 => 32,  // 256 bits (AVX2)
+            Architecture::ArmNeon => 16,  // 128 bits
+            Architecture::Generic => 8,  // Scalar
+        }
+    }
+    
+    /// Get optimal chunk size for this architecture
+    pub fn optimal_chunk_size(&self) -> usize {
+        match self {
+            Architecture::X86WithAVX512 => 2048,
+            Architecture::X86WithoutAVX512 => 1024,
+            Architecture::ArmNeon => 512,  // Tuned for Apple Silicon cache
+            Architecture::Generic => 256,
+        }
+    }
+    
+    /// Get the threshold for switching to dense accumulator
+    pub fn dense_accumulator_threshold(&self) -> usize {
+        match self {
+            Architecture::X86WithAVX512 => 256,  // From paper
+            Architecture::X86WithoutAVX512 => 256,
+            Architecture::ArmNeon => 192,  // Tuned for Apple Silicon
+            Architecture::Generic => 256,
+        }
+    }
+}
+
 /// System parameters for performance tuning
 #[derive(Debug, Clone)]
 pub struct SystemParameters {
@@ -81,35 +128,65 @@ pub struct MagnusConfig {
 
 impl Default for MagnusConfig {
     fn default() -> Self {
+        let arch = detect_architecture();
         Self {
             system_params: SystemParameters::default(),
-            dense_accum_threshold: 256, // Default from paper
+            dense_accum_threshold: arch.dense_accumulator_threshold(),
             sort_method: SortMethod::SortThenReduce,
             enable_coarse_level: true,
             coarse_batch_size: None, // Use heuristic by default
-            architecture: detect_architecture(),
+            architecture: arch,
+        }
+    }
+}
+
+impl MagnusConfig {
+    /// Create a config optimized for a specific architecture
+    pub fn for_architecture(arch: Architecture) -> Self {
+        Self {
+            system_params: SystemParameters::default(),
+            dense_accum_threshold: arch.dense_accumulator_threshold(),
+            sort_method: SortMethod::SortThenReduce,
+            enable_coarse_level: true,
+            coarse_batch_size: None,
+            architecture: arch,
         }
     }
 }
 
 /// Detects the current CPU architecture
-fn detect_architecture() -> Architecture {
-    // This is a placeholder. In a real implementation, we would use
-    // runtime CPU feature detection to determine the architecture.
+pub fn detect_architecture() -> Architecture {
+    #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
+    {
+        // Apple Silicon always has NEON
+        return Architecture::ArmNeon;
+    }
+    
     #[cfg(target_arch = "x86_64")]
     {
-        // Check for AVX-512 support
-        // In a real implementation, we'd use CPUID or similar
-        Architecture::X86WithoutAVX512
+        // Check for AVX-512 support using is_x86_feature_detected macro
+        #[cfg(target_feature = "avx512f")]
+        {
+            return Architecture::X86WithAVX512;
+        }
+        #[cfg(not(target_feature = "avx512f"))]
+        {
+            // Runtime detection for x86
+            if std::is_x86_feature_detected!("avx512f") {
+                return Architecture::X86WithAVX512;
+            } else {
+                return Architecture::X86WithoutAVX512;
+            }
+        }
     }
-
-    #[cfg(target_arch = "aarch64")]
+    
+    #[cfg(all(target_arch = "aarch64", not(target_os = "macos")))]
     {
-        Architecture::ArmNeon
+        // Other ARM platforms with NEON
+        return Architecture::ArmNeon;
     }
-
-    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-    {
-        Architecture::Generic
-    }
+    
+    // Fallback for other architectures
+    #[allow(unreachable_code)]
+    Architecture::Generic
 }

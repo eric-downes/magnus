@@ -362,6 +362,7 @@ dependencies = [
  "num-traits",
  "num_cpus",
  "proptest",
+ "rand",
  "rayon",
  "sprs",
 ]
