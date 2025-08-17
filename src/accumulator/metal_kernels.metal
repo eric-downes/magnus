@@ -56,7 +56,12 @@ kernel void bitonic_sort_step(
         float val1 = values[tid];
         float val2 = values[partner_idx];
         
-        bool ascending = ((tid & stage) == 0);
+        // Correct bitonic sort direction:
+        // The direction alternates for blocks of size (2 * stage)
+        // Within a stage-sized block, all comparisons have the same direction
+        uint block_id = tid / stage;
+        bool ascending = (block_id & 2) == 0;
+        
         bool swap = ascending ? (idx1 > idx2) : (idx1 < idx2);
         
         if (swap) {

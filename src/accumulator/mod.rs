@@ -7,6 +7,7 @@
 
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod accelerate;
+pub mod bitonic_sort_types;
 pub mod dense;
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod metal;
