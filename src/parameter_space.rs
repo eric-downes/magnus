@@ -4,11 +4,10 @@
 //! systematic testing across the algorithm's configuration space.
 
 use crate::constants::*;
-use crate::matrix::{SparseMatrixCSR, SparseMatrixCSC};
+use crate::matrix::SparseMatrixCSR;
 use rand::distributions::{Distribution, Uniform};
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
-use std::collections::HashMap;
 
 /// Number of random objects to generate per parameter combination
 pub const NUM_RAND_OBJS: usize = 3;
@@ -480,7 +479,7 @@ impl PatternMatrixGenerator {
             let block_start = block_id * block_size;
             let block_end = ((block_id + 1) * block_size).min(n);
 
-            for i in block_start..block_end {
+            for _i in block_start..block_end {
                 for j in block_start..block_end {
                     if self.rng.gen_bool(0.7) {
                         // 70% density within blocks

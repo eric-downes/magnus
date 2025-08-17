@@ -82,6 +82,10 @@ harness = false
 name = "tiered_benchmark"
 harness = false
 
+[[bench]]
+name = "unified_benchmark"
+harness = false
+
 [[bin]]
 name = "explore_parameters"
 path = "src/bin/explore_parameters.rs"

@@ -5,7 +5,7 @@
 //! Sparse Matrix Collection).
 
 use crate::matrix::SparseMatrixCSR;
-use crate::parameter_space::{MatrixGenerator, ParameterConfiguration, PatternMatrixGenerator};
+use crate::parameter_space::{MatrixGenerator, PatternMatrixGenerator};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
@@ -411,7 +411,7 @@ mod tests {
         );
 
         // Write to temporary file
-        let mut temp_file = NamedTempFile::new().unwrap();
+        let temp_file = NamedTempFile::new().unwrap();
         let path = temp_file.path().to_path_buf();
         
         MatrixMarketIO::write_matrix(&path, &matrix).unwrap();

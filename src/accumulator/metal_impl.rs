@@ -7,8 +7,7 @@
 
 use super::SimdAccelerator;
 use crate::constants::{
-    BITONIC_SORT_PADDING_INDEX, BITONIC_SORT_PADDING_VALUE, METAL_DEFAULT_THREADS_PER_GROUP,
-    METAL_GPU_THRESHOLD,
+    BITONIC_SORT_PADDING_INDEX, METAL_GPU_THRESHOLD,
 };
 use metal::Library;
 use metal::{CommandQueue, ComputePipelineState, Device};
@@ -259,8 +258,8 @@ mod tests {
     fn test_metal_sort() {
         if let Some(acc) = MetalAccumulator::new() {
             // Create large test data
-            let mut indices: Vec<usize> = (0..METAL_THRESHOLD).map(|i| i % 1000).collect();
-            let values: Vec<f32> = (0..METAL_THRESHOLD).map(|i| i as f32).collect();
+            let mut indices: Vec<usize> = (0..METAL_GPU_THRESHOLD).map(|i| i % 1000).collect();
+            let values: Vec<f32> = (0..METAL_GPU_THRESHOLD).map(|i| i as f32).collect();
 
             // Shuffle
             use rand::seq::SliceRandom;

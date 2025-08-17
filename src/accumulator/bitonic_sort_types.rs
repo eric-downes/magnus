@@ -4,7 +4,6 @@
 //! required by the bitonic sort algorithm, making the logic more
 //! explicit and less reliant on clever bit manipulation tricks.
 
-use std::marker::PhantomData;
 
 /// A power of two value, guaranteed at the type level
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

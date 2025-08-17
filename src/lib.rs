@@ -75,6 +75,7 @@ pub mod parameter_space;
 pub mod reduced_parameter_space;
 pub mod reordering;
 pub mod suitesparse_integration;
+pub mod test_tiers;
 pub mod utils;
 
 // Re-export primary components

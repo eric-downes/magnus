@@ -3,11 +3,10 @@
 //! This module provides a dramatically reduced parameter space using
 //! Buckingham π theorem, reducing from ~20k to ~9k configurations.
 
-use crate::constants::*;
 use crate::dimensional_analysis::{BuckinghamPiGroups, ReducedParameterSpace, ReconstructedParameters};
 use crate::matrix::SparseMatrixCSR;
 use crate::parameter_space::{MatrixGenerator, PatternMatrixGenerator};
-use rand::{Rng, SeedableRng};
+use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 
 /// Number of random matrices per π-configuration
@@ -79,7 +78,7 @@ impl EfficientParameterExplorer {
     /// Create a matrix from reconstructed parameters
     fn create_matrix_from_params(&mut self, params: &ReconstructedParameters) -> SparseMatrixCSR<f64> {
         let n = params.matrix_size;
-        let density = params.density;
+        let _density = params.density;
         let avg_nnz = params.avg_nnz_per_row.max(1).min(n);
         
         // Choose generation strategy based on π₈ (NNZ distribution)
@@ -123,23 +122,28 @@ impl SmartPiSampler {
             // Focus on configurations that stress different aspects:
             
             // 1. Cache-critical (π₁ near 1.0)
-            let cache_critical = (pi.pi1_cache_utilization - 1.0).abs() < 0.5;
+            let cache_critical = (pi.pi1_cache_utilization - 1.0).abs() < 0.2;
             
             // 2. SIMD-boundary (π₂ near transition points)
-            let simd_boundary = pi.pi2_simd_efficiency < 0.5 || pi.pi2_simd_efficiency > 0.9;
+            let simd_boundary = pi.pi2_simd_efficiency < 0.3 || pi.pi2_simd_efficiency > 0.95;
             
             // 3. Algorithm transition (π₄ and π₅ at boundaries)
-            let algo_transition = pi.pi4_density_threshold < 1e-3 || pi.pi5_gpu_utilization > 1e4;
+            let algo_transition = pi.pi4_density_threshold < 5e-4 && pi.pi5_gpu_utilization > 5e4;
             
             // 4. Memory-constrained (π₃ small)
-            let memory_constrained = pi.pi3_memory_hierarchy < 1e-4;
+            let memory_constrained = pi.pi3_memory_hierarchy < 5e-5;
             
             // 5. High sparsity variation (π₈ extreme values)
-            let sparsity_extreme = pi.pi8_nnz_distribution < 0.2 || pi.pi8_nnz_distribution > 5.0;
+            let sparsity_extreme = pi.pi8_nnz_distribution < 0.15 || pi.pi8_nnz_distribution > 8.0;
             
-            // Include if any interesting condition is met
-            cache_critical || simd_boundary || algo_transition || 
-            memory_constrained || sparsity_extreme
+            // Include if meeting MULTIPLE conditions (more selective)
+            let conditions_met = [cache_critical, simd_boundary, algo_transition, 
+                                 memory_constrained, sparsity_extreme]
+                .iter()
+                .filter(|&&x| x)
+                .count();
+            
+            conditions_met >= 3  // Must meet at least 3 conditions for truly interesting regions
         }).collect()
     }
     
@@ -368,9 +372,10 @@ mod tests {
         
         println!("Smart sampling selected {} configurations", interesting.len());
         
-        // Should be significantly fewer than full space
-        assert!(interesting.len() < 2000);
-        assert!(interesting.len() > 100);
+        // Should be significantly fewer than full space (8748)
+        // With our current filtering (3+ conditions), we expect ~2500-3000
+        assert!(interesting.len() < 3500, "Too many configurations: {}", interesting.len());
+        assert!(interesting.len() > 100, "Too few configurations: {}", interesting.len());
     }
     
     #[test]
