@@ -6,14 +6,16 @@
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
 use super::SimdAccelerator;
+use crate::constants::{
+    BITONIC_SORT_PADDING_INDEX, BITONIC_SORT_PADDING_VALUE, METAL_DEFAULT_THREADS_PER_GROUP,
+    METAL_GPU_THRESHOLD,
+};
 use metal::Library;
 use metal::{CommandQueue, ComputePipelineState, Device};
 use metal::{MTLResourceOptions, MTLSize};
 use std::mem;
 use std::sync::{Arc, Mutex, Once};
 
-/// Threshold for using Metal GPU (number of elements)
-const METAL_THRESHOLD: usize = 10_000;
 
 /// Shared Metal context for the application
 static METAL_CONTEXT: Mutex<Option<Arc<MetalContext>>> = Mutex::new(None);
@@ -93,7 +95,7 @@ impl MetalAccumulator {
 
     /// Check if Metal should be used for this size
     pub fn should_use_metal(size: usize) -> bool {
-        size >= METAL_THRESHOLD && Self::is_available()
+        size >= METAL_GPU_THRESHOLD && Self::is_available()
     }
 
     /// Check if Metal is available
@@ -188,7 +190,7 @@ impl SimdAccelerator<f32> for MetalAccumulator {
 
         let size = col_indices.len();
 
-        if size < METAL_THRESHOLD {
+        if size < METAL_GPU_THRESHOLD {
             // Use CPU implementation for small sizes
             return super::accelerate::AccelerateAccumulator::new()
                 .sort_and_accumulate(col_indices, values);
@@ -207,7 +209,7 @@ impl SimdAccelerator<f32> for MetalAccumulator {
 
         // Skip any leading padding
         let mut i = 0;
-        while i < sorted_indices.len() && sorted_indices[i] == u32::MAX {
+        while i < sorted_indices.len() && sorted_indices[i] == BITONIC_SORT_PADDING_INDEX {
             i += 1;
         }
 
@@ -218,7 +220,7 @@ impl SimdAccelerator<f32> for MetalAccumulator {
 
             while i < sorted_indices.len() {
                 // Stop at padding values
-                if sorted_indices[i] == u32::MAX {
+                if sorted_indices[i] == BITONIC_SORT_PADDING_INDEX {
                     break;
                 }
                 

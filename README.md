@@ -279,6 +279,8 @@ BENCH_TIER=quick cargo bench --bench tiered_benchmarks
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
+**Important**: All numeric constants must be defined in `src/constants.rs`. Never hardcode magic numbers in implementation code.
+
 ### Documentation
 
 - [Algorithm Details](docs/master-document.md)

@@ -816,6 +816,52 @@ fn generate_test_matrices() -> Vec<TestMatrix> {
 - Full GPU acceleration investigation
 - Production documentation and API stabilization
 
+## Code Standards and Best Practices
+
+### Constants Management
+
+**All numeric constants MUST be defined in `src/constants.rs`**
+
+To prevent uncaught errors and improve maintainability:
+
+1. **No hardcoded constants**: Never introduce numeric literals directly in code
+2. **Centralized definitions**: All constants must be defined in `src/constants.rs`
+3. **Descriptive names**: Use clear, ALL_CAPS names that describe the constant's purpose
+4. **Documentation**: Each constant should have a comment explaining its use
+5. **Categorization**: Group related constants together with section headers
+
+Example:
+```rust
+// ❌ BAD: Hardcoded constant
+if size < 10000 {
+    use_gpu();
+}
+
+// ✅ GOOD: Named constant
+use crate::constants::METAL_GPU_THRESHOLD;
+if size < METAL_GPU_THRESHOLD {
+    use_gpu();
+}
+```
+
+Categories in `src/constants.rs`:
+- Architecture-specific constants (vector widths, chunk sizes)
+- Accumulator thresholds
+- SIMD processing thresholds
+- Memory and cache constants
+- Prefetch strategy constants
+- Matrix density thresholds
+- Floating point tolerances
+- Display and debug constants
+- Benchmarking constants
+- Test matrix generation constants
+
+This centralization enables:
+- Easy tuning of algorithm parameters
+- Consistent behavior across the codebase
+- Prevention of "magic number" bugs
+- Clear documentation of design decisions
+
 ## Conclusion
 
 This implementation has successfully completed the core MAGNUS algorithm with extensive test coverage and initial hardware optimizations for ARM/Apple Silicon. The implementation strategy proved effective:

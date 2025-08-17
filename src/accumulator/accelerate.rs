@@ -13,6 +13,7 @@
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
 use super::SimdAccelerator;
+use crate::constants::ACCELERATE_SIMD_THRESHOLD;
 use std::os::raw::{c_float, c_int, c_void};
 
 // External Accelerate framework functions
@@ -60,7 +61,7 @@ impl SimdAccelerator<f32> for AccelerateAccumulator {
         }
 
         // For small sizes, use our optimized NEON implementation
-        if col_indices.len() <= 32 {
+        if col_indices.len() <= ACCELERATE_SIMD_THRESHOLD {
             return super::neon::NeonAccumulator::new().sort_and_accumulate(col_indices, values);
         }
 

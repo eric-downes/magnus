@@ -3,6 +3,8 @@
 //! This module provides architecture-specific prefetch hints to improve
 //! memory access patterns in sparse matrix operations.
 
+use crate::constants::*;
+
 /// Prefetch strategy for memory access optimization
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PrefetchStrategy {
@@ -140,12 +142,12 @@ fn get_system_memory() -> usize {
                 }
             }
         }
-        8 * 1024 * 1024 * 1024
+        AGGRESSIVE_MEMORY_THRESHOLD
     }
 
     #[cfg(not(any(target_os = "macos", target_os = "linux")))]
     {
-        8 * 1024 * 1024 * 1024 // Default to 8GB
+        AGGRESSIVE_MEMORY_THRESHOLD // Default to 8GB
     }
 }
 
@@ -314,10 +316,10 @@ impl AccessPatternAnalyzer {
     pub fn recommend_strategy(&self) -> PrefetchStrategy {
         let hit_rate = self.hit_rate();
 
-        if hit_rate > 0.9 {
+        if hit_rate > HIGH_HIT_RATE_THRESHOLD {
             // Excellent cache behavior, minimal prefetch needed
             PrefetchStrategy::Conservative
-        } else if hit_rate > 0.7 {
+        } else if hit_rate > MEDIUM_HIT_RATE_THRESHOLD {
             // Good cache behavior, moderate prefetch helpful
             PrefetchStrategy::Moderate
         } else {

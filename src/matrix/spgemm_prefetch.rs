@@ -4,6 +4,7 @@
 //! memory prefetching to improve cache performance.
 
 use crate::accumulator::Accumulator;
+use crate::constants::*;
 use crate::matrix::SparseMatrixCSR;
 use crate::utils::prefetch::{
     prefetch_read_l1, prefetch_read_l2, PrefetchConfig, PrefetchStrategy,
@@ -39,7 +40,7 @@ where
         apply_prefetch_strategy(a, b, i, config);
 
         // Create accumulator for this row (use sort-based for now)
-        let mut accumulator = crate::accumulator::sort::SortAccumulator::<T>::new(256);
+        let mut accumulator = crate::accumulator::sort::SortAccumulator::<T>::new(DEFAULT_SORT_ACCUMULATOR_SIZE);
 
         // Get row i of A
         let a_row_start = a.row_ptr[i];
@@ -237,17 +238,17 @@ where
     let b_avg_nnz = b_nnz / b.n_rows.max(1);
 
     // If matrices are very sparse, prefetching has less benefit
-    if a_density < 0.001 && b_density < 0.001 {
+    if a_density < SPARSE_DENSITY_THRESHOLD && b_density < SPARSE_DENSITY_THRESHOLD {
         return PrefetchStrategy::Conservative;
     }
 
     // If B has many non-zeros per row, aggressive prefetch helps
-    if b_avg_nnz >= 100 {
+    if b_avg_nnz >= B_MATRIX_AVG_NNZ_THRESHOLD {
         return PrefetchStrategy::Aggressive;
     }
 
     // If matrices are moderately sparse
-    if a_avg_nnz > 10 && b_avg_nnz > 10 {
+    if a_avg_nnz > MIN_AVG_NNZ_THRESHOLD && b_avg_nnz > MIN_AVG_NNZ_THRESHOLD {
         return PrefetchStrategy::Moderate;
     }
 

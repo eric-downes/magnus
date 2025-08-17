@@ -2,6 +2,54 @@
 
 Thank you for your interest in contributing to the MAGNUS project! This document outlines the process for contributing and the standards we follow.
 
+## Code Standards
+
+### Constants Management (CRITICAL)
+
+**All numeric constants MUST be defined in `src/constants.rs`**
+
+This is a strict requirement to prevent bugs. The bitonic sort bug that required significant debugging was caused by hardcoded constants. To prevent similar issues:
+
+#### Rules for Constants
+
+1. **Never hardcode numeric literals** in implementation code
+2. **Always define constants** in `src/constants.rs` 
+3. **Use descriptive ALL_CAPS names** that clearly indicate purpose
+4. **Document each constant** with a comment
+5. **Group related constants** under section headers
+
+#### Examples
+
+❌ **BAD**: Hardcoded constant
+```rust
+if elements.len() >= 10000 {
+    use_gpu_acceleration();
+}
+```
+
+✅ **GOOD**: Named constant
+```rust
+// In src/constants.rs
+/// Threshold for using Metal GPU acceleration (number of elements)
+pub const METAL_GPU_THRESHOLD: usize = 10_000;
+
+// In implementation file
+use crate::constants::METAL_GPU_THRESHOLD;
+if elements.len() >= METAL_GPU_THRESHOLD {
+    use_gpu_acceleration();
+}
+```
+
+#### When to Add Constants
+
+Add to `src/constants.rs` when you have:
+- Algorithm selection thresholds
+- Buffer sizes or capacity limits
+- Architecture-specific parameters
+- Floating-point tolerances
+- Display/debug limits
+- Any "magic number" affecting behavior
+
 ## Development Process
 
 1. **Fork the Repository**: Start by forking the repository and cloning it locally.
