@@ -51,12 +51,15 @@ kernel void bitonic_sort_step(
     uint partner_idx = tid ^ pass_of_stage;
     
     if (partner_idx > tid && partner_idx < n_elements) {
+        // Determine the correct sorting direction
+        uint block_size = 2 * pass_of_stage;
+        bool ascending = ((tid & block_size) == 0);
+        
         uint idx1 = indices[tid];
         uint idx2 = indices[partner_idx];
         float val1 = values[tid];
         float val2 = values[partner_idx];
         
-        bool ascending = ((tid & stage) == 0);
         bool swap = ascending ? (idx1 > idx2) : (idx1 < idx2);
         
         if (swap) {
@@ -167,4 +170,74 @@ kernel void merge_sorted_sequences(
     
     // Binary search to find merge position
     // Simplified - full implementation would be more sophisticated
+}
+
+// Simple kernel for accumulating sorted values - single pass
+// This version handles the entire array sequentially to ensure correctness
+// IMPORTANT: This expects data sorted with bitonic sort where padding (UINT_MAX) is at the end
+kernel void accumulate_sorted(
+    constant uint* sorted_indices [[buffer(0)]],
+    constant float* sorted_values [[buffer(1)]],
+    device uint* unique_indices [[buffer(2)]],
+    device float* accumulated_values [[buffer(3)]],
+    device atomic_uint* unique_count [[buffer(4)]],
+    constant uint& n_elements [[buffer(5)]],
+    uint tid [[thread_position_in_grid]])
+{
+    // Only the first thread does the work (sequential for now)
+    if (tid != 0) return;
+    
+    // Handle empty input
+    if (n_elements == 0) {
+        atomic_store_explicit(unique_count, 0, memory_order_relaxed);
+        return;
+    }
+    
+    // Find first non-padding element
+    uint start_idx = 0;
+    while (start_idx < n_elements && sorted_indices[start_idx] == UINT_MAX) {
+        start_idx++;
+    }
+    
+    // All elements are padding
+    if (start_idx >= n_elements) {
+        atomic_store_explicit(unique_count, 0, memory_order_relaxed);
+        return;
+    }
+    
+    // Initialize with first valid element
+    uint write_pos = 0;
+    uint current_idx = sorted_indices[start_idx];
+    float current_sum = sorted_values[start_idx];
+    
+    // Process remaining elements
+    for (uint i = start_idx + 1; i < n_elements; i++) {
+        uint idx = sorted_indices[i];
+        
+        // Stop at padding (UINT_MAX values are sorted to the end)
+        if (idx == UINT_MAX) {
+            break;
+        }
+        
+        if (idx == current_idx) {
+            // Same index - accumulate
+            current_sum += sorted_values[i];
+        } else {
+            // Different index - write previous and start new
+            unique_indices[write_pos] = current_idx;
+            accumulated_values[write_pos] = current_sum;
+            write_pos++;
+            
+            current_idx = idx;
+            current_sum = sorted_values[i];
+        }
+    }
+    
+    // Write the final accumulated value
+    unique_indices[write_pos] = current_idx;
+    accumulated_values[write_pos] = current_sum;
+    write_pos++;
+    
+    // Store the total count
+    atomic_store_explicit(unique_count, write_pos, memory_order_relaxed);
 }
