@@ -70,7 +70,9 @@ pub mod accumulator;
 pub mod constants;
 pub mod matrix;
 pub mod parallel;
+pub mod parameter_space;
 pub mod reordering;
+pub mod suitesparse_integration;
 pub mod utils;
 
 // Re-export primary components
