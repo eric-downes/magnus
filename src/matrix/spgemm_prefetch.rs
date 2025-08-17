@@ -40,7 +40,8 @@ where
         apply_prefetch_strategy(a, b, i, config);
 
         // Create accumulator for this row (use sort-based for now)
-        let mut accumulator = crate::accumulator::sort::SortAccumulator::<T>::new(DEFAULT_SORT_ACCUMULATOR_SIZE);
+        let mut accumulator =
+            crate::accumulator::sort::SortAccumulator::<T>::new(DEFAULT_SORT_ACCUMULATOR_SIZE);
 
         // Get row i of A
         let a_row_start = a.row_ptr[i];

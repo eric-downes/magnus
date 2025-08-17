@@ -1,0 +1,95 @@
+   Compiling magnus v0.1.0 (/Users/eric/compute/magnus)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.87s
+     Running unittests src/lib.rs (target/debug/deps/magnus-51dbd2fb034d083e)
+
+running 90 tests
+test accumulator::bitonic_sort_types::tests::test_bitonic_thread_direction ... ok
+test accumulator::bitonic_sort_types::tests::test_power_of_two ... ok
+test accumulator::accelerate::tests::test_accelerate_sort ... ok
+test accumulator::dense::tests::test_dense_accumulator_empty ... ok
+test accumulator::bitonic_sort_types::tests::test_config_iteration ... ok
+test accumulator::dense::tests::test_dense_accumulator_duplicate_columns ... ok
+test accumulator::dense::tests::test_dense_accumulator_multiple_entries ... ok
+test accumulator::accelerate::tests::test_accelerate_large ... ok
+test accumulator::dense::tests::test_dense_accumulator_reset ... ok
+test accumulator::dense::tests::test_dense_accumulator_single_entry ... ok
+test accumulator::dense::tests::test_multiply_row_dense ... ok
+test accumulator::neon::tests::test_neon_accumulation ... ok
+test accumulator::neon::tests::test_neon_sort_4 ... ok
+test accumulator::neon_safe::tests::test_safe_neon_empty_input ... ok
+test accumulator::neon_safe::tests::test_safe_neon_small_input ... ok
+test accumulator::neon_safe::tests::test_safe_neon_validation ... ok
+test accumulator::sort::tests::test_multiply_row_sort ... ok
+test accumulator::sort::tests::test_sort_accumulator_duplicate_columns ... ok
+test accumulator::sort::tests::test_sort_accumulator_empty ... ok
+test accumulator::sort::tests::test_sort_accumulator_multiple_entries ... ok
+test accumulator::sort::tests::test_sort_accumulator_reset ... ok
+test accumulator::sort::tests::test_sort_accumulator_single_entry ... ok
+test accumulator::tests::test_explicit_accumulator_creation ... ok
+test accumulator::tests::test_create_accumulator_selection ... ok
+test dimensional_analysis::tests::test_implicit_conversions ... ok
+test dimensional_analysis::tests::test_parameter_space_reduction ... ok
+test dimensional_analysis::tests::test_pi_group_formation ... ok
+test dimensional_analysis::tests::test_unit_categorization ... ok
+test matrix::categorization::tests::test_categorization_respects_threshold ... ok
+test matrix::categorization::tests::test_categorization_summary ... ok
+test matrix::categorization::tests::test_categorize_small_matrices ... ok
+test matrix::categorization::tests::test_empty_row_categorization ... ok
+test matrix::conversion::tests::test_csc_to_csr_conversion ... ok
+test matrix::conversion::tests::test_csr_to_csc_conversion ... ok
+test matrix::csc::tests::test_col_iter ... ok
+test matrix::conversion::tests::test_roundtrip_conversion ... ok
+test dimensional_analysis::tests::test_parameter_reconstruction ... ok
+test matrix::csc::tests::test_identity ... ok
+test matrix::csc::tests::test_new_matrix ... ok
+test matrix::csr::tests::test_identity ... ok
+test matrix::csc::tests::test_invalid_col_ptr - should panic ... ok
+test matrix::csc::tests::test_inconsistent_lengths - should panic ... ok
+test matrix::csr::tests::test_new_matrix ... ok
+test matrix::categorization::tests::test_coarse_level_disabled ... ok
+test matrix::csr::tests::test_invalid_row_ptr - should panic ... ok
+test matrix::csr::tests::test_row_iter ... ok
+test matrix::csr::tests::test_inconsistent_lengths - should panic ... ok
+test matrix::reference::tests::test_reference_multiplication ... ok
+test matrix::reference::tests::test_identity_multiplication ... ok
+test matrix::spgemm_prefetch::tests::test_spgemm_with_prefetch ... ok
+test matrix::spgemm_prefetch::tests::test_prefetch_recommendation ... ok
+test parameter_space::tests::test_pattern_generation ... ok
+test reduced_parameter_space::tests::test_critical_configurations ... ok
+test reduced_parameter_space::tests::test_efficient_generation ... ok
+test reduced_parameter_space::tests::test_reduction_summary ... ok
+test reduced_parameter_space::tests::test_scaling_prediction ... ok
+test parameter_space::tests::test_parameter_space_generation ... ok
+test reordering::coarse::tests::test_a_hat_csc_construction ... ok
+test reordering::coarse::tests::test_coarse_level_batch_processing ... ok
+test reordering::coarse::tests::test_coarse_level_single_row ... ok
+test reordering::coarse::tests::test_empty_row ... ok
+test reordering::coarse::tests::test_larger_matrix ... ok
+test reordering::coarse::tests::test_merge_sorted_arrays ... ok
+test reordering::fine::tests::test_chunk_metadata ... ok
+test reordering::fine::tests::test_empty_row ... ok
+test reordering::fine::tests::test_exclusive_scan ... ok
+test reordering::fine::tests::test_histogram ... ok
+test reordering::fine::tests::test_multiply_row_fine_level ... ok
+test reordering::fine::tests::test_reorder_by_chunk ... ok
+test suitesparse_integration::tests::test_matrix_market_format ... ok
+test suitesparse_integration::tests::test_matrix_market_io ... ok
+test reduced_parameter_space::tests::test_smart_sampling ... ok
+test test_tiers::tests::test_tier_configs ... ok
+test suitesparse_integration::tests::test_suitesparse_style_generation ... ok
+test tests::it_works ... ok
+test utils::formats::tests::test_csc_roundtrip ... ok
+test utils::formats::tests::test_csr_roundtrip ... ok
+test utils::formats::tests::test_csr_to_csc_via_sprs ... ok
+test utils::formats::tests::test_sprs_multiply_via_conversion ... ok
+test utils::prefetch::tests::test_pattern_analyzer ... ok
+test utils::prefetch::tests::test_prefetch_config ... ok
+test utils::prefetch::tests::test_prefetch_instructions ... ok
+test utils::tests::test_exclusive_scan ... ok
+test test_tiers::tests::test_time_estimates ... ok
+test parameter_space::tests::test_matrix_generation ... ok
+test accumulator::metal::tests::test_metal_availability ... ok
+test accumulator::metal::tests::test_threshold_logic ... ok
+test accumulator::metal_impl::tests::test_metal_availability ... ok
+test accumulator::metal_impl::tests::test_metal_sort ... ok
+test parameter_space::tests::test_complete_suite_generation has been running for over 60 seconds

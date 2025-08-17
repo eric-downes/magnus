@@ -83,9 +83,7 @@ impl MatrixMarketIO {
                 .saturating_sub(1); // Convert from 1-indexed to 0-indexed
 
             let val: f64 = if parts.len() >= 3 {
-                parts[2]
-                    .parse()
-                    .map_err(|_| "Invalid value".to_string())?
+                parts[2].parse().map_err(|_| "Invalid value".to_string())?
             } else {
                 1.0 // Pattern matrix
             };
@@ -105,20 +103,11 @@ impl MatrixMarketIO {
         let mut file = File::create(path).map_err(|e| format!("Failed to create file: {}", e))?;
 
         // Write header
-        writeln!(
-            file,
-            "%%MatrixMarket matrix coordinate real general"
-        )
-        .map_err(|e| format!("Failed to write header: {}", e))?;
+        writeln!(file, "%%MatrixMarket matrix coordinate real general")
+            .map_err(|e| format!("Failed to write header: {}", e))?;
 
-        writeln!(
-            file,
-            "{} {} {}",
-            matrix.n_rows,
-            matrix.n_cols,
-            matrix.nnz()
-        )
-        .map_err(|e| format!("Failed to write dimensions: {}", e))?;
+        writeln!(file, "{} {} {}", matrix.n_rows, matrix.n_cols, matrix.nnz())
+            .map_err(|e| format!("Failed to write dimensions: {}", e))?;
 
         // Write non-zeros
         for i in 0..matrix.n_rows {
@@ -129,7 +118,7 @@ impl MatrixMarketIO {
                 writeln!(
                     file,
                     "{} {} {}",
-                    i + 1, // Convert to 1-indexed
+                    i + 1,                 // Convert to 1-indexed
                     matrix.col_idx[j] + 1, // Convert to 1-indexed
                     matrix.values[j]
                 )
@@ -239,7 +228,7 @@ impl SuiteSparseStyleGenerator {
         // - Dense rows (constraints)
         // - Dense columns (variables in many constraints)
         // - Block angular structure
-        
+
         // Create a simple block angular structure
         let mut row_ptr = vec![0];
         let mut col_idx = Vec::new();
@@ -265,7 +254,7 @@ impl SuiteSparseStyleGenerator {
         // Block diagonal structure for remaining rows
         let remaining = n - n_coupling;
         let block_size = 50.min(remaining / 4);
-        
+
         for i in 0..remaining {
             let block_id = i / block_size;
             let block_start = n_coupling + block_id * block_size;
@@ -367,7 +356,7 @@ impl SuiteSparseDownloader {
     /// This is a placeholder for the download functionality
     pub fn download_matrix(&self, matrix: &SuiteSparseMatrix) -> Result<PathBuf, String> {
         let cache_path = self.get_cache_path(matrix);
-        
+
         if cache_path.exists() {
             return Ok(cache_path);
         }
@@ -375,7 +364,7 @@ impl SuiteSparseDownloader {
         // In a real implementation, this would download from:
         // https://sparse.tamu.edu/MM/{group}/{name}.tar.gz
         // and extract the .mtx file
-        
+
         Err(format!(
             "Downloading from SuiteSparse collection requires external HTTP client. \
              Please download {}/{} manually from https://sparse.tamu.edu/",
@@ -413,7 +402,7 @@ mod tests {
         // Write to temporary file
         let temp_file = NamedTempFile::new().unwrap();
         let path = temp_file.path().to_path_buf();
-        
+
         MatrixMarketIO::write_matrix(&path, &matrix).unwrap();
 
         // Read back

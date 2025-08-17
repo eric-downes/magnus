@@ -4,7 +4,6 @@
 //! required by the bitonic sort algorithm, making the logic more
 //! explicit and less reliant on clever bit manipulation tricks.
 
-
 /// A power of two value, guaranteed at the type level
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PowerOfTwo {
@@ -162,7 +161,7 @@ impl BitonicSortConfig {
     pub fn new(n_elements: usize) -> Self {
         let padded_size = PowerOfTwo::next_power_of_two(n_elements);
         let num_stages = padded_size.log2();
-        
+
         BitonicSortConfig {
             n_elements,
             padded_size,
@@ -202,11 +201,11 @@ mod tests {
         assert!(PowerOfTwo::new(0).is_none());
         assert!(PowerOfTwo::new(3).is_none());
         assert!(PowerOfTwo::new(5).is_none());
-        
+
         let p4 = PowerOfTwo::new(4).unwrap();
         assert_eq!(p4.value(), 4);
         assert_eq!(p4.log2(), 2);
-        
+
         let p16 = PowerOfTwo::from_log2(4);
         assert_eq!(p16.value(), 16);
         assert_eq!(p16.log2(), 4);
@@ -216,16 +215,16 @@ mod tests {
     fn test_bitonic_thread_direction() {
         let stage = BitonicStage::new(2); // Stage 2
         let pass = BitonicPass::new(stage, 0).unwrap(); // First pass of stage 2
-        
+
         // Block size should be 8 for this pass
         assert_eq!(pass.block_size().value(), 8);
-        
+
         // Threads 0-7 should sort ascending
         for tid in 0..8 {
             let thread = BitonicThread::new(tid);
             assert!(thread.is_ascending(&pass));
         }
-        
+
         // Threads 8-15 should sort descending
         for tid in 8..16 {
             let thread = BitonicThread::new(tid);
@@ -238,10 +237,10 @@ mod tests {
         let config = BitonicSortConfig::new(10);
         assert_eq!(config.padded_size(), 16);
         assert_eq!(config.num_stages(), 4);
-        
+
         let stages: Vec<_> = config.stages().collect();
         assert_eq!(stages.len(), 4);
-        
+
         for stage in stages {
             let passes: Vec<_> = config.passes(stage).collect();
             assert_eq!(passes.len() as u32, stage.num_passes());

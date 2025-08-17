@@ -1,6 +1,6 @@
 //! Compressed Sparse Column (CSC) matrix format implementation
 
-use crate::constants::{MAX_DISPLAY_ROWS, MAX_DISPLAY_ELEMENTS_PER_ROW};
+use crate::constants::{MAX_DISPLAY_ELEMENTS_PER_ROW, MAX_DISPLAY_ROWS};
 use num_traits::Num;
 use std::fmt;
 

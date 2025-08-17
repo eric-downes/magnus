@@ -1,0 +1,241 @@
+\begin{thebibliography}{10}
+
+\bibitem{cseg}
+Xiaojing An and \"{U}mit~V. \c{C}ataly\"{u}rek.
+\newblock Column-segmented sparse matrix-matrix multiplication on multicore {CPU}s.
+\newblock In {\em 2021 IEEE 28th International Conference on High Performance Computing, Data, and Analytics (HiPC)}, pages 202--211, December 2021.
+
+\bibitem{balancedHashing}
+Pham Nguyen~Quang Anh, Rui Fan, and Yonggang Wen.
+\newblock Balanced hashing and efficient {GPU} sparse general matrix-matrix multiplication.
+\newblock In {\em Proceedings of the 2016 International Conference on Supercomputing (ICS)}, New York, NY, USA, 2016. Association for Computing Machinery.
+
+\bibitem{azad}
+Ariful Azad, Grey Ballard, Aydin Bulu\c{c}, James Demmel, Laura Grigori, Oded Schwartz, Sivan Toledo, and Samuel Williams.
+\newblock Exploiting multiple levels of parallelism in sparse matrix-matrix multiplication.
+\newblock {\em SIAM Journal on Scientific Computing}, 38(6):C624--C651, 2016.
+
+\bibitem{tricount2}
+Ariful Azad, Aydin Bulu\c{c}, and John Gilbert.
+\newblock Parallel triangle counting and enumeration using matrix algebra.
+\newblock In {\em 2015 IEEE International Parallel and Distributed Processing Symposium (IPDPS) Workshop}, pages 804--811, 2015.
+
+\bibitem{HipMCL}
+Ariful Azad, Georgios~A Pavlopoulos, Christos~A Ouzounis, Nikos~C Kyrpides, and Aydin Bulu\c{c}.
+\newblock {HipMCL: a high-performance parallel implementation of the {M}arkov clustering algorithm for large-scale networks}.
+\newblock {\em Nucleic Acids Research}, 46(6):e33--e33, January 2018.
+
+\bibitem{AVX512sort}
+Berenger Bramas.
+\newblock A novel hybrid quicksort algorithm vectorized using {AVX-512} on {Intel Skylake}.
+\newblock {\em International Journal of Advanced Computer Science and Applications}, 8(10), 2017.
+
+\bibitem{rmat}
+Deepayan Chakrabarti, Yiping Zhan, and Christos Faloutsos.
+\newblock {\em R-MAT: A Recursive Model for Graph Mining}, pages 442--446.
+\newblock SIAM, 2004.
+
+\bibitem{liu3}
+Helin Cheng, Wenxuan Li, Yuechen Lu, and Weifeng Liu.
+\newblock {HASpGEMM}: Heterogeneity-aware sparse general matrix-matrix multiplication on modern asymmetric multicore processors.
+\newblock In {\em Proceedings of the 52nd International Conference on Parallel Processing (ICPP)}, pages 807--817, New York, NY, USA, 2023. Association for Computing Machinery.
+
+\bibitem{mkl}
+Intel Corporation.
+\newblock Developer reference for {Intel oneAPI} math kernel library ({MKL}) for {C}, 2023.
+
+\bibitem{cuSPARSE}
+NVIDIA Corporation.
+\newblock cusparse library, 2023.
+
+\bibitem{ESC}
+Steven Dalton, Luke Olson, and Nathan Bell.
+\newblock Optimizing sparse matrix-matrix multiplication for the {GPU}.
+\newblock {\em ACM Transactions on Mathematical Software}, 41(4), October 2015.
+
+\bibitem{graphblas}
+Timothy~A. Davis.
+\newblock Algorithm 1000: Suitesparse:graphblas: Graph algorithms in the language of sparse linear algebra.
+\newblock {\em ACM Transactions on Mathematical Software}, 45(4), December 2019.
+
+\bibitem{suitesparse}
+Timothy~A. Davis and Yifan Hu.
+\newblock The university of florida sparse matrix collection.
+\newblock {\em ACM Transactions on Mathematical Software}, 38(1), December 2011.
+
+\bibitem{kokkos}
+Mehmet Deveci, Christian Trott, and Siva Rajamanickam.
+\newblock Multi-threaded sparse matrix-matrix multiplication for many-core and {GPU} architectures.
+\newblock {\em Parallel Computing}, 78, January 2018.
+
+\bibitem{OpSparse}
+Zhaoyang Du, Yijin Guan, Tianchan Guan, Dimin Niu, Linyong Huang, Hongzhong Zheng, and Yuan Xie.
+\newblock {OpSparse}: A highly optimized framework for sparse general matrix multiplication on {GPUs}.
+\newblock {\em IEEE Access}, 10:85960--85974, 2022.
+
+\bibitem{erdosrenyi}
+P.~Erd\"{o}s and A.~R\'{e}nyi.
+\newblock On random graphs {I}.
+\newblock {\em Publicationes Mathematicae Debrecen}, 6:290, 1959.
+
+\bibitem{amg1}
+R.D. Falgout.
+\newblock An introduction to algebraic multigrid.
+\newblock {\em Computing in Science \& Engineering}, 8(6):24--33, 2006.
+
+\bibitem{pca}
+Xu~Feng, Yuyang Xie, Mingye Song, Wenjian Yu, and Jie Tang.
+\newblock Fast randomized {PCA} for sparse data.
+\newblock In {\em Asian conference on machine learning}, pages 710--725. PMLR, 2018.
+
+\bibitem{spgemmSurvey}
+Jianhua Gao, Weixing Ji, Fangli Chang, Shiyu Han, Bingxin Wei, Zeming Liu, and Yizhuo Wang.
+\newblock A systematic survey of general sparse matrix-matrix multiplication.
+\newblock {\em ACM Computing Surveys}, 55(12), March 2023.
+
+\bibitem{bfs}
+John~R. Gilbert, Steve Reinhardt, and Viral~B. Shah.
+\newblock High-performance graph algorithms from parallel sparse matrices.
+\newblock In {\em Applied Parallel Computing: State of the Art in Scientific Computing}, pages 260--269, Berlin, Heidelberg, 2007. Springer Berlin Heidelberg.
+
+\bibitem{subgraph}
+Vitaliy Gleyzer, Andrew~J. Soszynski, and Edward~K. Kao.
+\newblock Leveraging linear algebra to count and enumerate simple subgraphs.
+\newblock In {\em 2020 IEEE High Performance Extreme Computing Conference (HPEC)}, pages 1--8, 2020.
+
+\bibitem{likwid}
+Thomas Gruber, Jan Eitzinger, Georg Hager, and Gerhard Wellein.
+\newblock Overhead analysis of performance counter measurements.
+\newblock In {\em 43rd International Conference on Parallel Processing Workshops (ICCPW)}, pages 176--185, September 2014.
+
+\bibitem{pbSpGEMM}
+Zhixiang Gu, Jose Moreira, David Edelsohn, and Ariful Azad.
+\newblock Bandwidth optimized parallel algorithms for sparse matrix-matrix multiplication using propagation blocking.
+\newblock In {\em Proceedings of the 32nd ACM Symposium on Parallelism in Algorithms and Architectures (SPAA)}, pages 293--303, New York, NY, USA, 2020. Association for Computing Machinery.
+
+\bibitem{bella}
+Giulia Guidi, Marquita Ellis, Daniel Rokhsar, Katherine Yelick, and Aydın Bulu\c{c}.
+\newblock {\em BELLA: Berkeley Efficient Long-Read to Long-Read Aligner and Overlapper}, pages 123--134.
+\newblock 2021.
+
+\bibitem{genome1}
+Giulia Guidi, Oguz Selvitopi, Marquita Ellis, Leonid Oliker, Katherine~A. Yelick, and Aydin Bulu{\c{c}}.
+\newblock Parallel string graph construction and transitive reduction for de novo genome assembly.
+\newblock In {\em 2021 IEEE International Parallel and Distributed Processing Symposium (IPDPS)}, pages 517--526, Los Alamitos, CA, USA, May 2021. IEEE Computer Society.
+
+\bibitem{gustavson}
+Fred~G. Gustavson.
+\newblock Two fast algorithms for sparse matrices: Multiplication and permuted transposition.
+\newblock {\em ACM Transactions on Mathematical Software}, 4(3):250--269, September 1978.
+
+\bibitem{hoefler}
+Torsten Hoefler, Dan Alistarh, Tal Ben-Nun, Nikoli Dryden, and Alexandra Peste.
+\newblock Sparsity in deep learning: pruning and growth for efficient inference and training in neural networks.
+\newblock {\em The Journal of Machine Learning Research}, 22(1), January 2021.
+
+\bibitem{color}
+Haim Kaplan, Micha Sharir, and Elad Verbin.
+\newblock Colored intersection searching via sparse rectangular matrix multiplication.
+\newblock In {\em Proceedings of the Twenty-Second Annual Symposium on Computational Geometry (SCG)}, pages 52--60, New York, NY, USA, 2006. Association for Computing Machinery.
+
+\bibitem{fevre}
+Valentin Le~F\`{e}vre and Marc Casas.
+\newblock Efficient execution of {SpGEMM} on long vector architectures.
+\newblock In {\em Proceedings of the 32nd International Symposium on High-Performance Parallel and Distributed Computing (HPDC)}, pages 101--113, New York, NY, USA, 2023. Association for Computing Machinery.
+
+\bibitem{tricount3}
+Jiayu Li, Fugang Wang, Takuya Araki, and Judy Qiu.
+\newblock Generalized sparse matrix-matrix multiplication for vector engines and graph applications.
+\newblock In {\em 2019 IEEE/ACM Workshop on Memory Centric High Performance Computing (MCHPC)}, pages 33--42, 2019.
+
+\bibitem{amg2}
+Ruipeng Li, Bj\"{o}rn Sj\"{o}green, and Ulrike~Meier Yang.
+\newblock A new class of amg interpolation methods based on matrix-matrix multiplications.
+\newblock {\em SIAM Journal on Scientific Computing}, 43(5):S540--S564, 2021.
+
+\bibitem{registerAware}
+Junhong Liu, Xin He, Weifeng Liu, and Guangming Tan.
+\newblock Register-aware optimizations for parallel sparse matrix-matrix multiplication.
+\newblock {\em International Journal of Parallel Programming}, 47(3):403--417, June 2019.
+
+\bibitem{liu2}
+Weifeng Liu and Brian Vinter.
+\newblock An efficient {GPU} general sparse matrix-matrix multiplication for irregular data.
+\newblock In {\em 2014 IEEE 28th International Parallel and Distributed Processing Symposium}, pages 370--381, 2014.
+
+\bibitem{liu1}
+Weifeng Liu and Brian Vinter.
+\newblock A framework for general sparse matrix–matrix multiplication on {GPUs} and heterogeneous processors.
+\newblock {\em Journal of Parallel and Distributed Computing}, 85:47--61, 2015.
+\newblock IPDPS 2014 Selected Papers on Numerical and Combinatorial Algorithms.
+
+\bibitem{nagasaka1}
+Yusuke Nagasaka, Satoshi Matsuoka, Ariful Azad, and Ayd\i{}n Bulu\c{c}.
+\newblock High-performance sparse matrix-matrix products on {Intel KNL} and multicore architectures.
+\newblock In {\em Workshop Proceedings of the 47th International Conference on Parallel Processing (ICPP)}, New York, NY, USA, 2018. Association for Computing Machinery.
+
+\bibitem{nagasaka2}
+Yusuke Nagasaka, Satoshi Matsuoka, Ariful Azad, and Aydın Bulu\c{c}.
+\newblock Performance optimization, modeling and analysis of sparse matrix-matrix products on multi-core and many-core processors.
+\newblock {\em Parallel Computing}, 90:102545, 2019.
+
+\bibitem{nagasaka3}
+Yusuke Nagasaka, Akira Nukada, and Satoshi Matsuoka.
+\newblock High-performance and memory-saving sparse general matrix-matrix multiplication for {NVIDIA Pascal GPU}.
+\newblock In {\em 2017 46th International Conference on Parallel Processing (ICPP)}, pages 101--110, 2017.
+
+\bibitem{spECK}
+Mathias Parger, Martin Winter, Daniel Mlakar, and Markus Steinberger.
+\newblock {spECK}: accelerating {GPU} sparse matrix-matrix multiplication through lightweight analysis.
+\newblock In {\em Proceedings of the 25th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP)}, pages 362--375, New York, NY, USA, 2020. Association for Computing Machinery.
+
+\bibitem{partway}
+Md. Mostofa~Ali Patwary, Nadathur~Rajagopalan Satish, Narayanan Sundaram, Jongsoo Park, Michael~J. Anderson, Satya~Gautam Vadlamudi, Dipankar Das, Sergey~G. Pudov, Vadim~O. Pirogov, and Pradeep Dubey.
+\newblock Parallel efficient sparse matrix-matrix multiplication on multicore platforms.
+\newblock In {\em High Performance Computing}, pages 48--57, Cham, 2015. Springer International Publishing.
+
+\bibitem{dnn}
+Eric Qin, Ananda Samajdar, Hyoukjun Kwon, Vineet Nadella, Dipankar Srinivasan, Sudarshan an~Das, Bharat Kaul, and Tushar Krishna.
+\newblock {SIGMA}: A sparse and irregular {GEMM} accelerator with flexible interconnects for {DNN} training.
+\newblock In {\em 2020 IEEE International Symposium on High Performance Computer Architecture (HPCA)}, pages 58--70, 2020.
+
+\bibitem{kokkos2}
+Sivasankaran Rajamanickam, Seher Acer, Luc Berger-Vergiat, Vinh Dang, Nathan Ellingwood, Evan Harvey, Brian Kelley, Christian~R. Trott, Jeremiah Wilke, and Ichitaro Yamazaki.
+\newblock Kokkos kernels: Performance portable sparse/dense linear algebra and graph kernels, 2021.
+
+\bibitem{mcl}
+Oguz Selvitopi, Md~Taufique Hussain, Ariful Azad, and Aydın Bulu\c{c}.
+\newblock Optimizing high performance {M}arkov clustering for pre-exascale architectures.
+\newblock In {\em 2020 IEEE International Parallel and Distributed Processing Symposium (IPDPS)}, pages 116--126, 2020.
+
+\bibitem{hierRowMerging}
+Hikaru Takayashiki, Hotaka Yagi, Hiroki Nishimoto, and Naoki Yoshifuji.
+\newblock A new sparse general matrix-matrix multiplication method for long vector architecture by hierarchical row merging.
+\newblock In {\em Proceedings of the SC '23 Workshops of The International Conference on High Performance Computing, Network, Storage, and Analysis}, pages 756--759, New York, NY, USA, 2023. Association for Computing Machinery.
+
+\bibitem{adaptLoadBalanceGPU}
+Martin Winter, Daniel Mlakar, Rhaleb Zayer, Hans-Peter Seidel, and Markus Steinberger.
+\newblock Adaptive sparse matrix-matrix multiplication on the {GPU}.
+\newblock In {\em Proceedings of the 24th Symposium on Principles and Practice of Parallel Programming (PPoPP)}, pages 68--81, New York, NY, USA, 2019. Association for Computing Machinery.
+
+\bibitem{tricount1}
+Michael~M. Wolf, Jonathan~W. Berry, and Dylan~T. Stark.
+\newblock A task-based linear algebra building blocks approach for scalable graph analytics.
+\newblock In {\em 2015 IEEE High Performance Extreme Computing Conference (HPEC)}, pages 1--6, 2015.
+
+\bibitem{genome2}
+Kathy Yelick, Aydın Bulu\c{c}, Muaaz Awan, Ariful Azad, Bowei Brock, Rob Egan, Saliya Ekanayake, Marquita Ellis, Evangelos Georganas, Giulia Guidi, Steven Hofmeyr, Oguz Selvitopi, Cristina Teodoropol, and Leonid Oliker.
+\newblock The parallelism motifs of genomic data analysis.
+\newblock {\em Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences}, 378(2166):20190394, 2020.
+
+\bibitem{ASA}
+Chao Zhang, Maximilian Bremer, Cy~Chan, John Shalf, and Xiaochen Guo.
+\newblock {ASA}: Accelerating sparse accumulation in column-wise {SpGEMM}.
+\newblock {\em ACM Transactions on Architecture and Code Optimization}, 19(4), September 2022.
+
+\bibitem{gamma}
+Guowei Zhang, Nithya Attaluri, Joel~S. Emer, and Daniel Sanchez.
+\newblock {GAMMA}: leveraging {G}ustavson’s algorithm to accelerate sparse matrix multiplication.
+\newblock In {\em Proceedings of the 26th ACM International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS)}, pages 687--701, New York, NY, USA, 2021. Association for Computing Machinery.
+
+\end{thebibliography}

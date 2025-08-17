@@ -1,0 +1,766 @@
+@misc{mkl,
+  title={Developer Reference for {Intel oneAPI} Math Kernel Library ({MKL}) for {C}},
+  author={Intel Corporation},
+  year={2023}
+}
+
+@misc{cuSPARSE,
+  title={cuSPARSE Library},
+  author={NVIDIA Corporation},
+  year={2023}
+}
+
+@INPROCEEDINGS{cseg,
+  author={An, Xiaojing and \c{C}ataly\"{u}rek, \"{U}mit V.},
+  booktitle={2021 IEEE 28th International Conference on High Performance Computing, Data, and Analytics (HiPC)}, 
+  title={Column-Segmented Sparse Matrix-Matrix Multiplication on Multicore {CPU}s}, 
+  month={December},
+  year={2021},
+  volume={},
+  number={},
+  pages={202--211},
+  keywords={Runtime;Multicore processing;High performance computing;Conferences;Memory management;Parallel processing;Hardware;sparse matrix;matrix multiplication;shared memory parallelism},
+  doi={10.1109/HiPC53243.2021.00034}}
+
+@inproceedings{nagasaka1,
+author = {Nagasaka, Yusuke and Matsuoka, Satoshi and Azad, Ariful and Bulu\c{c}, Ayd\i{}n},
+title = {High-Performance Sparse Matrix-Matrix Products on {Intel KNL} and Multicore Architectures},
+year = {2018},
+isbn = {9781450365239},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3229710.3229720},
+doi = {10.1145/3229710.3229720},
+abstract = {Sparse matrix-matrix multiplication (SpGEMM) is a computational primitive that is widely used in areas ranging from traditional numerical applications to recent big data analysis and machine learning. Although many SpGEMM algorithms have been proposed, hardware specific optimizations for multi- and many-core processors are lacking and a detailed analysis of their performance under various use cases and matrices is not available. We firstly identify and mitigate multiple bottlenecks with memory management and thread scheduling on Intel Xeon Phi (Knights Landing or KNL). Specifically targeting multi- and many-core processors, we develop a hash-table-based algorithm and optimize a heap-based shared-memory SpGEMM algorithm. We examine their performance together with other publicly available codes. Different from the literature, our evaluation also includes use cases that are representative of real graph algorithms, such as multi-source breadth-first search or triangle counting. Our hash-table and heap-based algorithms are showing significant speedups from libraries in the majority of the cases while different algorithms dominate the other scenarios with different matrix size, sparsity, compression factor and operation type. We wrap up in-depth evaluation results and make a recipe to give the best SpGEMM algorithm for target scenario. A critical finding is that hash-table-based SpGEMM gets a significant performance boost if the nonzeros are not required to be sorted within each row of the output matrix.},
+booktitle = {Workshop Proceedings of the 47th International Conference on Parallel Processing (ICPP)},
+articleno = {34},
+numpages = {10},
+keywords = {Sparse matrix, SpGEMM, Intel KNL},
+location = {Eugene, OR, USA}
+}
+
+@article{nagasaka2,
+title = {Performance optimization, modeling and analysis of sparse matrix-matrix products on multi-core and many-core processors},
+journal = {Parallel Computing},
+volume = {90},
+pages = {102545},
+year = {2019},
+issn = {0167-8191},
+doi = {https://doi.org/10.1016/j.parco.2019.102545},
+url = {https://www.sciencedirect.com/science/article/pii/S016781911930136X},
+author = {Yusuke Nagasaka and Satoshi Matsuoka and Ariful Azad and Aydın Bulu\c{c}},
+keywords = {Sparse matrix, SpGEMM, Intel KNL},
+abstract = {Sparse matrix-matrix multiplication (SpGEMM) is a computational primitive that is widely used in areas ranging from traditional numerical applications to recent big data analysis and machine learning. Although many SpGEMM algorithms have been proposed, hardware specific optimizations for multi- and many-core processors are lacking and a detailed analysis of their performance under various use cases and matrices is not available. We firstly identify and mitigate multiple bottlenecks with memory management and thread scheduling on Intel Xeon Phi (Knights Landing or KNL). Specifically targeting many-core processors, we develop a hash-table-based algorithm and optimize a heap-based shared-memory SpGEMM algorithm. We examine their performance together with other publicly available codes. Different from the literature, our evaluation also includes use cases that are representative of real graph algorithms, such as multi-source breadth-first search or triangle counting. Our hash-table and heap-based algorithms are showing significant speedups from libraries in the majority of the cases while different algorithms dominate the other scenarios with different matrix size, sparsity, compression factor and operation type. We wrap up in-depth evaluation results and make a recipe to give the best SpGEMM algorithm for target scenario. We build the performance model for hash-table and heap-based algorithms, which supports the recipe. A critical finding is that hash-table-based SpGEMM gets a significant performance boost if the nonzeros are not required to be sorted within each row of the output matrix. Finally, we integrate our implementations into a large-scale protein clustering code named HipMCL, accelerating its SpGEMM kernel by up to 10X and achieving an overall performance boost for the whole HipMCL application by 2.6X.}
+}
+
+@article{suitesparse,
+author = {Davis, Timothy A. and Hu, Yifan},
+title = {The university of Florida sparse matrix collection},
+year = {2011},
+issue_date = {November 2011},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {38},
+number = {1},
+issn = {0098-3500},
+url = {https://doi.org/10.1145/2049662.2049663},
+doi = {10.1145/2049662.2049663},
+abstract = {We describe the University of Florida Sparse Matrix Collection, a large and actively growing set of sparse matrices that arise in real applications. The Collection is widely used by the numerical linear algebra community for the development and performance evaluation of sparse matrix algorithms. It allows for robust and repeatable experiments: robust because performance results with artificially generated matrices can be misleading, and repeatable because matrices are curated and made publicly available in many formats. Its matrices cover a wide spectrum of domains, include those arising from problems with underlying 2D or 3D geometry (as structural engineering, computational fluid dynamics, model reduction, electromagnetics, semiconductor devices, thermodynamics, materials, acoustics, computer graphics/vision, robotics/kinematics, and other discretizations) and those that typically do not have such geometry (optimization, circuit simulation, economic and financial modeling, theoretical and quantum chemistry, chemical process simulation, mathematics and statistics, power networks, and other networks and graphs). We provide software for accessing and managing the Collection, from MATLAB™, Mathematica™, Fortran, and C, as well as an online search capability. Graph visualization of the matrices is provided, and a new multilevel coarsening scheme is proposed to facilitate this task.},
+journal = {ACM Transactions on Mathematical Software},
+month = {December},
+articleno = {1},
+numpages = {25},
+keywords = {sparse matrices, performance evaluation, multilevel algorithms, Graph drawing}
+}
+
+@inbook{rmat,
+author = {Deepayan Chakrabarti and Yiping Zhan and Christos Faloutsos},
+title = {R-MAT: A Recursive Model for Graph Mining},
+booktitle = {Proceedings of the 2004 SIAM International Conference on Data Mining (SDM)},
+year = {2004},
+publisher = {SIAM},
+chapter = {},
+pages = {442--446},
+doi = {10.1137/1.9781611972740.43},
+URL = {https://epubs.siam.org/doi/abs/10.1137/1.9781611972740.43},
+eprint = {https://epubs.siam.org/doi/pdf/10.1137/1.9781611972740.43},
+    abstract = { Abstract How does a ‘normal’ computer (or social) network look like? How can we spot ‘abnormal’ sub-networks in the Internet, or web graph? The answer to such questions is vital for outlier detection (terrorist networks, or illegal money-laundering rings), forecasting, and simulations (“how will a computer virus spread?”). The heart of the problem is finding the properties of real graphs that seem to persist over multiple disciplines. We list such “laws” and, more importantly, we propose a simple, parsimonious model, the “recursive matrix” (R-MAT) model, which can quickly generate realistic graphs, capturing the essence of each graph in only a few parameters. Contrary to existing generators, our model can trivially generate weighted, directed and bipartite graphs; it subsumes the celebrated Erdős-Rényi model as a special case; it can match the power law behaviors, as well as the deviations from them (like the “winner does not take it all” model of Pennock et al. [21]). We present results on multiple, large real graphs, where we show that our parameter fitting algorithm (AutoMAT-fast) fits them very well. }
+}
+
+@article{erdosrenyi,
+  added-at = {2010-05-05T00:38:27.000+0200},
+  author = {Erd\"{o}s, P. and R\'{e}nyi, A.},
+  biburl = {https://www.bibsonomy.org/bibtex/25aab47a7be9ec47644735f8e0a4607b6/alex},
+  interhash = {99061fc859ba540d4485abfbce44f298},
+  intrahash = {5aab47a7be9ec47644735f8e0a4607b6},
+  journal = {Publicationes Mathematicae Debrecen},
+  keywords = {graph sna},
+  pages = 290,
+  timestamp = {2010-05-05T00:38:27.000+0200},
+  title = {On Random Graphs {I}},
+  volume = 6,
+  year = 1959
+}
+
+@article{kokkos,
+author = {Deveci, Mehmet and Trott, Christian and Rajamanickam, Siva},
+year = {2018},
+month = {January},
+pages = {},
+title = {Multi-threaded Sparse Matrix-Matrix Multiplication for Many-Core and {GPU} Architectures},
+volume = {78},
+journal = {Parallel Computing},
+doi = {10.1016/j.parco.2018.06.009}
+}
+
+@article{AVX512sort,
+title = {A Novel Hybrid Quicksort Algorithm Vectorized using {AVX-512} on {Intel Skylake}},
+journal = {International Journal of Advanced Computer Science and Applications},
+doi = {10.14569/IJACSA.2017.081044},
+url = {http://dx.doi.org/10.14569/IJACSA.2017.081044},
+year = {2017},
+publisher = {The Science and Information Organization},
+volume = {8},
+number = {10},
+author = {Berenger Bramas}
+}
+
+@article{matlabSPA,
+author = {Gilbert, John and Moler, Cleve and Schreiber, Robert},
+year = {1997},
+month = {May},
+pages = {},
+title = {Sparse matrices in {MATLAB}: Design and implementation},
+volume = {13},
+journal = {SIAM Journal on Matrix Analysis and Applications},
+doi = {10.1137/0613024}
+}
+
+@InProceedings{partway,
+author="Patwary, Md. Mostofa Ali
+and Satish, Nadathur Rajagopalan
+and Sundaram, Narayanan
+and Park, Jongsoo
+and Anderson, Michael J.
+and Vadlamudi, Satya Gautam
+and Das, Dipankar
+and Pudov, Sergey G.
+and Pirogov, Vadim O.
+and Dubey, Pradeep",
+title="Parallel Efficient Sparse Matrix-Matrix Multiplication on Multicore Platforms",
+booktitle="High Performance Computing",
+year="2015",
+publisher="Springer International Publishing",
+address="Cham",
+pages="48--57",
+abstract="Sparse matrix-matrix multiplication (SpGEMM) is a key kernel in many applications in High Performance Computing such as algebraic multigrid solvers and graph analytics. Optimizing SpGEMM on modern processors is challenging due to random data accesses, poor data locality and load imbalance during computation. In this work, we investigate different partitioning techniques, cache optimizations (using dense arrays instead of hash tables), and dynamic load balancing on SpGEMM using a diverse set of real-world and synthetic datasets. We demonstrate that our implementation outperforms the state-of-the-art using Intel{\$}{\$}^{\{}{\{}{\backslash}textregistered {\}}{\}}{\$}{\$}Xeon{\$}{\$}^{\{}{\{}{\backslash}textregistered {\}}{\}}{\$}{\$}processors. We are up to 3.8X faster than Intel{\$}{\$}^{\{}{\{}{\backslash}textregistered {\}}{\}}{\$}{\$}Math Kernel Library (MKL) and up to 257X faster than CombBLAS. We also outperform the best published GPU implementation of SpGEMM on nVidia GTX Titan and on AMD Radeon HD 7970 by up to 7.3X and 4.5X, respectively on their published datasets. We demonstrate good multi-core scalability (geomean speedup of 18.2X using 28 threads) as compared to MKL which gets 7.5X scaling on 28 threads.",
+isbn="978-3-319-20119-1"
+}
+
+@article{spgemmSurvey,
+author = {Gao, Jianhua and Ji, Weixing and Chang, Fangli and Han, Shiyu and Wei, Bingxin and Liu, Zeming and Wang, Yizhuo},
+title = {A Systematic Survey of General Sparse Matrix-matrix Multiplication},
+year = {2023},
+issue_date = {December 2023},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {55},
+number = {12},
+issn = {0360-0300},
+url = {https://doi.org/10.1145/3571157},
+doi = {10.1145/3571157},
+abstract = {General Sparse Matrix-Matrix Multiplication (SpGEMM) has attracted much attention from researchers in graph analyzing, scientific computing, and deep learning. Many optimization techniques have been developed for different applications and computing architectures over the past decades. The objective of this article is to provide a structured and comprehensive overview of the researches on SpGEMM. Existing researches have been grouped into different categories based on target architectures and design choices. Covered topics include typical applications, compression formats, general formulations, key problems and techniques, architecture-oriented optimizations, and programming models. The rationales of different algorithms are analyzed and summarized. This survey sufficiently reveals the latest progress of SpGEMM research to 2021. Moreover, a thorough performance comparison of existing implementations is presented. Based on our findings, we highlight future research directions, which encourage better design and implementations in later studies.},
+journal = {ACM Computing Surveys},
+month = {March},
+articleno = {244},
+numpages = {36},
+keywords = {SpGEMM, parallel computing, sparse matrix, parallel architecture}
+}
+
+@inproceedings{pbSpGEMM,
+author = {Gu, Zhixiang and Moreira, Jose and Edelsohn, David and Azad, Ariful},
+title = {Bandwidth Optimized Parallel Algorithms for Sparse Matrix-Matrix Multiplication using Propagation Blocking},
+year = {2020},
+isbn = {9781450369350},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3350755.3400216},
+doi = {10.1145/3350755.3400216},
+abstract = {Sparse matrix-matrix multiplication (SpGEMM) is a widely used kernel in various graph, scientific computing and machine learning algorithms. It is well known that SpGEMM is a memory-bound operation, and its peak performance is expected to be bound by the memory bandwidth. Yet, existing algorithms fail to saturate the memory bandwidth, resulting in suboptimal performance under the Roofline model. In this paper, we characterize existing SpGEMM algorithms based on their memory access patterns and develop practical lower and upper bounds for SpGEMM performance. We then develop an SpGEMM algorithm based on the outer product. The newly developed algorithm called PB-SpGEMM saturates memory bandwidth by using the propagation blocking technique and by performing in-cache sorting and merging. For many practical matrices, PB-SpGEMM runs 20\%-50\% faster than the state-of-the-art heap and hash SpGEMM algorithms on modern multicore processors. Most importantly, PB-SpGEMM attains performance predicted by the Roofline model, and its performance remains stable with respect to matrix size and sparsity.},
+booktitle = {Proceedings of the 32nd ACM Symposium on Parallelism in Algorithms and Architectures (SPAA)},
+pages = {293--303},
+numpages = {11},
+keywords = {parallel algorithm, SpGEMM},
+location = {Virtual Event, USA}
+}
+
+@article{amossen,
+author = {Amossen, Rasmus and Campagna, Andrea and Pagh, Rasmus},
+year = {2013},
+month = {March},
+pages = {741--757},
+title = {Better Size Estimation for Sparse Matrix Products},
+volume = {69},
+isbn = {978-3-642-15368-6},
+journal = {Algorithmica},
+doi = {10.1007/978-3-642-15369-3_31}
+}
+
+@article{ESC,
+author = {Dalton, Steven and Olson, Luke and Bell, Nathan},
+title = {Optimizing Sparse Matrix-Matrix Multiplication for the {GPU}},
+year = {2015},
+month = {October},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {41},
+number = {4},
+issn = {0098-3500},
+url = {https://doi.org/10.1145/2699470},
+doi = {10.1145/2699470},
+abstract = {Sparse matrix--matrix multiplication (SpGEMM) is a key operation in numerous areas from information to the physical sciences. Implementing SpGEMM efficiently on throughput-oriented processors, such as the graphics processing unit (GPU), requires the programmer to expose substantial fine-grained parallelism while conserving the limited off-chip memory bandwidth. Balancing these concerns, we decompose the SpGEMM operation into three highly parallel phases: expansion, sorting, and contraction, and introduce a set of complementary bandwidth-saving performance optimizations. Our implementation is fully general and our optimization strategy adaptively processes the SpGEMM workload row-wise to substantially improve performance by decreasing the work complexity and utilizing the memory hierarchy more effectively.},
+journal = {ACM Transactions on Mathematical Software},
+month = {October},
+articleno = {25},
+numpages = {20},
+keywords = {sparse, matrix--matrix, Parallel, GPU}
+}
+
+@article{liu1,
+title = {A framework for general sparse matrix–matrix multiplication on {GPUs} and heterogeneous processors},
+journal = {Journal of Parallel and Distributed Computing},
+volume = {85},
+pages = {47--61},
+year = {2015},
+note = {IPDPS 2014 Selected Papers on Numerical and Combinatorial Algorithms},
+issn = {0743-7315},
+doi = {https://doi.org/10.1016/j.jpdc.2015.06.010},
+url = {https://www.sciencedirect.com/science/article/pii/S0743731515001185},
+author = {Weifeng Liu and Brian Vinter},
+keywords = {Sparse matrix, Sparse matrix-matrix multiplication, Linear algebra, GPU, Heterogeneous processor, Merging, Parallel algorithm},
+abstract = {General sparse matrix–matrix multiplication (SpGEMM) is a fundamental building block for numerous applications such as algebraic multigrid method (AMG), breadth first search and shortest path problem. Compared to other sparse BLAS routines, an efficient parallel SpGEMM implementation has to handle extra irregularity from three aspects: (1) the number of nonzero entries in the resulting sparse matrix is unknown in advance, (2) very expensive parallel insert operations at random positions in the resulting sparse matrix dominate the execution time, and (3) load balancing must account for sparse data in both input matrices. In this work we propose a framework for SpGEMM on GPUs and emerging CPU–GPU heterogeneous processors. This framework particularly focuses on the above three problems. Memory pre-allocation for the resulting matrix is organized by a hybrid method that saves a large amount of global memory space and efficiently utilizes the very limited on-chip scratchpad memory. Parallel insert operations of the nonzero entries are implemented through the GPU merge path algorithm that is experimentally found to be the fastest GPU merge approach. Load balancing builds on the number of necessary arithmetic operations on the nonzero entries and is guaranteed in all stages. Compared with the state-of-the-art CPU and GPU SpGEMM methods, our approach delivers excellent absolute performance and relative speedups on various benchmarks multiplying matrices with diverse sparsity structures. Furthermore, on heterogeneous processors, our SpGEMM approach achieves higher throughput by using re-allocatable shared virtual memory.}
+}
+
+@ARTICLE{amg1,
+  author={Falgout, R.D.},
+  journal={Computing in Science \& Engineering}, 
+  title={An introduction to algebraic multigrid}, 
+  year={2006},
+  volume={8},
+  number={6},
+  pages={24--33},
+  keywords={Interpolation;Equations;Linear systems;Smoothing methods;Multigrid methods;Error correction;Parallel machines;Concurrent computing;Distributed computing;Large-scale systems;multigrid solvers;linear systems;AMG;multigrid principles},
+  doi={10.1109/MCSE.2006.105}}
+
+@article{amg2,
+author = {Li, Ruipeng and Sj\"{o}green, Bj\"{o}rn and Yang, Ulrike Meier},
+title = {A New Class of AMG Interpolation Methods Based on Matrix-Matrix Multiplications},
+journal = {SIAM Journal on Scientific Computing},
+volume = {43},
+number = {5},
+pages = {S540--S564},
+year = {2021},
+doi = {10.1137/20M134931X},
+
+URL = { 
+    
+        https://doi.org/10.1137/20M134931X
+    
+    
+
+},
+eprint = { 
+    
+        https://doi.org/10.1137/20M134931X
+    
+    
+
+}
+,
+    abstract = { A new class of distance-two interpolation methods for algebraic multigrid (AMG) that can be formulated in terms of sparse matrix-matrix multiplications is presented and analyzed. Compared with similar distance-two prolongation operators [H. De Sterck et al., Numer. Linear Algebra Appl., 15 (2008), pp. 115--139], the proposed algorithms exhibit improved efficiency and portability to various computing platforms, since they allow one to easily exploit existing high-performance sparse matrix kernels. The new interpolation methods have been implemented in hypre [R. D. Falgout and U. M. Yang, hypre: A library of high performance preconditioners, in Computational Science --- ICCS 2002, P. M. A. Sloot et al., eds., Springer, Berlin, Heidelberg, 2002, pp. 632--641], a widely used parallel multigrid solver library. With the proposed interpolations, the overall time of hypre's BoomerAMG setup can be considerably reduced, while sustaining equivalent, sometimes improved, convergence rates. Numerical results for a variety of test problems on parallel machines are presented that support the superiority of the proposed interpolation operators over the existing ones in hypre. }
+}
+
+@InProceedings{bfs,
+author="Gilbert, John R.
+and Reinhardt, Steve
+and Shah, Viral B.",
+title="High-Performance Graph Algorithms from Parallel Sparse Matrices",
+booktitle="Applied Parallel Computing: State of the Art in Scientific Computing",
+year="2007",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="260--269",
+abstract="Large-scale computation on graphs and other discrete structures is becoming increasingly important in many applications, including computational biology, web search, and knowledge discovery. High-performance combinatorial computing is an infant field, in sharp contrast with numerical scientific computing.",
+isbn="978-3-540-75755-9"
+}
+
+@INPROCEEDINGS{subgraph,
+  author={Gleyzer, Vitaliy and Soszynski, Andrew J. and Kao, Edward K.},
+  booktitle={2020 IEEE High Performance Extreme Computing Conference (HPEC)}, 
+  title={Leveraging Linear Algebra to Count and Enumerate Simple Subgraphs}, 
+  year={2020},
+  volume={},
+  number={},
+  pages={1--8},
+  keywords={NP-hard problem;Scalability;Conferences;Linear algebra;Linear accelerators},
+  doi={10.1109/HPEC43674.2020.9286191}}
+
+@INPROCEEDINGS{tricount1,
+  author={Wolf, Michael M. and Berry, Jonathan W. and Stark, Dylan T.},
+  booktitle={2015 IEEE High Performance Extreme Computing Conference (HPEC)}, 
+  title={A task-based linear algebra Building Blocks approach for scalable graph analytics}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={1--6},
+  keywords={Linear algebra;Kernel;Parallel processing;TV;Libraries;Data analysis;Instruction sets},
+  doi={10.1109/HPEC.2015.7322450}}
+
+@INPROCEEDINGS{tricount2,
+    author={Azad, Ariful and Bulu\c{c}, Aydin and Gilbert, John},
+    booktitle={2015 IEEE International Parallel and Distributed Processing Symposium (IPDPS) Workshop}, 
+    title={Parallel Triangle Counting and Enumeration Using Matrix Algebra}, 
+    year={2015},
+    volume={},
+    number={},
+    pages={804--811},
+    doi={10.1109/IPDPSW.2015.75},
+    url={https://doi.org/10.1109/IPDPSW.2015.75}
+}
+
+@INPROCEEDINGS{tricount3,
+  author={Li, Jiayu and Wang, Fugang and Araki, Takuya and Qiu, Judy},
+  booktitle={2019 IEEE/ACM Workshop on Memory Centric High Performance Computing (MCHPC)}, 
+  title={Generalized Sparse Matrix-Matrix Multiplication for Vector Engines and Graph Applications}, 
+  year={2019},
+  volume={},
+  number={},
+  pages={33--42},
+  keywords={Engines;Sparse matrices;Registers;Kernel;Computer architecture;Indexes;Machine learning algorithms;Sparse Linear Algebra Kernel;NEC Vector Engine;GraphSparse Linear Algebra Kernel;NEC Vector Engine;Graph},
+  doi={10.1109/MCHPC49590.2019.00012}}
+
+
+@inproceedings{color,
+author = {Kaplan, Haim and Sharir, Micha and Verbin, Elad},
+title = {Colored intersection searching via sparse rectangular matrix multiplication},
+year = {2006},
+isbn = {1595933409},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1137856.1137866},
+doi = {10.1145/1137856.1137866},
+abstract = {In a Batched Colored Intersection Searching Problem (CI), one is given a set of n geometric objects (of a certain class). Each object is colored by one of c colors, and the goal is to report all pairs of colors (c1,c2) such that there are two objects, one colored c1 and one colored c2, that intersect each other. We also consider the bipartite version of the problem, where we are interested in intersections between objects of one class with objects of another class (e.g., points and halfspaces).In a Sparse Rectangular Matrix Multiplication Problem (SRMM), one is given an n1\texttimes{}n2 matrix A and an n2\texttimes{}n3 matrix B, each containing at most m non-zero entries, and the goal is to compute their product AB.In this paper we present a technique for solving CI problems over a wide range of classes of geometric objects. The basic idea is first to use some decomposition method, such as geometric cuttings, to represent the intersection graph of the objects as a union of bi-cliques. Then, in each of these bi-cliques, contract all vertices of the same color. Finally, use an algorithm for sparse matrix multiplication (adapted from Yuster and Zwick [20]) to compute the union of the bi-cliques. We apply the technique to segments in R1, to segments in R2, to points and halfplanes in R2, and, more generally, to points and halfspaces in Rd, for any fixed d. However, the technique extends to colored intersection searching in any class (or pair of classes) of geometric objects of constant descriptive complexity.In particular, using our technique we obtain an algorithm that reports all the pairs of intersecting colors for n points and n halfplanes in R2, that are colored by c colors, in O(n4/3c0.46) time when n ≥ c1.44, and in O(n1.04c0.9 + c2) time when n≤c1.44.The algorithms that we give for CI use the algorithm for SRMM as a black box, which means that any improved algorithm for SRMM immediately leads to an improved algorithm for all colored intersection problems that our method applies to. We also show that the complexity of computing all intersecting colors in a set of segments on the real line is identical, up to a polylogarithmic multiplicative factor, to the complexity of SRMM with the appropriate parameters.},
+booktitle = {Proceedings of the Twenty-Second Annual Symposium on Computational Geometry (SCG)},
+pages = {52--60},
+numpages = {9},
+keywords = {colored intersection searching, generalized intersection searching, matrix multiplication, range searching},
+location = {Sedona, Arizona, USA}
+}
+
+@INPROCEEDINGS {genome1,
+author = {Giulia Guidi and
+                  Oguz Selvitopi and
+                  Marquita Ellis and
+                  Leonid Oliker and
+                  Katherine A. Yelick and
+                  Aydin Bulu{\c{c}}},
+booktitle = {2021 IEEE International Parallel and Distributed Processing Symposium (IPDPS)},
+title = {Parallel String Graph Construction and Transitive Reduction for De Novo Genome Assembly},
+year = {2021},
+volume = {},
+issn = {},
+pages = {517--526},
+abstract = {One of the most computationally intensive tasks in computational biology is de novo genome assembly, the decoding of the sequence of an unknown genome from redundant and erroneous short sequences. A common assembly paradigm identifies overlapping sequences, simplifies their layout, and creates consensus. Despite many algorithms developed in the literature, the efficient assembly of large genomes is still an open problem. In this work, we introduce new distributed-memory parallel algorithms for overlap detection and layout simplification steps of de novo genome assembly, and implement them in the diBELLA 2D pipeline. Our distributed memory algorithms for both overlap detection and layout simplification are based on linear-algebra operations over semirings using 2D distributed sparse matrices. Our layout step consists of performing a transitive reduction from the overlap graph to a string graph. We provide a detailed communication analysis of the main stages of our new algorithms. diBELLA 2D achieves near linear scaling with over 80% parallel efficiency for the human genome, reducing the runtime for overlap detection by 1.2-1.3× for the human genome and 1.5-1.9× for C.elegans compared to the state-of-the-art. Our transitive reduction algorithm outperforms an existing distributed-memory implementation by 10.5-13.3× for the human genome and 18-29× for the C. elegans. Our work paves the way for efficient de novo assembly of large genomes using long reads in distributed memory.},
+keywords = {concurrent computing;runtime;program processors;layout;pipelines;memory management;genomics},
+doi = {10.1109/IPDPS49936.2021.00060},
+url = {https://doi.ieeecomputersociety.org/10.1109/IPDPS49936.2021.00060},
+publisher = {IEEE Computer Society},
+address = {Los Alamitos, CA, USA},
+month = {May}
+}
+
+
+@article{genome2,
+  title={The parallelism motifs of genomic data analysis},
+  author={Yelick, Kathy and Bulu\c{c}, Aydın and Awan, Muaaz and Azad, Ariful and Brock, Bowei and Egan, Rob and Ekanayake, Saliya and Ellis, Marquita and Georganas, Evangelos and Guidi, Giulia and Hofmeyr, Steven and Selvitopi, Oguz and Teodoropol, Cristina and Oliker, Leonid},
+  journal={Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences},
+  volume={378},
+  number={2166},
+  pages={20190394},
+  year={2020},
+  publisher={Royal Society},
+  doi={10.1098/rsta.2019.0394}
+}
+
+@inproceedings{pca,
+  title={Fast randomized {PCA} for sparse data},
+  author={Feng, Xu and Xie, Yuyang and Song, Mingye and Yu, Wenjian and Tang, Jie},
+  booktitle={Asian conference on machine learning},
+  pages={710--725},
+  year={2018},
+  organization={PMLR}
+}
+
+@INPROCEEDINGS{mcl,
+  author={Selvitopi, Oguz and Hussain, Md Taufique and Azad, Ariful and Bulu\c{c}, Aydın},
+  booktitle={2020 IEEE International Parallel and Distributed Processing Symposium (IPDPS)}, 
+  title={Optimizing High Performance {M}arkov Clustering for Pre-Exascale Architectures}, 
+  year={2020},
+  volume={},
+  number={},
+  pages={116--126},
+  keywords={Clustering algorithms;Sparse matrices;Markov processes;Memory management;Merging;Optimization;Graphics processing units;Markov clustering;HipMCL;SpGEMM},
+  doi={10.1109/IPDPS47924.2020.00022}}
+
+@INPROCEEDINGS{dnn,
+    author={Qin, Eric and Samajdar, Ananda and Kwon, Hyoukjun and Nadella, Vineet and Srinivasan, Sudarshan an  Das, Dipankar and Kaul, Bharat and Krishna, Tushar},
+    booktitle={2020 IEEE International Symposium on High Performance Computer Architecture (HPCA)}, 
+    title={{SIGMA}: A Sparse and Irregular {GEMM} Accelerator with Flexible Interconnects for {DNN} Training}, 
+    year={2020},
+    volume={},
+    number={},
+    pages={58--70},
+    doi={10.1109/HPCA47549.2020.00015},
+    url={htpps://www.doi.org/10.1109/HPCA47549.2020.00015}
+}
+
+@article{HipMCL,
+    author = {Azad, Ariful and Pavlopoulos, Georgios A and Ouzounis, Christos A and Kyrpides, Nikos C and Bulu\c{c}, Aydin},
+    title = "{HipMCL: a high-performance parallel implementation of the {M}arkov clustering algorithm for large-scale networks}",
+    journal = {Nucleic Acids Research},
+    volume = {46},
+    number = {6},
+    pages = {e33--e33},
+    year = {2018},
+    month = {January},
+    abstract = "{Biological networks capture structural or functional properties of relevant entities such as molecules, proteins or genes. Characteristic examples are gene expression networks or protein–protein interaction networks, which hold information about functional affinities or structural similarities. Such networks have been expanding in size due to increasing scale and abundance of biological data. While various clustering algorithms have been proposed to find highly connected regions, Markov Clustering (MCL) has been one of the most successful approaches to cluster sequence similarity or expression networks. Despite its popularity, MCL’s scalability to cluster large datasets still remains a bottleneck due to high running times and memory demands. Here, we present High-performance MCL (HipMCL), a parallel implementation of the original MCL algorithm that can run on distributed-memory computers. We show that HipMCL can efficiently utilize 2000 compute nodes and cluster a network of ∼70 million nodes with ∼68 billion edges in ∼2.4 h. By exploiting distributed-memory environments, HipMCL clusters large-scale networks several orders of magnitude faster than MCL and enables clustering of even bigger networks. HipMCL is based on MPI and OpenMP and is freely available under a modified BSD license.}",
+    issn = {0305-1048},
+    doi = {10.1093/nar/gkx1313},
+    url = {https://doi.org/10.1093/nar/gkx1313},
+    eprint = {https://academic.oup.com/nar/article-pdf/46/6/e33/24525991/gkx1313.pdf},
+}
+
+@INPROCEEDINGS{liu2,
+  author={Liu, Weifeng and Vinter, Brian},
+  booktitle={2014 IEEE 28th International Parallel and Distributed Processing Symposium}, 
+  title={An Efficient {GPU} General Sparse Matrix-Matrix Multiplication for Irregular Data}, 
+  year={2014},
+  volume={},
+  number={},
+  pages={370--381},
+  keywords={Sparse matrices;Graphics processing units;Upper bound;Load management;Artificial neural networks;Libraries;Instruction sets;sparse matrices;matrix multiplication;linear algebra;GPU;merging;parallel algorithms},
+  doi={10.1109/IPDPS.2014.47}}
+
+@inbook{bella,
+author = { Giulia Guidi  and  Marquita Ellis  and  Daniel Rokhsar  and  Katherine Yelick  and  Aydın Bulu\c{c} },
+title = {BELLA: Berkeley Efficient Long-Read to Long-Read Aligner and Overlapper},
+booktitle = {Proceedings of the 2021 SIAM Conference on Applied and Computational Discrete Algorithms (ACDA21)},
+year = {2021},
+chapter = {},
+pages = {123--134},
+doi = {10.1137/1.9781611976830.12},
+URL = {https://epubs.siam.org/doi/abs/10.1137/1.9781611976830.12},
+eprint = {https://epubs.siam.org/doi/pdf/10.1137/1.9781611976830.12},
+    abstract = { Abstract Recent advances in long-read sequencing allow characterization of genome structure and its variation within and between species at a resolution not previously possible. Detection of overlap between reads is an essential component of many long read genome pipelines, such as de novo genome assembly. Longer reads simplify genome assembly and improve reconstruction contiguity, but current long read technologies are associated with moderate to high error rates. In this work, we present Berkeley Efficient Long-Read to Long-Read Aligner and Overlapper (BELLA), a novel overlap detection and alignment algorithm using sparse matrix-matrix multiplication. In addition, we present a probabilistic model that demonstrates the feasibility of using k-mers for overlap candidate detection and shows its flexibility when applied to different k-mer selection strategies. Based on such a model, we introduce a notion of reliable k-mers. Combining reliable k-mers with our binning mechanism increases the computational efficiency and accuracy of our algorithm. Finally, we present a new method based on Chernoff bounds to separate true overlaps from false positives by combining alignment techniques and probabilistic modeling. Our goal is to maximize the balance of precision and recall. For both real and synthetic data, BELLA is among the best F1 scores, showing a stability of performance that is often lacking in competing software. BELLA's F1 score is consistently within 1.7\% of the top performer. In particular, we show improved de novo assembly quality on synthetic data when BELLA is coupled with the miniasm assembler. }
+}
+
+
+@inproceedings{liu3,
+author = {Cheng, Helin and Li, Wenxuan and Lu, Yuechen and Liu, Weifeng},
+title = {{HASpGEMM}: Heterogeneity-Aware Sparse General Matrix-Matrix Multiplication on Modern Asymmetric Multicore Processors},
+year = {2023},
+isbn = {9798400708435},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3605573.3605611},
+doi = {10.1145/3605573.3605611},
+abstract = {Sparse general matrix-matrix multiplication (SpGEMM) is an important kernel in computational science and engineering, and has been widely studied on homogeneous processors, e.g., CPUs and GPUs. Recently, the asymmetric multicore processors (AMPs), composed of big and LITTLE cores from ARM, or of performance and efficient cores from Apple and Intel, are becoming the mainstream processors of modern computers. However, directly running the existing SpGEMM algorithms on AMPs easily leads to load imbalance problems due to the irregularity from both the sparse matrix side and the AMP side, and there is still a lack of parallel SpGEMM algorithm that can efficiently exploit the different cores on AMPs. In this paper, we propose a parallel algorithm called heterogeneity-aware SpGEMM (HASpGEMM). To motivate our algorithm design, we first obtain the performance characteristics of a variety of kernels (i.e., SPA, HASH and ESC) on P- and E-cores of Intel 12th and 13th Gen AMPs through micro-benchmarking. On top of the large amount of kernel-level testing data, we design a row-wise mapping technique to better select kernels and cores for rows of different characteristics and develop a task assignment scheme to better balance workload in terms of compute and memory access on the two kinds of cores. Based on the experimental data, compared to the SPA, HASH, ESC, and the latest Intel oneMKL library on Intel Core i9-12900KF and i9-13900KF AMPs, our algorithm HASpGEMM achieves an average speedup of 2.83x, 1.85x, 3.85x, 1.88x (with a maximum speedup of 46.50x, 37.48x, 106.31x, 113.17x) on the i9-12900KF processor. On the i9-13900KF processor, it achieves an average speedup of 4.06x, 2.21x, 4.56x, 2.23x (with a maximum speedup of 52.51x, 78.08x, 161.68x, 131.48x).},
+booktitle = {Proceedings of the 52nd International Conference on Parallel Processing (ICPP)},
+pages = {807--817},
+numpages = {11},
+keywords = {Sparse general matrix-matrix multiplication, Heterogeneity-aware algorithm., Asymmetric multicore processor},
+location = {<conf-loc>, <city>Salt Lake City</city>, <state>UT</state>, <country>USA</country>, </conf-loc>}
+}
+
+@ARTICLE{OpSparse,
+  author={Du, Zhaoyang and Guan, Yijin and Guan, Tianchan and Niu, Dimin and Huang, Linyong and Zheng, Hongzhong and Xie, Yuan},
+  journal={IEEE Access}, 
+  title={{OpSparse}: A Highly Optimized Framework for Sparse General Matrix Multiplication on {GPUs}}, 
+  year={2022},
+  volume={10},
+  number={},
+  pages={85960--85974},
+  keywords={Libraries;Sparse matrices;Optimization;Kernel;Resource management;Instruction sets;Memory management;Sparse general matrix multiplication;SpGEMM;GPU;high-performance computing},
+  doi={10.1109/ACCESS.2022.3196940}}
+
+@inproceedings{hierRowMerging,
+author = {Takayashiki, Hikaru and Yagi, Hotaka and Nishimoto, Hiroki and Yoshifuji, Naoki},
+title = {A New Sparse General Matrix-matrix Multiplication Method for Long Vector Architecture by Hierarchical Row Merging},
+year = {2023},
+isbn = {9798400707858},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3624062.3625131},
+doi = {10.1145/3624062.3625131},
+abstract = {Vector processors have become essential to high-performance computing in scientific and engineering applications, especially in numerical calculations that leverage data parallelism. With escalating computational demands, the efficient execution of Sparse GEneral Matrix-matrix Multiplication&nbsp;(SpGEMM) on vector processors has become crucial. However, it brings challenges for vector processors due to its complex data structures and irregular memory access patterns. This paper presents a new method designed to perform SpGEMM on vector processors, inspired by Iterative Row Merging. The proposed method hierarchically merges rows by utilizing long vector instructions. We evaluate the proposed method against other methods across 27 sparse matrices. The results indicate that the proposed method outperforms other methods for 22 out of the 27 sparse matrices, reaching up to 31.9 times better performance in the best case.},
+booktitle = {Proceedings of the SC '23 Workshops of The International Conference on High Performance Computing, Network, Storage, and Analysis},
+pages = {756--759},
+numpages = {4},
+keywords = {matrix-matrix multiplication, sparse matrix, vector processors},
+location = {<conf-loc>, <city>Denver</city>, <state>CO</state>, <country>USA</country>, </conf-loc>}
+}
+
+@inproceedings{fevre,
+author = {Le F\`{e}vre, Valentin and Casas, Marc},
+title = {Efficient Execution of {SpGEMM} on Long Vector Architectures},
+year = {2023},
+isbn = {9798400701559},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3588195.3593000},
+doi = {10.1145/3588195.3593000},
+abstract = {The Sparse General Matrix-Matrix multiplication (SpGEMM) C=A x B is a fundamental routine extensively used in domains like machine learning or graph analytics. Despite its relevance, the efficient execution of SpGEMM on vector architectures is a relatively unexplored topic. The most recent algorithm to run SpGEMM on these architectures is based on the SParse Accumulator (SPA) approach, and it is relatively efficient for sparse matrices featuring several tens of non-zero coefficients per column as it computes C columns one by one. However, when dealing with matrices containing just a few non-zero coefficients per column, the state-of-the-art algorithm is not able to fully exploit long vector architectures when computing the SpGEMM kernel.To overcome this issue we propose the SPA paRallel with Sorting (SPARS) algorithm, which computes in parallel several C columns among other optimizations, and the HASH algorithm, which uses dynamically sized hash tables to store intermediate output values. To combine the efficiency of SPA for relatively dense matrix blocks with the high performance that SPARS and HASH deliver for very sparse matrix blocks we propose H-SPA(t) and H-HASH(t), which dynamically switch between different algorithms. H-SPA(t) and H-HASH(t) obtain 1.24x and 1.57x average speed-ups with respect to SPA respectively, over a set of 40 sparse matrices obtained from the SuiteSparse Matrix Collection. For the 22 most sparse matrices, H-SPA(t) and H-HASH(t) deliver 1.42x and 1.99x average speed-ups respectively.},
+booktitle = {Proceedings of the 32nd International Symposium on High-Performance Parallel and Distributed Computing (HPDC)},
+pages = {101--113},
+numpages = {13},
+keywords = {vector processor, sparse multiplication, sparse matrix, SpGEMM, RISC-V},
+location = {Orlando, FL, USA}
+}
+
+@article{ASA,
+author = {Zhang, Chao and Bremer, Maximilian and Chan, Cy and Shalf, John and Guo, Xiaochen},
+title = {{ASA}: Accelerating Sparse Accumulation in Column-wise {SpGEMM}},
+year = {2022},
+issue_date = {December 2022},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {19},
+number = {4},
+issn = {1544-3566},
+url = {https://doi.org/10.1145/3543068},
+doi = {10.1145/3543068},
+abstract = {Sparse linear algebra is an important kernel in many different applications. Among various sparse general matrix-matrix multiplication (SpGEMM) algorithms, Gustavson’s column-wise SpGEMM has good locality when reading input matrix and can be easily parallelized by distributing the computation of different columns of an output matrix to different processors. However, the sparse accumulation (SPA) step in column-wise SpGEMM, which merges partial sums from each of the multiplications by the row indices, is still a performance bottleneck. The state-of-the-art software implementation uses a hash table for partial sum search in the SPA, which makes SPA the largest contributor to the execution time of SpGEMM. There are three reasons that cause the SPA to become the bottleneck: (1) hash probing requires data-dependent branches that are difficult for a branch predictor to predict correctly; (2) the accumulation of partial sum is dependent on the results of the hash probing, which makes it difficult to hide the hash probing latency; and (3) hash collision requires time-consuming linear search and optimizations to reduce these collisions require an accurate estimation of the number of non-zeros in each column of the output matrix.This work proposes ASA architecture to accelerate the SPA. ASA overcomes the challenges of SPA by (1) executing the partial sum search and accumulate with a single instruction through ISA extension to eliminate data-dependent branches in hash probing, (2) using a dedicated on-chip cache to perform the search and accumulation in a pipelined fashion, (3) relying on the parallel search capability of a set-associative cache to reduce search latency, and (4) delaying the merging of overflowed entries. As a result, ASA achieves an average of 2.25\texttimes{} and 5.05\texttimes{} speedup as compared to the state-of-the-art software implementation of a Markov clustering application and its SpGEMM kernel, respectively. As compared to a state-of-the-art hashing accelerator design, ASA achieves an average of 1.95\texttimes{} speedup in the SpGEMM kernel.},
+journal = {ACM Transactions on Architecture and Code Optimization},
+month = {September},
+articleno = {49},
+numpages = {24},
+keywords = {Markov clustering, sparse linear algebra, sparse accumulation, SpGEMM}
+}
+
+@article{gustavson,
+author = {Gustavson, Fred G.},
+title = {Two Fast Algorithms for Sparse Matrices: Multiplication and Permuted Transposition},
+year = {1978},
+issue_date = {Sept. 1978},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {4},
+number = {3},
+issn = {0098-3500},
+url = {https://doi.org/10.1145/355791.355796},
+doi = {10.1145/355791.355796},
+journal = {ACM Transactions on Mathematical Software},
+month = {September},
+pages = {250--269},
+numpages = {20}
+}
+
+@article{registerAware,
+author = {Liu, Junhong and He, Xin and Liu, Weifeng and Tan, Guangming},
+title = {Register-Aware Optimizations for Parallel Sparse Matrix-Matrix Multiplication},
+year = {2019},
+issue_date = {June 2019},
+publisher = {Kluwer Academic Publishers},
+address = {USA},
+volume = {47},
+number = {3},
+issn = {0885-7458},
+url = {https://doi.org/10.1007/s10766-018-0604-8},
+doi = {10.1007/s10766-018-0604-8},
+abstract = {General sparse matrix---matrix multiplication (SpGEMM) is a fundamental building block of a number of high-level algorithms and real-world applications. In recent years, several efficient SpGEMM algorithms have been proposed for many-core processors such as GPUs. However, their implementations of sparse accumulators, the core component of SpGEMM, mostly use low speed on-chip shared memory and global memory, and high speed registers are seriously underutilised. In this paper, we propose three novel register-aware SpGEMM algorithms for three representative sparse accumulators, i.e., sort, merge and hash, respectively. We fully utilise the GPU registers to fetch data, finish computations and store results out. In the experiments, our algorithms deliver excellent performance on a benchmark suite including 205 sparse matrices from the SuiteSparse Matrix Collection. Specifically, on an Nvidia Pascal P100 GPU, our three register-aware sparse accumulators achieve on average 2.0 $$times $$ (up to 5.4 $$times $$ ), 2.6 $$times $$ (up to 10.5 $$times $$ ) and 1.7 $$times $$ (up to 5.2 $$times $$ ) speedups over their original implementations in libraries bhSPARSE, RMerge and NSPARSE, respectively.},
+journal = {International Journal of Parallel Programming},
+month = {June},
+pages = {403--417},
+numpages = {15},
+keywords = {GPU, Register, Sparse matrix, Sparse matrix---matrix multiplication}
+}
+
+
+@article{azad,
+author = {Azad, Ariful and Ballard, Grey and Bulu\c{c}, Aydin and Demmel, James and Grigori, Laura and Schwartz, Oded and Toledo, Sivan and Williams, Samuel},
+title = {Exploiting Multiple Levels of Parallelism in Sparse Matrix-Matrix Multiplication},
+journal = {SIAM Journal on Scientific Computing},
+volume = {38},
+number = {6},
+pages = {C624--C651},
+year = {2016},
+doi = {10.1137/15M104253X},
+URL = { 
+    
+        https://doi.org/10.1137/15M104253X
+    
+    
+
+},
+eprint = { 
+    
+        https://doi.org/10.1137/15M104253X
+    
+    
+
+}
+,
+    abstract = { Sparse matrix-matrix multiplication (or SpGEMM) is a key primitive for many high-performance graph algorithms as well as for some linear solvers, such as algebraic multigrid. The scaling of existing parallel implementations of SpGEMM is heavily bound by communication. Even though 3D (or 2.5D) algorithms have been proposed and theoretically analyzed in the flat MPI model on Erdös--Rényi matrices, those algorithms had not been implemented in practice and their complexities had not been analyzed for the general case. In this work, we present the first implementation of the 3D SpGEMM formulation that exploits multiple (intranode and internode) levels of parallelism, achieving significant speedups over the state-of-the-art publicly available codes at all levels of concurrencies. We extensively evaluate our implementation and identify bottlenecks that should be subject to further research. }
+}
+
+@inproceedings{balancedHashing,
+author = {Anh, Pham Nguyen Quang and Fan, Rui and Wen, Yonggang},
+title = {Balanced Hashing and Efficient {GPU} Sparse General Matrix-Matrix Multiplication},
+year = {2016},
+isbn = {9781450343619},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2925426.2926273},
+doi = {10.1145/2925426.2926273},
+abstract = {General sparse matrix-matrix multiplication (SpGEMM) is a core component of many algorithms. A number of recent works have used high throughput graphics processing units (GPUs) to accelerate SpGEMM. However, exploiting the power of GPUs for SpGEMM requires addressing a number of challenges, including highly imbalanced workloads and large numbers of inefficient random global memory accesses. This paper presents a SpGEMM algorithm which uses several novel techniques to overcome these problems. We first propose two low cost methods to achieve perfect load balancing during the most expensive step in SpGEMM. Next, we show how to eliminate nearly all random global memory accesses using shared memory based hash tables. To optimize the performance of the hash tables, we propose a lightweight method to estimate the number of nonzeros in the output matrix. We compared our algorithm to the CUSP, CUSPARSE and the state-of-the-art BHSPARSE GPU SpGEMM algorithms, and show that it performs 5.6x, 2.4x and 1.5x better on average, and up to 11.8x, 9.5x and 2.5x better in the best case, respectively. Furthermore, we show that our algorithm performs especially well on highly imbalanced and unstructured matrices.},
+booktitle = {Proceedings of the 2016 International Conference on Supercomputing (ICS)},
+articleno = {36},
+numpages = {12},
+keywords = {Sparse matrix-matrix multiplication, Performance optimization, GPU},
+location = {Istanbul, Turkey}
+}
+
+@inproceedings{spECK,
+author = {Parger, Mathias and Winter, Martin and Mlakar, Daniel and Steinberger, Markus},
+title = {{spECK}: accelerating {GPU} sparse matrix-matrix multiplication through lightweight analysis},
+year = {2020},
+isbn = {9781450368186},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3332466.3374521},
+doi = {10.1145/3332466.3374521},
+abstract = {Sparse general matrix-matrix multiplication on GPUs is challenging due to the varying sparsity patterns of sparse matrices. Existing solutions achieve good performance for certain types of matrices, but fail to accelerate all kinds of matrices in the same manner. Our approach combines multiple strategies with dynamic parameter selection to dynamically choose and tune the best fitting algorithm for each row of the matrix. This choice is supported by a lightweight, multi-level matrix analysis, which carefully balances analysis cost and expected performance gains. Our evaluation on thousands of matrices with various characteristics shows that we outperform all currently available solutions in 79\% over all matrices with >15k products and that we achieve the second best performance in 15\%. For these matrices, our solution is on average 83\% faster than the second best approach and up to 25X faster than other state-of-the-art GPU implementations. Using our approach, applications can expect great performance independent of the matrices they work on.},
+booktitle = {Proceedings of the 25th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP)},
+pages = {362--375},
+numpages = {14},
+location = {San Diego, California}
+}
+
+@inproceedings{tileSpGEMM,
+author = {Niu, Yuyao and Lu, Zhengyang and Ji, Haonan and Song, Shuhui and Jin, Zhou and Liu, Weifeng},
+title = {{TileSpGEMM}: a tiled algorithm for parallel sparse general matrix-matrix multiplication on {GPUs}},
+year = {2022},
+isbn = {9781450392044},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3503221.3508431},
+doi = {10.1145/3503221.3508431},
+abstract = {Sparse general matrix-matrix multiplication (SpGEMM) is one of the most fundamental building blocks in sparse linear solvers, graph processing frameworks and machine learning applications. The existing parallel approaches for shared memory SpGEMM mostly use the row-row style with possibly good parallelism. However, because of the irregularity in sparsity structures, the existing row-row methods often suffer from three problems: (1) load imbalance, (2) high global space complexity and unsatisfactory data locality, and (3) sparse accumulator selection.We in this paper propose a tiled parallel SpGEMM algorithm named TileSpGEMM. Our algorithm sparsifies the tiled method in dense general matrix-matrix multiplication (GEMM), and saves each non-empty tile in a sparse form. Its first advantage is that the basic working unit is now a fixed-size sparse tile containing a small number of nonzeros, but not a row possibly very long. Thus the load imbalance issue can be naturally alleviated. Secondly, the temporary space needed for each tile is small and can always be in on-chip scratchpad memory. Thus there is no need to allocate an off-chip space for a large amount of intermediate products, and the data locality can be much better. Thirdly, because the computations are restricted within a single tile, it is relatively easier to select a fast sparse accumulator for a sparse tile. Our experimental results on two newest NVIDIA GPUs show that our TileSpGEMM outperforms four state-of-the-art SpGEMM methods cuSPARSE, bhSPARSE, NSPARSE and spECK in 139, 138, 127 and 94 out of all 142 square matrices executing no less than one billion flops for an SpGEMM operation, and delivers up to 2.78x, 145.35x, 97.86x and 3.70x speedups, respectively.},
+booktitle = {Proceedings of the 27th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP)},
+pages = {90--106},
+numpages = {17},
+keywords = {GPU, SpGEMM, sparse matrix, tiled algorithm},
+location = {Seoul, Republic of Korea}
+}
+
+@INPROCEEDINGS{nagasaka3,
+  author={Nagasaka, Yusuke and Nukada, Akira and Matsuoka, Satoshi},
+  booktitle={2017 46th International Conference on Parallel Processing (ICPP)}, 
+  title={High-Performance and Memory-Saving Sparse General Matrix-Matrix Multiplication for {NVIDIA Pascal GPU}}, 
+  year={2017},
+  volume={},
+  number={},
+  pages={101--110},
+  keywords={Sparse matrices;Graphics processing units;Memory management;Acceleration;Instruction sets;Kernel;Parallel processing;Sparse matrix;SpGEMM;GPU},
+  doi={10.1109/ICPP.2017.19}}
+
+@inproceedings{gamma,
+author = {Zhang, Guowei and Attaluri, Nithya and Emer, Joel S. and Sanchez, Daniel},
+title = {{GAMMA}: leveraging {G}ustavson’s algorithm to accelerate sparse matrix multiplication},
+year = {2021},
+isbn = {9781450383172},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3445814.3446702},
+doi = {10.1145/3445814.3446702},
+abstract = {Sparse matrix-sparse matrix multiplication (spMspM) is at the heart of a wide range of scientific and machine learning applications. spMspM is inefficient on general-purpose architectures, making accelerators attractive. However, prior spMspM accelerators use inner- or outer-product dataflows that suffer poor input or output reuse, leading to high traffic and poor performance. These prior accelerators have not explored Gustavson's algorithm, an alternative spMspM dataflow that does not suffer from these problems but features irregular memory access patterns that prior accelerators do not support.  We present GAMMA, an spMspM accelerator that uses Gustavson's algorithm to address the challenges of prior work. GAMMA performs spMspM's computation using specialized processing elements with simple high-radix mergers, and performs many merges in parallel to achieve high throughput. GAMMA uses a novel on-chip storage structure that combines features of both caches and explicitly managed buffers. This structure captures Gustavson's irregular reuse patterns and streams thousands of concurrent sparse fibers (i.e., lists of coordinates and values for rows or columns) with explicitly decoupled data movement. GAMMA features a new dynamic scheduling algorithm to achieve high utilization despite irregularity. We also present new preprocessing algorithms that boost GAMMA's efficiency and versatility. As a result, GAMMA outperforms prior accelerators by gmean 2.1x, and reduces memory traffic by gmean 2.2x and by up to 13x.},
+booktitle = {Proceedings of the 26th ACM International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS)},
+pages = {687--701},
+numpages = {15},
+keywords = {Gustavson's algorithm, accelerator, data movement reduction, explicit data orchestration, high-radix merge, sparse linear algebra, sparse matrix multiplication},
+location = {Virtual, USA}
+}
+
+@inproceedings{adaptLoadBalanceGPU,
+author = {Winter, Martin and Mlakar, Daniel and Zayer, Rhaleb and Seidel, Hans-Peter and Steinberger, Markus},
+title = {Adaptive sparse matrix-matrix multiplication on the {GPU}},
+year = {2019},
+isbn = {9781450362252},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3293883.3295701},
+doi = {10.1145/3293883.3295701},
+abstract = {In the ongoing efforts targeting the vectorization of linear algebra primitives, sparse matrix-matrix multiplication (SpGEMM) has received considerably less attention than sparse Matrix-Vector multiplication (SpMV). While both are equally important, this disparity can be attributed mainly to the additional formidable challenges raised by SpGEMM.In this paper, we present a dynamic approach for addressing SpGEMM on the GPU. Our approach works directly on the standard compressed sparse rows (CSR) data format. In comparison to previous SpGEMM implementations, our approach guarantees a homogeneous, load-balanced access pattern to the first input matrix and improves memory access to the second input matrix. It adaptively re-purposes GPU threads during execution and maximizes the time efficient on-chip scratchpad memory can be used. Adhering to a completely deterministic scheduling pattern guarantees bit-stable results during repetitive execution, a property missing from other approaches. Evaluation on an extensive sparse matrix benchmark suggests our approach being the fastest SpGEMM implementation for highly sparse matrices (80\% of the set). When bit-stable results are sought, our approach is the fastest across the entire test set.},
+booktitle = {Proceedings of the 24th Symposium on Principles and Practice of Parallel Programming (PPoPP)},
+pages = {68--81},
+numpages = {14},
+keywords = {sparse matrix, bit-stable, adaptive, SpGEMM, GPU, ESC},
+location = {Washington, District of Columbia}
+}
+
+@inproceedings{likwid,
+author = {Gruber, Thomas and Eitzinger, Jan and Hager, Georg and Wellein, Gerhard},
+year = {2014},
+month = {September},
+pages={176--185},
+title = {Overhead Analysis of Performance Counter Measurements},
+booktitle={43rd International Conference on Parallel Processing Workshops (ICCPW)},
+doi = {10.1109/ICPPW.2014.34}
+}
+
+@article{graphblas,
+author = {Davis, Timothy A.},
+title = {Algorithm 1000: SuiteSparse:GraphBLAS: Graph Algorithms in the Language of Sparse Linear Algebra},
+year = {2019},
+issue_date = {December 2019},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {45},
+number = {4},
+issn = {0098-3500},
+url = {https://doi.org/10.1145/3322125},
+doi = {10.1145/3322125},
+abstract = {SuiteSparse:GraphBLAS is a full implementation of the GraphBLAS standard, which defines a set of sparse matrix operations on an extended algebra of semirings using an almost unlimited variety of operators and types. When applied to sparse adjacency matrices, these algebraic operations are equivalent to computations on graphs. GraphBLAS provides a powerful and expressive framework for creating graph algorithms based on the elegant mathematics of sparse matrix operations on a semiring. An overview of the GraphBLAS specification is given, followed by a description of the key features and performance of its implementation in the SuiteSparse:GraphBLAS package.},
+journal = {ACM Transactions on Mathematical Software},
+month = {December},
+articleno = {44},
+numpages = {25},
+keywords = {Graph algorithms, GraphBLAS, sparse matrices}
+}
+
+@misc{kokkos2,
+      title={Kokkos Kernels: Performance Portable Sparse/Dense Linear Algebra and Graph Kernels}, 
+      author={Sivasankaran Rajamanickam and Seher Acer and Luc Berger-Vergiat and Vinh Dang and Nathan Ellingwood and Evan Harvey and Brian Kelley and Christian R. Trott and Jeremiah Wilke and Ichitaro Yamazaki},
+      year={2021},
+      eprint={2103.11991},
+      archivePrefix={arXiv},
+      primaryClass={cs.MS},
+      url={https://arxiv.org/abs/2103.11991}, 
+}
+
+@article{hoefler,
+author = {Hoefler, Torsten and Alistarh, Dan and Ben-Nun, Tal and Dryden, Nikoli and Peste, Alexandra},
+title = {Sparsity in deep learning: pruning and growth for efficient inference and training in neural networks},
+year = {2021},
+issue_date = {January 2021},
+publisher = {JMLR.org},
+volume = {22},
+number = {1},
+issn = {1532--4435},
+abstract = {The growing energy and performance costs of deep learning have driven the community to reduce the size of neural networks by selectively pruning components. Similarly to their biological counterparts, sparse networks generalize just as well, sometimes even better than, the original dense networks. Sparsity promises to reduce the memory footprint of regular networks to fit mobile devices, as well as shorten training time for ever growing networks. In this paper, we survey prior work on sparsity in deep learning and provide an extensive tutorial of sparsification for both inference and training. We describe approaches to remove and add elements of neural networks, different training strategies to achieve model sparsity, and mechanisms to exploit sparsity in practice. Our work distills ideas from more than 300 research papers and provides guidance to practitioners who wish to utilize sparsity today, as well as to researchers whose goal is to push the frontier forward. We include the necessary background on mathematical methods in sparsification, describe phenomena such as early structure adaptation, the intricate relations between sparsity and the training process, and show techniques for achieving acceleration on real hardware. We also define a metric of pruned parameter efficiency that could serve as a baseline for comparison of different sparse networks. We close by speculating on how sparsity can improve future workloads and outline major open problems in the field.},
+journal = {The Journal of Machine Learning Research},
+month = jan,
+articleno = {241},
+numpages = {124},
+keywords = {sparsity, deep learning, performance, low memory, generalization}
+}

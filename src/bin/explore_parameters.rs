@@ -9,8 +9,8 @@ use magnus::parameter_space::{
     MatrixGenerator, ParameterConfiguration, ParameterSpaceExplorer, PatternMatrixGenerator,
     TestSuiteGenerator,
 };
-use magnus::suitesparse_integration::{MatrixMarketIO, SuiteSparseStyleGenerator};
 use magnus::reference_spgemm;
+use magnus::suitesparse_integration::{MatrixMarketIO, SuiteSparseStyleGenerator};
 use std::time::Instant;
 
 fn main() {
@@ -92,7 +92,7 @@ fn generate_test_suite() {
 
     for case in &suite.test_cases {
         *size_counts.entry(case.config.matrix.size).or_insert(0) += 1;
-        
+
         let density_category = if case.config.matrix.density < ULTRA_SPARSE_DENSITY {
             "ultra-sparse"
         } else if case.config.matrix.density < SPARSE_DENSITY {
@@ -185,7 +185,10 @@ fn demonstrate_patterns() {
     // Generate different patterns
     let patterns = vec![
         ("Banded (bandwidth=10)", gen.generate_banded(size, 10)),
-        ("Block Diagonal (block=50)", gen.generate_block_diagonal(size, 50)),
+        (
+            "Block Diagonal (block=50)",
+            gen.generate_block_diagonal(size, 50),
+        ),
         ("Power Law (α=1.5)", gen.generate_power_law(size, 1.5)),
         ("Power Law (α=2.5)", gen.generate_power_law(size, 2.5)),
     ];
@@ -194,9 +197,11 @@ fn demonstrate_patterns() {
         println!("{}:", name);
         println!("  Size: {}×{}", matrix.n_rows, matrix.n_cols);
         println!("  Non-zeros: {}", matrix.nnz());
-        println!("  Density: {:.6}", 
-            matrix.nnz() as f64 / (matrix.n_rows * matrix.n_cols) as f64);
-        
+        println!(
+            "  Density: {:.6}",
+            matrix.nnz() as f64 / (matrix.n_rows * matrix.n_cols) as f64
+        );
+
         // Analyze row distribution
         let mut min_nnz = usize::MAX;
         let mut max_nnz = 0;
@@ -209,8 +214,12 @@ fn demonstrate_patterns() {
             total_nnz += row_nnz;
         }
 
-        println!("  Row NNZ: min={}, max={}, avg={:.1}", 
-            min_nnz, max_nnz, total_nnz as f64 / matrix.n_rows as f64);
+        println!(
+            "  Row NNZ: min={}, max={}, avg={:.1}",
+            min_nnz,
+            max_nnz,
+            total_nnz as f64 / matrix.n_rows as f64
+        );
         println!();
     }
 }
@@ -228,13 +237,15 @@ fn demonstrate_suitesparse_style() {
         println!("{} matrix:", domain);
         println!("  Size: {}×{}", matrix.n_rows, matrix.n_cols);
         println!("  Non-zeros: {}", matrix.nnz());
-        println!("  Density: {:.6}", 
-            matrix.nnz() as f64 / (matrix.n_rows * matrix.n_cols) as f64);
+        println!(
+            "  Density: {:.6}",
+            matrix.nnz() as f64 / (matrix.n_rows * matrix.n_cols) as f64
+        );
 
         // Save to file
         let path = format!("test_matrices/{}_matrix.mtx", domain);
         std::fs::create_dir_all("test_matrices").ok();
-        
+
         if let Err(e) = MatrixMarketIO::write_matrix(&path, &matrix) {
             eprintln!("  Failed to save: {}", e);
         } else {
@@ -246,36 +257,32 @@ fn demonstrate_suitesparse_style() {
     // Show recommended SuiteSparse matrices
     println!("\nRecommended SuiteSparse Matrices for Testing:");
     println!("----------------------------------------------");
-    
+
     use magnus::suitesparse_integration::SuiteSparseDownloader;
-    
+
     for matrix in SuiteSparseDownloader::recommended_matrices() {
-        println!("  {}/{}: {}×{}, {} nnz ({})",
-            matrix.group,
-            matrix.name,
-            matrix.n_rows,
-            matrix.n_cols,
-            matrix.nnz,
-            matrix.kind
+        println!(
+            "  {}/{}: {}×{}, {} nnz ({})",
+            matrix.group, matrix.name, matrix.n_rows, matrix.n_cols, matrix.nnz, matrix.kind
         );
         println!("    {}", matrix.description);
     }
 }
 
 fn print_configuration(config: &ParameterConfiguration) {
-    println!("  Matrix: size={}, density={:.4}, avg_nnz={}",
-        config.matrix.size,
-        config.matrix.density,
-        config.matrix.avg_nnz_per_row
+    println!(
+        "  Matrix: size={}, density={:.4}, avg_nnz={}",
+        config.matrix.size, config.matrix.density, config.matrix.avg_nnz_per_row
     );
-    println!("  Algorithm: dense_threshold={}, gpu_threshold={}, simd_min={}",
+    println!(
+        "  Algorithm: dense_threshold={}, gpu_threshold={}, simd_min={}",
         config.algorithm.dense_threshold,
         config.algorithm.gpu_threshold,
         config.algorithm.simd_min_elements
     );
-    println!("  Memory: l2_cache={}, chunk_size={}",
-        config.memory.l2_cache_size,
-        config.memory.chunk_size
+    println!(
+        "  Memory: l2_cache={}, chunk_size={}",
+        config.memory.l2_cache_size, config.memory.chunk_size
     );
 }
 
@@ -283,7 +290,7 @@ fn create_compatible_matrix(matrix: &SparseMatrixCSR<f64>) -> SparseMatrixCSR<f6
     // Create a simple compatible matrix (transpose structure with random values)
     let n = matrix.n_cols;
     let m = matrix.n_rows;
-    
+
     let mut row_ptr = vec![0];
     let mut col_idx = Vec::new();
     let mut values = Vec::new();
@@ -295,7 +302,7 @@ fn create_compatible_matrix(matrix: &SparseMatrixCSR<f64>) -> SparseMatrixCSR<f6
         // Each row has a few random non-zeros
         let nnz = rng.gen_range(1..5.min(m));
         let mut cols = std::collections::HashSet::new();
-        
+
         while cols.len() < nnz {
             cols.insert(rng.gen_range(0..m));
         }

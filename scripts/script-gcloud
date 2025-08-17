@@ -1,0 +1,40 @@
+gcloud compute instances create magnus-avx512 \
+      --zone=us-central1-a \
+      --machine-type=n2-standard-4 \
+      --image-family=ubuntu-2204-lts \
+      --image-project=ubuntu-os-cloud \
+      --boot-disk-size=50GB \
+      --boot-disk-type=pd-ssd \
+      --preemptible
+
+  # SSH to it
+  gcloud compute ssh magnus-avx512 --zone=us-central1-a
+
+  # Verify AVX-512 (on the instance)
+  $ lscpu | grep avx512
+
+  # Stop when done (IMPORTANT - saves money!)
+  gcloud compute instances stop magnus-avx512 --zone=us-central1-a
+
+  💰 Cost Comparison
+
+  | Instance      | Regular  | Spot/Preemptible | Monthly (8h/day spot) |
+  |---------------|----------|------------------|-----------------------|
+  | n2-standard-4 | $0.19/hr | $0.06/hr         | ~$14                  |
+  | n2-standard-8 | $0.38/hr | $0.11/hr         | ~$26                  |
+  | c2-standard-8 | $0.42/hr | $0.13/hr         | ~$31                  |
+
+  📝 Simple Workflow
+
+  # 1. Start your instance
+  gcloud compute instances start magnus-avx512 --zone=us-central1-a
+
+  # 2. Copy your code
+  gcloud compute scp --recurse ~/compute/magnus magnus-avx512:~/ --zone=us-central1-a
+
+  # 3. SSH and work
+  gcloud compute ssh magnus-avx512 --zone=us-central1-a
+
+  # 4. ALWAYS stop when done
+  gcloud compute instances stop magnus-avx512 --zone=us-central1-a
+

@@ -1,0 +1,15 @@
+\section{Conclusion}
+On modern CPUs, 
+current SpGEMM algorithms often scale poorly to massive
+matrices due to inefficient use of the cache hierarchy.
+We present MAGNUS, a novel algorithm for locality generation, where
+the intermediate product is reordered into cache-friendly chunks using a hierarchical two-level approach.
+MAGNUS consists of two algorithms that create multiple levels of locality: the fine- and coarse-level algorithms.
+The coarse-level algorithm generates a set of coarse-level chunks, and the fine-level algorithm further subdivides the coarse-level chunks into cache-friendly fine-level chunks.
+An accumulator is then applied to each fine-level chunk, where a dense or sort-based accumulator is selected based on a threshold on the number of elements in the chunk.
+MAGNUS is input- and system-aware: the chunk properties are determined using the matrix dimensions and the system cache sizes.
+
+Our experimental results compare MAGNUS with several state-of-the-art baselines for three matrix sets on three Intel architectures.
+MAGNUS is faster than all the baselines in most cases and is often an order of magnitude faster than at least one baseline.
+More importantly, MAGNUS scales to massive, uniform random matrices, the most challenging test sets that we consider.
+This challenging case highlights the importance of the locality-generation techniques in MAGNUS, which allows MAGNUS to scale with an ideal performance bound independent of the matrix properties.  In contrast, the baselines diverge from this bound as the matrix size increases.

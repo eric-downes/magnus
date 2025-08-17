@@ -6,15 +6,12 @@
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
 use super::SimdAccelerator;
-use crate::constants::{
-    BITONIC_SORT_PADDING_INDEX, METAL_GPU_THRESHOLD,
-};
+use crate::constants::{BITONIC_SORT_PADDING_INDEX, METAL_GPU_THRESHOLD};
 use metal::Library;
 use metal::{CommandQueue, ComputePipelineState, Device};
 use metal::{MTLResourceOptions, MTLSize};
 use std::mem;
 use std::sync::{Arc, Mutex, Once};
-
 
 /// Shared Metal context for the application
 static METAL_CONTEXT: Mutex<Option<Arc<MetalContext>>> = Mutex::new(None);
@@ -222,7 +219,7 @@ impl SimdAccelerator<f32> for MetalAccumulator {
                 if sorted_indices[i] == BITONIC_SORT_PADDING_INDEX {
                     break;
                 }
-                
+
                 let idx = sorted_indices[i] as usize;
                 if idx == current_idx {
                     current_sum += sorted_values[i];

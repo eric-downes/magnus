@@ -66,7 +66,10 @@ where
     } else {
         // For large output dimensions, use sort-based accumulator
         // Start with a reasonable initial capacity
-        let initial_capacity = std::cmp::min(n_cols / INITIAL_CAPACITY_DIVISOR, MAX_SORT_ACCUMULATOR_CAPACITY);
+        let initial_capacity = std::cmp::min(
+            n_cols / INITIAL_CAPACITY_DIVISOR,
+            MAX_SORT_ACCUMULATOR_CAPACITY,
+        );
         Box::new(sort::SortAccumulator::new(initial_capacity))
     }
 }

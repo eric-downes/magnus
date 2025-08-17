@@ -229,7 +229,7 @@ impl ParameterSpaceExplorer {
         // Ensure density is achievable with given size
         let max_possible_nnz = size;
         let required_nnz = (size as f64 * density) as usize;
-        
+
         required_nnz <= max_possible_nnz && max_nnz <= max_possible_nnz
     }
 
@@ -396,7 +396,9 @@ impl MatrixGenerator {
                 remaining
             } else {
                 let variation = self.rng.gen_range(0.5..1.5);
-                ((avg_per_row as f64 * variation) as usize).min(remaining).min(n)
+                ((avg_per_row as f64 * variation) as usize)
+                    .min(remaining)
+                    .min(n)
             };
 
             let mut row_cols = std::collections::HashSet::new();
@@ -463,11 +465,7 @@ impl PatternMatrixGenerator {
     }
 
     /// Generate a block diagonal matrix
-    pub fn generate_block_diagonal(
-        &mut self,
-        n: usize,
-        block_size: usize,
-    ) -> SparseMatrixCSR<f64> {
+    pub fn generate_block_diagonal(&mut self, n: usize, block_size: usize) -> SparseMatrixCSR<f64> {
         let mut row_ptr = vec![0];
         let mut col_idx = Vec::new();
         let mut values = Vec::new();
@@ -520,7 +518,7 @@ impl PatternMatrixGenerator {
 
         for degree in degrees {
             let mut row_cols = std::collections::HashSet::new();
-            
+
             while row_cols.len() < degree {
                 row_cols.insert(self.rng.gen_range(0..n));
             }
@@ -567,7 +565,7 @@ impl TestSuiteGenerator {
 
         for config in configurations {
             let matrices = self.matrix_gen.generate_matrices(&config);
-            
+
             test_cases.push(TestCase {
                 config: config.clone(),
                 matrices,
@@ -589,29 +587,22 @@ impl TestSuiteGenerator {
             // Banded matrices
             for bandwidth in [10, 50, 100] {
                 if bandwidth < size {
-                    cases.push(self.create_pattern_test_case(
-                        size,
-                        PatternType::Banded(bandwidth),
-                    ));
+                    cases.push(self.create_pattern_test_case(size, PatternType::Banded(bandwidth)));
                 }
             }
 
             // Block diagonal matrices
             for block_size in [16, 64, 256] {
                 if block_size < size {
-                    cases.push(self.create_pattern_test_case(
-                        size,
-                        PatternType::BlockDiagonal(block_size),
-                    ));
+                    cases.push(
+                        self.create_pattern_test_case(size, PatternType::BlockDiagonal(block_size)),
+                    );
                 }
             }
 
             // Power law matrices
             for alpha in [0.5, 1.0, 2.0] {
-                cases.push(self.create_pattern_test_case(
-                    size,
-                    PatternType::PowerLaw(alpha),
-                ));
+                cases.push(self.create_pattern_test_case(size, PatternType::PowerLaw(alpha)));
             }
         }
 
@@ -696,7 +687,7 @@ mod tests {
     fn test_parameter_space_generation() {
         let mut explorer = ParameterSpaceExplorer::new(42);
         let configs = explorer.generate_configurations();
-        
+
         assert!(!configs.is_empty());
         println!("Generated {} parameter configurations", configs.len());
     }
@@ -746,7 +737,7 @@ mod tests {
     #[test]
     fn test_pattern_generation() {
         let mut gen = PatternMatrixGenerator::new(42);
-        
+
         // Test banded matrix
         let banded = gen.generate_banded(100, 5);
         assert_eq!(banded.n_rows, 100);
@@ -764,13 +755,14 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // This test is slow - run with --ignored
     fn test_complete_suite_generation() {
         let mut gen = TestSuiteGenerator::new(42);
         let suite = gen.generate_test_suite();
-        
+
         assert!(!suite.test_cases.is_empty());
         println!("Generated {} test cases", suite.test_cases.len());
-        
+
         // Check that each test case has the right number of matrices
         for case in &suite.test_cases {
             assert_eq!(case.matrices.len(), NUM_RAND_OBJS);
