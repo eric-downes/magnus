@@ -11,7 +11,6 @@ use magnus::parameter_space::{
 };
 use magnus::suitesparse_integration::{MatrixMarketIO, SuiteSparseStyleGenerator};
 use magnus::reference_spgemm;
-use std::path::PathBuf;
 use std::time::Instant;
 
 fn main() {

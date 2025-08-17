@@ -86,8 +86,8 @@ impl BitonicStage {
 /// Represents a pass within a stage of bitonic sort
 #[derive(Debug, Clone, Copy)]
 pub struct BitonicPass {
-    stage: BitonicStage,
-    pass_index: u32,
+    _stage: BitonicStage,
+    _pass_index: u32,
     pass_distance: PowerOfTwo,
 }
 
@@ -99,8 +99,8 @@ impl BitonicPass {
         } else {
             let pass_distance = PowerOfTwo::from_log2(stage.number() - pass_index);
             Some(BitonicPass {
-                stage,
-                pass_index,
+                _stage: stage,
+                _pass_index: pass_index,
                 pass_distance,
             })
         }

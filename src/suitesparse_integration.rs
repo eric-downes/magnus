@@ -193,14 +193,14 @@ impl MatrixMarketIO {
 
 /// Generates test matrices similar to those in SuiteSparse collection
 pub struct SuiteSparseStyleGenerator {
-    matrix_gen: MatrixGenerator,
+    _matrix_gen: MatrixGenerator,
     pattern_gen: PatternMatrixGenerator,
 }
 
 impl SuiteSparseStyleGenerator {
     pub fn new(seed: u64) -> Self {
         Self {
-            matrix_gen: MatrixGenerator::new(seed),
+            _matrix_gen: MatrixGenerator::new(seed),
             pattern_gen: PatternMatrixGenerator::new(seed + 1000),
         }
     }

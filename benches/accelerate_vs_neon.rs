@@ -4,7 +4,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 mod apple_benchmarks {
-    use criterion::{BenchmarkId, Criterion};
+    use criterion::Criterion;
     use magnus::accumulator::{AccelerateAccumulator, NeonAccumulator, SimdAccelerator};
     use rand::seq::SliceRandom;
     use rand::Rng;

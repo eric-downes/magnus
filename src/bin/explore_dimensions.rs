@@ -5,7 +5,7 @@
 
 use magnus::dimensional_analysis::{
     BuckinghamPiGroups, DimensionalConstants, DimensionalReduction,
-    ImplicitConversions, ReducedParameterSpace,
+    ImplicitConversions,
 };
 use magnus::reduced_parameter_space::{
     EfficientParameterExplorer, PiConfiguration, ReductionSummary,
@@ -137,7 +137,7 @@ fn explore_pi_space() {
     println!("=================================");
     println!();
     
-    let mut explorer = EfficientParameterExplorer::new(42);
+    let explorer = EfficientParameterExplorer::new(42);
     let configs = explorer.generate_efficient_configurations();
     
     println!("Total π-configurations: {}", configs.len());
@@ -345,7 +345,7 @@ fn run_full_exploration() {
         
         let test_start = Instant::now();
         let c = sparse_gemm_parallel(a, &b);
-        let test_time = test_start.elapsed();
+        let _test_time = test_start.elapsed();
         
         tested += 1;
         

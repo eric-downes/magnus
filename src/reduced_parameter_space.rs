@@ -22,18 +22,18 @@ pub struct PiConfiguration {
 /// Efficient parameter space explorer using dimensionless groups
 pub struct EfficientParameterExplorer {
     reduced_space: ReducedParameterSpace,
-    matrix_gen: MatrixGenerator,
+    _matrix_gen: MatrixGenerator,
     pattern_gen: PatternMatrixGenerator,
-    rng: ChaCha8Rng,
+    _rng: ChaCha8Rng,
 }
 
 impl EfficientParameterExplorer {
     pub fn new(seed: u64) -> Self {
         Self {
             reduced_space: ReducedParameterSpace::default(),
-            matrix_gen: MatrixGenerator::new(seed),
+            _matrix_gen: MatrixGenerator::new(seed),
             pattern_gen: PatternMatrixGenerator::new(seed + 1000),
-            rng: ChaCha8Rng::seed_from_u64(seed),
+            _rng: ChaCha8Rng::seed_from_u64(seed),
         }
     }
     
