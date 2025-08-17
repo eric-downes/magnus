@@ -81,3 +81,11 @@ harness = false
 [[bench]]
 name = "tiered_benchmark"
 harness = false
+
+[[bin]]
+name = "explore_parameters"
+path = "src/bin/explore_parameters.rs"
+
+[[bin]]
+name = "explore_dimensions"
+path = "src/bin/explore_dimensions.rs"
