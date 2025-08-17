@@ -116,7 +116,8 @@ pub fn create_simd_accelerator_f32() -> Box<dyn SimdAccelerator<f32>> {
             // Default to Accelerate framework on Apple Silicon
             // Users can opt-out by setting MAGNUS_DISABLE_ACCELERATE=1
             if std::env::var("MAGNUS_DISABLE_ACCELERATE").is_ok() {
-                Box::new(super::neon::NeonAccumulator::new())
+                // Use the safe wrapper instead of raw NEON
+                Box::new(super::neon_safe::SafeNeonAccumulator::new())
             } else {
                 Box::new(super::accelerate::AccelerateAccumulator::new())
             }
