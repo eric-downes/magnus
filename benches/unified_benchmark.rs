@@ -88,15 +88,10 @@ fn benchmark_pi_configs(
             |b| {
                 b.iter_batched(
                     || {
-                        let matrices = generate_test_matrices(TestTier::Quick, pi_config);
-                        if matrices.len() >= 2 {
-                            (matrices[0].clone(), matrices[1].clone())
-                        } else {
-                            // Fallback: generate identity matrices
-                            let a = generate_identity_matrix(test_size);
-                            let b = generate_identity_matrix(test_size);
-                            (a, b)
-                        }
+                        // Always generate compatible matrices for multiplication
+                        let a = generate_sparse_matrix(test_size, test_size, 10);
+                        let b = generate_sparse_matrix(test_size, test_size, 10);
+                        (a, b)
                     },
                     |(a, b)| {
                         let config = MagnusConfig::default();
