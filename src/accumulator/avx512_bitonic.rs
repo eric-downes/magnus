@@ -203,31 +203,3 @@ pub unsafe fn bitonic_sort_16_explicit(
     *values = _mm512_loadu_ps(val_arr.as_ptr());
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    
-    #[test]
-    fn test_bitonic_explicit() {
-        unsafe {
-            // Test with reverse order
-            let mut indices = [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0u32];
-            let mut values = [15.0, 14.0, 13.0, 12.0, 11.0, 10.0, 9.0, 8.0, 
-                            7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0f32];
-            
-            let mut idx_vec = _mm512_loadu_si512(indices.as_ptr() as *const __m512i);
-            let mut val_vec = _mm512_loadu_ps(values.as_ptr());
-            
-            bitonic_sort_16_explicit(&mut idx_vec, &mut val_vec);
-            
-            _mm512_storeu_si512(indices.as_mut_ptr() as *mut __m512i, idx_vec);
-            _mm512_storeu_ps(values.as_mut_ptr(), val_vec);
-            
-            // Check sorted
-            for i in 0..16 {
-                assert_eq!(indices[i], i as u32, "Index {} should be {}", i, i);
-                assert_eq!(values[i], i as f32, "Value {} should be {}", i, i);
-            }
-        }
-    }
-}

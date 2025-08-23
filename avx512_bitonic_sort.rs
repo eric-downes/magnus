@@ -4,8 +4,8 @@
 #![allow(non_camel_case_types)]
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-mod avx512_bitonic_fixed {
-    use core::arch::x86_64::*;
+pub mod avx512_bitonic_fixed {
+    use std::arch::x86_64::*;
 
     // ---------- indices: partner = i ^ j ----------
     #[inline(always)] unsafe fn idx_xor_1() -> __m512i {
@@ -49,7 +49,6 @@ mod avx512_bitonic_fixed {
 
     /// Sort one __m512 (16 f32) ascending using a correct bitonic network.
     /// No scalar fallback inside the network; entirely SIMD.
-    #[inline(always)]
     #[target_feature(enable = "avx512f")]
     pub unsafe fn bitonic_sort_16f32_ps(mut v: __m512) -> __m512 {
         // k = 2; j = 1

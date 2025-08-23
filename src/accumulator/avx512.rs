@@ -120,33 +120,106 @@ impl Avx512Accumulator {
     }
 
     /// Bitonic sort for exactly 16 elements using AVX512 intrinsics
-    /// For now, fall back to scalar sort until we get the SIMD version working correctly
+    /// Sorts index-value pairs by index using a fully vectorized bitonic network
     #[target_feature(enable = "avx512f")]
     unsafe fn bitonic_sort_16(&self, indices: &mut __m512i, values: &mut __m512) {
-        // Extract to arrays for sorting
-        let mut idx_arr = [0u32; 16];
-        let mut val_arr = [0.0f32; 16];
-        
-        _mm512_storeu_si512(idx_arr.as_mut_ptr() as *mut __m512i, *indices);
-        _mm512_storeu_ps(val_arr.as_mut_ptr(), *values);
-        
-        // Create index-value pairs and sort
-        let mut pairs: Vec<(u32, f32)> = idx_arr.iter()
-            .zip(val_arr.iter())
-            .map(|(&i, &v)| (i, v))
-            .collect();
-        
-        pairs.sort_by_key(|&(i, _)| i);
-        
-        // Copy back to arrays
-        for (i, &(idx, val)) in pairs.iter().enumerate() {
-            idx_arr[i] = idx;
-            val_arr[i] = val;
+        // Helper function to create index permutation vectors for XOR operations
+        #[inline(always)]
+        unsafe fn idx_xor_1() -> __m512i {
+            _mm512_set_epi32(14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1)
         }
-        
-        // Reload into SIMD registers
-        *indices = _mm512_loadu_si512(idx_arr.as_ptr() as *const __m512i);
-        *values = _mm512_loadu_ps(val_arr.as_ptr());
+        #[inline(always)]
+        unsafe fn idx_xor_2() -> __m512i {
+            _mm512_set_epi32(13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2)
+        }
+        #[inline(always)]
+        unsafe fn idx_xor_4() -> __m512i {
+            _mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6, 5, 4)
+        }
+        #[inline(always)]
+        unsafe fn idx_xor_8() -> __m512i {
+            _mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10, 9, 8)
+        }
+
+        // Per-(k, j) "want max" masks to ensure per-pair complement
+        const K2_J1:  u16 = 0x6666;
+        const K4_J2:  u16 = 0x3C3C;
+        const K4_J1:  u16 = 0x5A5A;
+        const K8_J4:  u16 = 0x0FF0;
+        const K8_J2:  u16 = 0x33CC;
+        const K8_J1:  u16 = 0x55AA;
+        const K16_J8: u16 = 0xFF00;
+        const K16_J4: u16 = 0xF0F0;
+        const K16_J2: u16 = 0xCCCC;
+        const K16_J1: u16 = 0xAAAA;
+
+        // Helper function for each sorting step
+        // Compares indices only, but swaps both indices and values together
+        // When indices are equal, maintains stability by using lane position as tie-breaker
+        #[inline(always)]
+        unsafe fn step16_pairs(
+            indices: __m512i,
+            values: __m512,
+            idx_perm: __m512i,
+            want_max: u16
+        ) -> (__m512i, __m512) {
+            // Get partner indices and values using the permutation
+            let partner_indices = _mm512_permutexvar_epi32(idx_perm, indices);
+            let partner_values = _mm512_permutexvar_ps(idx_perm, values);
+            
+            // Compare indices: true where current > partner
+            let gt_mask = _mm512_cmpgt_epu32_mask(indices, partner_indices);
+            
+            // Check for equality: true where indices are equal
+            let eq_mask = _mm512_cmpeq_epu32_mask(indices, partner_indices);
+            
+            // For equal indices, use lane position as tie-breaker
+            // Create lane indices: [0, 1, 2, ..., 15]
+            let lanes = _mm512_set_epi32(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
+            let partner_lanes = _mm512_permutexvar_epi32(idx_perm, lanes);
+            let lane_gt = _mm512_cmpgt_epu32_mask(lanes, partner_lanes);
+            
+            // Combine: swap if (indices > partner) OR (indices == partner AND lane > partner_lane)
+            let swap = gt_mask | (eq_mask & lane_gt);
+            
+            // XOR with want_max to determine which lanes should take partner
+            let take_partner = swap ^ want_max;
+            
+            // Apply the same blend mask to both indices and values
+            let new_indices = _mm512_mask_blend_epi32(take_partner, indices, partner_indices);
+            let new_values = _mm512_mask_blend_ps(take_partner, values, partner_values);
+            
+            (new_indices, new_values)
+        }
+
+        // Apply the bitonic sorting network
+        // k = 2; j = 1
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_1(), K2_J1);
+        *indices = i; *values = v;
+
+        // k = 4; j = 2,1
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_2(), K4_J2);
+        *indices = i; *values = v;
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_1(), K4_J1);
+        *indices = i; *values = v;
+
+        // k = 8; j = 4,2,1
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_4(), K8_J4);
+        *indices = i; *values = v;
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_2(), K8_J2);
+        *indices = i; *values = v;
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_1(), K8_J1);
+        *indices = i; *values = v;
+
+        // k = 16; j = 8,4,2,1
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_8(), K16_J8);
+        *indices = i; *values = v;
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_4(), K16_J4);
+        *indices = i; *values = v;
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_2(), K16_J2);
+        *indices = i; *values = v;
+        let (i, v) = step16_pairs(*indices, *values, idx_xor_1(), K16_J1);
+        *indices = i; *values = v;
     }
     
     /// Perform one pass of bitonic merge with specified compare distance and direction mask
