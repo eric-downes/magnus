@@ -20,6 +20,8 @@ rayon = "1.8"        # Data-parallel operations
 num-traits = "0.2"   # Generic numeric operations
 aligned-vec = "0.6"  # Aligned memory allocation
 num_cpus = "1.17"    # CPU core detection
+rand = "0.8"         # Random number generation
+rand_chacha = "0.3"  # Reproducible RNG
 
 # Metal GPU support (Apple Silicon)
 [target.'cfg(all(target_arch = "aarch64", target_os = "macos"))'.dependencies]
@@ -29,8 +31,7 @@ objc = "0.2"         # Objective-C runtime
 [dev-dependencies]
 criterion = "0.7"    # Benchmarking framework
 proptest = "1.7"     # Property-based testing
-rand = "0.8"         # Random number generation for benchmarks
-rand_chacha = "0.3"  # Reproducible RNG for testing
+tempfile = "3.8"     # Temporary files for testing
 
 [[bench]]
 name = "matrix_multiply"
@@ -80,3 +81,15 @@ harness = false
 [[bench]]
 name = "tiered_benchmark"
 harness = false
+
+[[bench]]
+name = "unified_benchmark"
+harness = false
+
+[[bin]]
+name = "explore_parameters"
+path = "src/bin/explore_parameters.rs"
+
+[[bin]]
+name = "explore_dimensions"
+path = "src/bin/explore_dimensions.rs"

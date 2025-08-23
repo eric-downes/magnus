@@ -6,14 +6,12 @@
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
 use super::SimdAccelerator;
+use crate::constants::{BITONIC_SORT_PADDING_INDEX, METAL_GPU_THRESHOLD};
 use metal::Library;
 use metal::{CommandQueue, ComputePipelineState, Device};
 use metal::{MTLResourceOptions, MTLSize};
 use std::mem;
 use std::sync::{Arc, Mutex, Once};
-
-/// Threshold for using Metal GPU (number of elements)
-const METAL_THRESHOLD: usize = 10_000;
 
 /// Shared Metal context for the application
 static METAL_CONTEXT: Mutex<Option<Arc<MetalContext>>> = Mutex::new(None);
@@ -93,7 +91,7 @@ impl MetalAccumulator {
 
     /// Check if Metal should be used for this size
     pub fn should_use_metal(size: usize) -> bool {
-        size >= METAL_THRESHOLD && Self::is_available()
+        size >= METAL_GPU_THRESHOLD && Self::is_available()
     }
 
     /// Check if Metal is available
@@ -107,6 +105,7 @@ impl MetalAccumulator {
         let n_padded = n.next_power_of_two();
 
         // Pad to power of 2 for bitonic sort
+        // Use sentinel values that will sort to the end
         let mut padded_indices = vec![u32::MAX; n_padded];
         let mut padded_values = vec![f32::INFINITY; n_padded];
         padded_indices[..n].copy_from_slice(indices);
@@ -168,12 +167,12 @@ impl MetalAccumulator {
         command_buffer.commit();
         command_buffer.wait_until_completed();
 
-        // Read back results
+        // Read back results (including padding to handle all sorted elements)
         let indices_ptr = indices_buffer.contents() as *const u32;
         let values_ptr = values_buffer.contents() as *const f32;
 
-        let sorted_indices = unsafe { std::slice::from_raw_parts(indices_ptr, n).to_vec() };
-        let sorted_values = unsafe { std::slice::from_raw_parts(values_ptr, n).to_vec() };
+        let sorted_indices = unsafe { std::slice::from_raw_parts(indices_ptr, n_padded).to_vec() };
+        let sorted_values = unsafe { std::slice::from_raw_parts(values_ptr, n_padded).to_vec() };
 
         (sorted_indices, sorted_values)
     }
@@ -187,7 +186,7 @@ impl SimdAccelerator<f32> for MetalAccumulator {
 
         let size = col_indices.len();
 
-        if size < METAL_THRESHOLD {
+        if size < METAL_GPU_THRESHOLD {
             // Use CPU implementation for small sizes
             return super::accelerate::AccelerateAccumulator::new()
                 .sort_and_accumulate(col_indices, values);
@@ -200,27 +199,40 @@ impl SimdAccelerator<f32> for MetalAccumulator {
         let (sorted_indices, sorted_values) = self.gpu_bitonic_sort(&indices_u32, values);
 
         // Accumulate duplicates (on CPU for now)
+        // Filter out padding values (u32::MAX with f32::INFINITY)
         let mut result_indices = Vec::new();
         let mut result_values = Vec::new();
 
-        let mut current_idx = sorted_indices[0] as usize;
-        let mut current_sum = sorted_values[0];
-
-        for i in 1..sorted_indices.len() {
-            let idx = sorted_indices[i] as usize;
-            if idx == current_idx {
-                current_sum += sorted_values[i];
-            } else {
-                if current_idx != usize::MAX {
-                    result_indices.push(current_idx);
-                    result_values.push(current_sum);
-                }
-                current_idx = idx;
-                current_sum = sorted_values[i];
-            }
+        // Skip any leading padding
+        let mut i = 0;
+        while i < sorted_indices.len() && sorted_indices[i] == BITONIC_SORT_PADDING_INDEX {
+            i += 1;
         }
 
-        if current_idx != usize::MAX {
+        if i < sorted_indices.len() {
+            let mut current_idx = sorted_indices[i] as usize;
+            let mut current_sum = sorted_values[i];
+            i += 1;
+
+            while i < sorted_indices.len() {
+                // Stop at padding values
+                if sorted_indices[i] == BITONIC_SORT_PADDING_INDEX {
+                    break;
+                }
+
+                let idx = sorted_indices[i] as usize;
+                if idx == current_idx {
+                    current_sum += sorted_values[i];
+                } else {
+                    result_indices.push(current_idx);
+                    result_values.push(current_sum);
+                    current_idx = idx;
+                    current_sum = sorted_values[i];
+                }
+                i += 1;
+            }
+
+            // Don't forget the last accumulated value
             result_indices.push(current_idx);
             result_values.push(current_sum);
         }
@@ -243,8 +255,8 @@ mod tests {
     fn test_metal_sort() {
         if let Some(acc) = MetalAccumulator::new() {
             // Create large test data
-            let mut indices: Vec<usize> = (0..METAL_THRESHOLD).map(|i| i % 1000).collect();
-            let values: Vec<f32> = (0..METAL_THRESHOLD).map(|i| i as f32).collect();
+            let mut indices: Vec<usize> = (0..METAL_GPU_THRESHOLD).map(|i| i % 1000).collect();
+            let values: Vec<f32> = (0..METAL_GPU_THRESHOLD).map(|i| i as f32).collect();
 
             // Shuffle
             use rand::seq::SliceRandom;

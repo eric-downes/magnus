@@ -67,9 +67,15 @@
 //! ```
 
 pub mod accumulator;
+pub mod constants;
+pub mod dimensional_analysis;
 pub mod matrix;
 pub mod parallel;
+pub mod parameter_space;
+pub mod reduced_parameter_space;
 pub mod reordering;
+pub mod suitesparse_integration;
+pub mod test_tiers;
 pub mod utils;
 
 // Re-export primary components
@@ -89,6 +95,19 @@ pub use reordering::{
     multiply_row_coarse_level, multiply_row_fine_level, process_coarse_level_rows,
 };
 pub use utils::{from_sprs_csc, from_sprs_csr, to_sprs_csc, to_sprs_csr};
+
+/// Simple sparse matrix multiplication using reference implementation
+/// (for testing and benchmarking dimensional analysis configurations)
+pub fn sparse_gemm_parallel<T>(
+    a: &matrix::SparseMatrixCSR<T>,
+    b: &matrix::SparseMatrixCSR<T>,
+) -> matrix::SparseMatrixCSR<T>
+where
+    T: std::ops::AddAssign + Copy + num_traits::Num + Send + Sync,
+{
+    let config = MagnusConfig::default();
+    magnus_spgemm_parallel(a, b, &config)
+}
 
 /// Performs sparse general matrix-matrix multiplication (SpGEMM)
 /// using the MAGNUS algorithm.

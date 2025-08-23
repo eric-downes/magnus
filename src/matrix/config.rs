@@ -1,5 +1,7 @@
 //! Configuration and system parameters for MAGNUS
 
+use crate::constants::*;
+
 /// The target architecture for performance optimization
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Architecture {
@@ -74,8 +76,8 @@ pub struct SystemParameters {
 impl Default for SystemParameters {
     fn default() -> Self {
         Self {
-            cache_line_size: 64,        // Common cache line size
-            l2_cache_size: 256_000,     // 256KB L2 cache (conservative default)
+            cache_line_size: DEFAULT_CACHE_LINE_SIZE,
+            l2_cache_size: DEFAULT_L2_CACHE_SIZE,
             n_threads: num_cpus::get(), // Use all available cores
         }
     }

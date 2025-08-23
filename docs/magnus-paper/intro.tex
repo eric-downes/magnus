@@ -1,0 +1,30 @@
+\section{Introduction}
+\sloppy The sparse general matrix-matrix multiplication operation (SpGEMM) $C = A B$ is critical to the performance of many applications, including genome assembly~\cite{genome1,genome2,bella}, machine learning~\cite{pca,mcl,dnn,HipMCL,hoefler}, algebraic multigrid~\cite{amg1,amg2}, and graph analytics~\cite{bfs,subgraph,tricount1,tricount2,color,tricount3}.
+The main challenge of SpGEMM comes from the sparse structures of $A$ and $B$, leading to unpredictable memory access patterns. Such irregularities pose significant difficulties for modern multicore architectures optimized for regular access patterns and high data reuse. Consequently, many state-of-the-art SpGEMM algorithms struggle to scale effectively for massive, irregular matrices, mainly due to inefficient utilization of the cache hierarchy.
+
+Multithreaded SpGEMM algorithms are typically based on Gustavson's method, where, for each row of $A$, rows of $B$ are loaded, scaled, \emph{accumulated}, and written to $C$. The performance of the accumulation step is critical to the overall performance of SpGEMM. Conventional accumulators perform well for certain sparsity patterns, such as banded matrices, where the entire accumulator data structure is accessed infrequently. However, for highly irregular matrices, such as random power-law matrices, frequent accesses to the entire accumulator lead to suboptimal data reuse. As a result, scaling to massive matrices can become prohibitive, especially when the size of the accumulator exceeds the highest level of private cache.
+Several algorithms have been proposed to address caching issues in accumulators, the most recent being the CSeg method~\cite{partway,cseg}, where $B$ is partitioned into segments so that only a smaller range of the accumulator is accessed. However, CSeg scales poorly for some datasets; when there are many partitions, the cost of constructing and accessing the partitioning information becomes significant, especially as the number of partitions increases with the matrix dimensions.
+
+We present MAGNUS (\textbf{M}atrix \textbf{A}lgebra for \textbf{G}igantic \textbf{NU}merical \textbf{S}ystems), a novel algorithm that uses a hierarchical approach to generate the locality needed by the accumulators.
+The central idea of MAGNUS is to reorder the \textit{intermediate product} of $C$ (arrays of column indices and values generated before accumulation) into cache-friendly chunks that are processed independently by the accumulator.
+The MAGNUS workflow consists of two main algorithms: the fine- and coarse-level algorithms, the naming of which comes from two-level multigrid methods~\cite{amg1}.
+The coarse-level algorithm is based on the outer product formulation of SpGEMM and generates the first level of locality.
+The fine-level algorithm is based on Gustavson's formulation and further reorders the coarse-level chunks. The accumulator is then applied to each fine-level chunk.
+MAGNUS is input- and system-aware: the number of fine- and coarse-level chunks are chosen based on the matrix parameters and system specifications,
+where the optimal number of chunks is selected by minimizing the storage requirement of all frequently accessed data structures.
+Additionally, MAGNUS is accumulator agnostic, where conventional accumulators can be applied to the fine-level chunks.
+This paper considers two accumulators: AVX-512 vectorized sorting, which is used on chunks with a small number of elements, and dense accumulation, which is used otherwise.
+
+Our experimental results provide two significant contributions: a set of microbenchmarks to motivate the need for MAGNUS, and the comparison of an OpenMP implementation of MAGNUS with six state-of-the-art SpGEMM baselines.
+For the microbenchmarks, the key building blocks of MAGNUS are tested in isolation and analyzed using Likwid~\cite{likwid}.
+First, we show that the performance of the accumulators drops significantly if the accumulation data structures do not fit into the L2 cache. Second, we show that with the optimal MAGNUS parameters, the execution time for the building blocks is minimized and performs at near-streaming speed.
+
+For the SpGEMM results, MAGNUS is compared to six state-of-the-art baselines, including
+CSeg~\cite{cseg} and Intel Math Kernel Library (MKL)~\cite{mkl}.
+Three matrix test sets are evaluated on three Intel architectures.
+For the SuiteSparse matrix collection~\cite{suitesparse}, MAGNUS is the fastest method in most cases and is often an order of magnitude faster than at least one baseline.
+For our second matrix set, which comes from a recursive model to generate power law graphs~\cite{rmat}, MAGNUS is always the fastest.
+With the exception of CSeg, the speedup of MAGNUS over the baselines increases as the matrix size increases.
+Lastly, we consider massive uniform random matrices~\cite{erdosrenyi}, which is the most challenging case for our baselines since the uniformity results in frequent accesses to the entire accumulation data structures.
+This test set demonstrates the need for the two-level approach in MAGNUS, where using the fine-level algorithm alone results in divergence from an ideal performance bound (CSeg also exhibits this poor scaling).
+However, using the complete MAGNUS algorithm allows scaling to the largest case, where the performance of MAGNUS is close to an ideal bound independent of the matrix size.

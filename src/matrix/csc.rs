@@ -1,5 +1,6 @@
 //! Compressed Sparse Column (CSC) matrix format implementation
 
+use crate::constants::{MAX_DISPLAY_ELEMENTS_PER_ROW, MAX_DISPLAY_ROWS};
 use num_traits::Num;
 use std::fmt;
 
@@ -160,7 +161,7 @@ impl<T: fmt::Debug + Copy + Num> fmt::Debug for SparseMatrixCSC<T> {
         writeln!(f, "  nnz: {}", self.nnz())?;
 
         // Print a sample of the matrix content
-        let max_cols_to_print = 5.min(self.n_cols);
+        let max_cols_to_print = MAX_DISPLAY_ROWS.min(self.n_cols);
 
         if max_cols_to_print > 0 {
             writeln!(f, "  content sample:")?;
@@ -173,7 +174,7 @@ impl<T: fmt::Debug + Copy + Num> fmt::Debug for SparseMatrixCSC<T> {
                 if start == end {
                     writeln!(f, "(empty)")?;
                 } else {
-                    let max_elements = 5.min(end - start);
+                    let max_elements = MAX_DISPLAY_ELEMENTS_PER_ROW.min(end - start);
 
                     for i in start..(start + max_elements) {
                         write!(f, "({}, {:?}) ", self.row_idx[i], self.values[i])?;

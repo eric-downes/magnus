@@ -7,6 +7,7 @@
 
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod accelerate;
+pub mod bitonic_sort_types;
 pub mod dense;
 #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
 pub mod metal;
@@ -19,6 +20,7 @@ pub mod neon_safe;
 pub mod simd;
 pub mod sort;
 
+use crate::constants::{INITIAL_CAPACITY_DIVISOR, MAX_SORT_ACCUMULATOR_CAPACITY};
 use num_traits::Num;
 use std::ops::AddAssign;
 
@@ -64,7 +66,10 @@ where
     } else {
         // For large output dimensions, use sort-based accumulator
         // Start with a reasonable initial capacity
-        let initial_capacity = std::cmp::min(n_cols / 10, 1024);
+        let initial_capacity = std::cmp::min(
+            n_cols / INITIAL_CAPACITY_DIVISOR,
+            MAX_SORT_ACCUMULATOR_CAPACITY,
+        );
         Box::new(sort::SortAccumulator::new(initial_capacity))
     }
 }
