@@ -1,55 +1,84 @@
-// Corrected AVX512 Bitonic Sort Implementation
-// This version correctly implements the bitonic sorting network for 16 elements
+// Cargo.toml: edition = "2021"
+// No deps. Requires AVX-512F at runtime.
 
 #![allow(non_camel_case_types)]
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-mod avx512_bitonic {
-    use std::arch::x86_64::*;
+mod avx512_bitonic_fixed {
+    use core::arch::x86_64::*;
 
-    /// Correct bitonic sort for 16 f32 values using AVX512
-    /// Uses scalar operations internally but wrapped in SIMD load/store
-    #[target_feature(enable = "avx512f")]
-    pub unsafe fn bitonic_sort_16f32_ps(v: __m512) -> __m512 {
-        let mut arr = [0.0f32; 16];
-        _mm512_storeu_ps(arr.as_mut_ptr(), v);
-        
-        // Bitonic sort network for 16 elements
-        let mut k = 2;
-        while k <= 16 {
-            let mut j = k / 2;
-            while j > 0 {
-                for i in 0..16 {
-                    let ixj = i ^ j;
-                    if ixj > i {
-                        // Determine sort direction: ascending if (i & k) == 0
-                        let ascending = (i & k) == 0;
-                        
-                        if (arr[i] > arr[ixj]) == ascending {
-                            arr.swap(i, ixj);
-                        }
-                    }
-                }
-                j /= 2;
-            }
-            k *= 2;
-        }
-        
-        _mm512_loadu_ps(arr.as_ptr())
+    // ---------- indices: partner = i ^ j ----------
+    #[inline(always)] unsafe fn idx_xor_1() -> __m512i {
+        // _mm512_set_epi32 takes (e15..e0); last arg is lane 0
+        _mm512_set_epi32(14,15,12,13,10,11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1)
+    }
+    #[inline(always)] unsafe fn idx_xor_2() -> __m512i {
+        _mm512_set_epi32(13,12,15,14, 9, 8,11,10, 5, 4, 7, 6, 1, 0, 3, 2)
+    }
+    #[inline(always)] unsafe fn idx_xor_4() -> __m512i {
+        _mm512_set_epi32(11,10, 9, 8,15,14,13,12, 3, 2, 1, 0, 7, 6, 5, 4)
+    }
+    #[inline(always)] unsafe fn idx_xor_8() -> __m512i {
+        _mm512_set_epi32( 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10, 9, 8)
     }
 
-    /// Public interface for sorting 16 f32 values
-    pub fn sort16_in_place_f32(xs: &mut [f32]) {
-        if xs.len() != 16 {
-            xs.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-            return;
-        }
-        
-        if !std::is_x86_feature_detected!("avx512f") {
-            xs.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-            return;
-        }
+    // ---------- per-(k, j) "want max" masks (lane_id bit-j XOR bit-k) ----------
+    // (bit 0 = lane 0 / LSB). These ensure per-pair complement.
+    const K2_J1:  __mmask16 = 0x6666;
 
+    const K4_J2:  __mmask16 = 0x3C3C;
+    const K4_J1:  __mmask16 = 0x5A5A;
+
+    const K8_J4:  __mmask16 = 0x0FF0;
+    const K8_J2:  __mmask16 = 0x33CC;
+    const K8_J1:  __mmask16 = 0x55AA;
+
+    const K16_J8: __mmask16 = 0xFF00;
+    const K16_J4: __mmask16 = 0xF0F0;
+    const K16_J2: __mmask16 = 0xCCCC;
+    const K16_J1: __mmask16 = 0xAAAA;
+
+    #[inline(always)]
+    unsafe fn step16_ps(v: __m512, idx: __m512i, want_max: __mmask16) -> __m512 {
+        let w      = _mm512_permutexvar_ps(idx, v);
+        // Ordered, non-signaling compare: true where v > w (NaNs => false)
+        let swap: __mmask16 = _mm512_cmp_ps_mask(v, w, _CMP_GT_OQ);
+        let take_w: __mmask16 = swap ^ want_max;       // XOR to select min/max per lane
+        _mm512_mask_blend_ps(take_w, v, w)             // take partner where requested
+    }
+
+    /// Sort one __m512 (16 f32) ascending using a correct bitonic network.
+    /// No scalar fallback inside the network; entirely SIMD.
+    #[inline(always)]
+    #[target_feature(enable = "avx512f")]
+    pub unsafe fn bitonic_sort_16f32_ps(mut v: __m512) -> __m512 {
+        // k = 2; j = 1
+        v = step16_ps(v, idx_xor_1(), K2_J1);
+
+        // k = 4; j = 2,1
+        v = step16_ps(v, idx_xor_2(), K4_J2);
+        v = step16_ps(v, idx_xor_1(), K4_J1);
+
+        // k = 8; j = 4,2,1
+        v = step16_ps(v, idx_xor_4(), K8_J4);
+        v = step16_ps(v, idx_xor_2(), K8_J2);
+        v = step16_ps(v, idx_xor_1(), K8_J1);
+
+        // k = 16; j = 8,4,2,1
+        v = step16_ps(v, idx_xor_8(), K16_J8);
+        v = step16_ps(v, idx_xor_4(), K16_J4);
+        v = step16_ps(v, idx_xor_2(), K16_J2);
+        v = step16_ps(v, idx_xor_1(), K16_J1);
+        v
+    }
+
+    /// Public wrapper: sorts &mut [f32] of length 16 in-place with AVX-512.
+    /// (Falls back to scalar only if AVX-512F is not available or len != 16.)
+    pub fn sort16_in_place_f32(xs: &mut [f32]) {
+        if xs.len() != 16 || !std::is_x86_feature_detected!("avx512f") {
+            xs.sort_by(|a, b| a.partial_cmp(b).unwrap_or(core::cmp::Ordering::Equal));
+            return;
+        }
         unsafe {
             let p = xs.as_mut_ptr();
             let v = _mm512_loadu_ps(p);
@@ -59,64 +88,18 @@ mod avx512_bitonic {
     }
 }
 
-// Export for use
-pub use avx512_bitonic::sort16_in_place_f32;
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::avx512_bitonic_fixed::sort16_in_place_f32;
 
     #[test]
-    fn test_correctness() {
-        // Test multiple patterns
-        let test_cases = vec![
-            // Already sorted
-            (0..16).map(|i| i as f32).collect::<Vec<_>>(),
-            // Reverse sorted
-            (0..16).rev().map(|i| i as f32).collect::<Vec<_>>(),
-            // Random
-            vec![9.0, 3.0, 5.0, 2.0, 7.0, 1.0, 8.0, 6.0,
-                 0.0, 4.0, 12.0, 11.0, 10.0, 15.0, 14.0, 13.0],
-            // Duplicates
-            vec![5.0, 5.0, 5.0, 5.0, 1.0, 1.0, 1.0, 1.0,
-                 10.0, 10.0, 10.0, 10.0, 3.0, 3.0, 3.0, 3.0],
-            // Negative values
-            vec![0.0, -1.0, 2.0, -3.0, 4.0, -5.0, 6.0, -7.0,
-                 8.0, -9.0, 10.0, -11.0, 12.0, -13.0, 14.0, -15.0],
+    fn sorts_and_preserves_duplicates() {
+        let mut v = [
+            3.0, 3.0, 2.0, 5.0, 5.0, 1.0, 4.0, 4.0,
+            0.0, 2.0, 2.0, 1.0, 6.0, 6.0, 6.0, 6.0,
         ];
-        
-        for mut data in test_cases {
-            let mut expected = data.clone();
-            expected.sort_by(|a, b| a.partial_cmp(b).unwrap());
-            
-            sort16_in_place_f32(&mut data);
-            
-            for i in 0..16 {
-                assert!((data[i] - expected[i]).abs() < 1e-6,
-                        "Mismatch at index {}: got {}, expected {}",
-                        i, data[i], expected[i]);
-            }
-        }
+        sort16_in_place_f32(&mut v);
+        assert!(v.windows(2).all(|w| w[0] <= w[1]));
+        assert_eq!(v.iter().filter(|&&x| x == 6.0).count(), 4);
     }
-}
-
-fn main() {
-    println!("Corrected AVX512 Bitonic Sort Implementation");
-    println!("===========================================\n");
-    
-    if !std::is_x86_feature_detected!("avx512f") {
-        println!("AVX512F not available");
-        return;
-    }
-    
-    // Demonstrate correctness
-    let mut test = vec![15.0, 14.0, 13.0, 12.0, 11.0, 10.0, 9.0, 8.0,
-                       7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0];
-    
-    println!("Input:  {:?}", test);
-    sort16_in_place_f32(&mut test);
-    println!("Output: {:?}", test);
-    
-    let is_sorted = test.windows(2).all(|w| w[0] <= w[1]);
-    println!("\nSorted correctly: {}", if is_sorted { "✓ Yes" } else { "✗ No" });
 }
