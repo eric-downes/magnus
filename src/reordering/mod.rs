@@ -65,7 +65,7 @@ impl ChunkMetadata {
         };
 
         // Calculate number of chunks needed
-        let n_chunks = (total_elements + chunk_length - 1) / chunk_length;
+        let n_chunks = total_elements.div_ceil(chunk_length);
 
         // Calculate shift bits for power-of-2 chunk size
         // This is a fast way to compute the chunk index: col >> shift_bits

@@ -9,8 +9,12 @@
 #![cfg(all(target_arch = "aarch64", target_os = "macos"))]
 
 use super::SimdAccelerator;
+use crate::matrix::csr::SparseMatrixCSR;
 use std::os::raw::c_void;
 use std::sync::Once;
+
+/// Type alias for CSR matrix components (row_ptr, col_idx, values)
+type CSRComponents = (Vec<usize>, Vec<usize>, Vec<f32>);
 
 // Metal Framework bindings
 #[link(name = "Metal", kind = "framework")]
@@ -152,23 +156,16 @@ impl Default for MetalConfig {
 
 /// High-level interface for Metal-accelerated SpGEMM
 pub fn spgemm_metal(
-    a_rows: usize,
-    _a_cols: usize,
-    a_row_ptr: &[usize],
-    _a_col_idx: &[usize],
-    _a_values: &[f32],
-    _b_cols: usize,
-    _b_row_ptr: &[usize],
-    _b_col_idx: &[usize],
-    _b_values: &[f32],
-) -> Result<(Vec<usize>, Vec<usize>, Vec<f32>), MetalError> {
+    a: &SparseMatrixCSR<f32>,
+    _b: &SparseMatrixCSR<f32>,
+) -> Result<CSRComponents, MetalError> {
     // Check if Metal is available
     if !MetalAccelerator::is_available() {
         return Err(MetalError::NotAvailable);
     }
 
     // Check if problem size warrants GPU acceleration
-    let total_ops = a_row_ptr[a_rows];
+    let total_ops = a.row_ptr[a.n_rows];
     if total_ops < METAL_THRESHOLD {
         return Err(MetalError::SizeTooSmall);
     }

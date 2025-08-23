@@ -156,7 +156,7 @@ impl MetalAccumulator {
                 );
 
                 let threads_per_group = MTLSize::new(256, 1, 1);
-                let thread_groups = MTLSize::new((n_padded as u64 + 255) / 256, 1, 1);
+                let thread_groups = MTLSize::new((n_padded as u64).div_ceil(256), 1, 1);
 
                 encoder.dispatch_thread_groups(thread_groups, threads_per_group);
                 encoder.end_encoding();
