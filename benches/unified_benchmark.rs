@@ -88,9 +88,14 @@ fn benchmark_pi_configs(
             |b| {
                 b.iter_batched(
                     || {
-                        // Always generate compatible matrices for multiplication
-                        let a = generate_sparse_matrix(test_size, test_size, 10);
-                        let b = generate_sparse_matrix(test_size, test_size, 10);
+                        // Generate compatible matrices - can be rectangular
+                        // A: m×k, B: k×n -> C: m×n
+                        let m = test_size;
+                        let k = (test_size * 3) / 4; // Inner dimension
+                        let n = (test_size * 5) / 4; // Can be different from m
+                        
+                        let a = generate_sparse_matrix(m, k, 10);
+                        let b = generate_sparse_matrix(k, n, 10);
                         (a, b)
                     },
                     |(a, b)| {
@@ -112,13 +117,37 @@ fn benchmark_traditional_sizes(
     for &size in config.matrix_sizes.iter().take(3) {
         let nnz_per_row = (config.max_nnz / size).max(10).min(size / 10);
 
+        // Test square matrices
         group.bench_function(
-            BenchmarkId::new("matrix_size", format!("{}x{}", size, size)),
+            BenchmarkId::new("matrix_size", format!("{}x{}_square", size, size)),
             |b| {
                 b.iter_batched(
                     || {
                         let a = generate_sparse_matrix(size, size, nnz_per_row);
                         let b = generate_sparse_matrix(size, size, nnz_per_row);
+                        (a, b)
+                    },
+                    |(a, b)| {
+                        let config = MagnusConfig::default();
+                        magnus_spgemm(&a, &b, &config)
+                    },
+                    BatchSize::SmallInput,
+                );
+            },
+        );
+
+        // Test rectangular matrices
+        group.bench_function(
+            BenchmarkId::new("matrix_size", format!("{}x{}_rect", size, (size * 3) / 2)),
+            |b| {
+                b.iter_batched(
+                    || {
+                        // A: m×k, B: k×n where m != n to test rectangular output
+                        let m = size;
+                        let k = (size * 4) / 5;
+                        let n = (size * 3) / 2;
+                        let a = generate_sparse_matrix(m, k, nnz_per_row);
+                        let b = generate_sparse_matrix(k, n, nnz_per_row);
                         (a, b)
                     },
                     |(a, b)| {
@@ -247,12 +276,44 @@ fn quick_benchmarks(c: &mut Criterion) {
     group.measurement_time(Duration::from_secs(1));
     group.sample_size(10);
 
-    // Test tiny matrix to ensure basic functionality
-    group.bench_function("100x100_sparse", |b| {
+    // Test tiny square matrix to ensure basic functionality
+    group.bench_function("100x100_square", |b| {
         b.iter_batched(
             || {
                 let a = generate_sparse_matrix(100, 100, 5);
                 let b = generate_sparse_matrix(100, 100, 5);
+                (a, b)
+            },
+            |(a, b)| {
+                let config = MagnusConfig::default();
+                magnus_spgemm(&a, &b, &config)
+            },
+            BatchSize::SmallInput,
+        );
+    });
+
+    // Test rectangular: tall × wide = square
+    group.bench_function("200x100_x_100x150_rect", |b| {
+        b.iter_batched(
+            || {
+                let a = generate_sparse_matrix(200, 100, 5); // tall
+                let b = generate_sparse_matrix(100, 150, 5); // wide
+                (a, b)
+            },
+            |(a, b)| {
+                let config = MagnusConfig::default();
+                magnus_spgemm(&a, &b, &config)
+            },
+            BatchSize::SmallInput,
+        );
+    });
+
+    // Test extreme aspect ratios
+    group.bench_function("1000x10_x_10x1000_extreme", |b| {
+        b.iter_batched(
+            || {
+                let a = generate_sparse_matrix(1000, 10, 2);  // very tall and narrow
+                let b = generate_sparse_matrix(10, 1000, 2);  // very wide and short
                 (a, b)
             },
             |(a, b)| {
