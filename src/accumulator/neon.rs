@@ -345,7 +345,7 @@ unsafe fn neon_hybrid_sort(col_indices: &[usize], values: &[f32]) -> (Vec<usize>
 
     // Process in chunks of 16 using NEON
     let chunk_size = 16;
-    let num_chunks = (len + chunk_size - 1) / chunk_size;
+    let num_chunks = len.div_ceil(chunk_size);
 
     let mut all_indices = Vec::with_capacity(len);
     let mut all_values = Vec::with_capacity(len);

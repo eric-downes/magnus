@@ -69,7 +69,7 @@ where
     // Fixed memory overhead for fine-level structures (using 2 as default chunk_log)
     let chunk_log = 2; // Default from paper, will be tuned later
     let chunk_size = 1 << chunk_log;
-    let n_chunks = (b.n_cols + chunk_size - 1) / chunk_size;
+    let n_chunks = b.n_cols.div_ceil(chunk_size);
 
     // Iterate through each row of A and categorize it
     for i in 0..a.n_rows {
@@ -143,8 +143,10 @@ where
 {
     let categories = categorize_rows(a, b, config);
 
-    let mut summary = CategorizationSummary::default();
-    summary.total_rows = categories.len();
+    let mut summary = CategorizationSummary {
+        total_rows: categories.len(),
+        ..Default::default()
+    };
 
     for category in categories {
         match category {

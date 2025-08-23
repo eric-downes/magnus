@@ -4,10 +4,14 @@
 //! using Rayon for parallel processing of matrix rows.
 
 use rayon::prelude::*;
+use std::sync::{Arc, Mutex};
 
 use crate::accumulator;
 use crate::matrix;
 use crate::reordering;
+
+/// Type alias for batch results accumulator
+type BatchResults<T> = Arc<Mutex<Vec<Vec<(usize, T)>>>>;
 
 /// Performs sparse general matrix-matrix multiplication (SpGEMM)
 /// using the MAGNUS algorithm with parallel row processing.
@@ -185,7 +189,7 @@ where
         let n_chunks = metadata.n_chunks;
 
         // Create shared mutex-protected result accumulators for this batch
-        let batch_results: Arc<Mutex<Vec<Vec<(usize, T)>>>> =
+        let batch_results: BatchResults<T> =
             Arc::new(Mutex::new(vec![Vec::new(); batch_end - batch_start]));
 
         // Process chunks in parallel
@@ -214,7 +218,7 @@ where
             if !chunk_results.iter().all(|r| r.is_empty()) {
                 let mut batch_accumulators = batch_results.lock().unwrap();
                 for i in 0..(batch_end - batch_start) {
-                    batch_accumulators[i].extend(chunk_results[i].drain(..));
+                    batch_accumulators[i].append(&mut chunk_results[i]);
                 }
             }
         });
@@ -331,18 +335,18 @@ where
     let mut current_col = sorted_entries[0].0;
     let mut current_val = sorted_entries[0].1;
 
-    for i in 1..sorted_entries.len() {
-        if sorted_entries[i].0 == current_col {
+    for entry in sorted_entries.iter().skip(1) {
+        if entry.0 == current_col {
             // Same column, accumulate value
-            current_val += sorted_entries[i].1;
+            current_val += entry.1;
         } else {
             // New column, store previous result
             col_indices.push(current_col);
             values.push(current_val);
 
             // Start new accumulation
-            current_col = sorted_entries[i].0;
-            current_val = sorted_entries[i].1;
+            current_col = entry.0;
+            current_val = entry.1;
         }
     }
 

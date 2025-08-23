@@ -52,14 +52,14 @@ where
         let mut current_idx = pairs[0].0;
         let mut current_val = pairs[0].1;
 
-        for i in 1..pairs.len() {
-            if pairs[i].0 == current_idx {
-                current_val += pairs[i].1;
+        for pair in pairs.iter().skip(1) {
+            if pair.0 == current_idx {
+                current_val += pair.1;
             } else {
                 result_indices.push(current_idx);
                 result_values.push(current_val);
-                current_idx = pairs[i].0;
-                current_val = pairs[i].1;
+                current_idx = pair.0;
+                current_val = pair.1;
             }
         }
 
