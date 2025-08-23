@@ -93,7 +93,7 @@ fn benchmark_pi_configs(
                         let m = test_size;
                         let k = (test_size * 3) / 4; // Inner dimension
                         let n = (test_size * 5) / 4; // Can be different from m
-                        
+
                         let a = generate_sparse_matrix(m, k, 10);
                         let b = generate_sparse_matrix(k, n, 10);
                         (a, b)
@@ -312,8 +312,8 @@ fn quick_benchmarks(c: &mut Criterion) {
     group.bench_function("1000x10_x_10x1000_extreme", |b| {
         b.iter_batched(
             || {
-                let a = generate_sparse_matrix(1000, 10, 2);  // very tall and narrow
-                let b = generate_sparse_matrix(10, 1000, 2);  // very wide and short
+                let a = generate_sparse_matrix(1000, 10, 2); // very tall and narrow
+                let b = generate_sparse_matrix(10, 1000, 2); // very wide and short
                 (a, b)
             },
             |(a, b)| {
