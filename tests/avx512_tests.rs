@@ -155,8 +155,9 @@ fn test_capacity_growth() {
     let mut acc = Avx512Accumulator::new(4);  // Start small
     
     // Add many more elements than initial capacity
+    // Note: Using (i+1) as value to avoid zero, since sparse matrices skip zero values
     for i in 0..100 {
-        acc.accumulate(i, i as f32);
+        acc.accumulate(i, (i + 1) as f32);
     }
     
     let (indices, values) = acc.extract_result();
@@ -166,7 +167,7 @@ fn test_capacity_growth() {
     // Verify correctness
     for i in 0..100 {
         assert_eq!(indices[i], i);
-        assert_eq!(values[i], i as f32);
+        assert_eq!(values[i], (i + 1) as f32);
     }
 }
 

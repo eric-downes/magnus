@@ -120,7 +120,7 @@ impl Avx512Accumulator {
     }
 
     /// Bitonic sort for exactly 16 elements using AVX512 intrinsics
-    /// For now, using a simpler approach that extracts, sorts, and reloads
+    /// For now, fall back to scalar sort until we get the SIMD version working correctly
     #[target_feature(enable = "avx512f")]
     unsafe fn bitonic_sort_16(&self, indices: &mut __m512i, values: &mut __m512) {
         // Extract to arrays for sorting
@@ -147,6 +147,61 @@ impl Avx512Accumulator {
         // Reload into SIMD registers
         *indices = _mm512_loadu_si512(idx_arr.as_ptr() as *const __m512i);
         *values = _mm512_loadu_ps(val_arr.as_ptr());
+    }
+    
+    /// Perform one pass of bitonic merge with specified compare distance and direction mask
+    #[target_feature(enable = "avx512f")]
+    unsafe fn bitonic_merge_stage(
+        &self,
+        indices: &mut __m512i,
+        values: &mut __m512,
+        distance: usize,
+        dir_mask: u16
+    ) {
+        // Create permutation indices for getting partners
+        let mut perm_array = [0i32; 16];
+        for i in 0..16 {
+            perm_array[i] = (i ^ distance) as i32;
+        }
+        let perm = _mm512_loadu_si512(perm_array.as_ptr() as *const __m512i);
+        
+        // Get partner indices and values
+        let partner_indices = _mm512_permutexvar_epi32(perm, *indices);
+        let partner_values = _mm512_permutexvar_ps(perm, *values);
+        
+        // Compare current indices with partner indices
+        let gt_mask = _mm512_cmpgt_epu32_mask(*indices, partner_indices);
+        
+        // Determine swap mask based on direction and comparison
+        // dir_mask bit i = 1 means element i should have smaller value if i < partner
+        let mut swap_mask = 0u16;
+        for i in 0..16 {
+            let partner = i ^ distance;
+            if i < partner {  // Only lower index makes decision
+                let should_be_smaller = (dir_mask >> i) & 1;
+                let is_greater = (gt_mask >> i) & 1;
+                
+                if should_be_smaller != 0 {
+                    // Element i should be smaller
+                    if is_greater != 0 {
+                        // Current is greater, need to swap
+                        swap_mask |= 1 << i;
+                        swap_mask |= 1 << partner;
+                    }
+                } else {
+                    // Element i should be greater  
+                    if is_greater == 0 {
+                        // Current is smaller, need to swap
+                        swap_mask |= 1 << i;
+                        swap_mask |= 1 << partner;
+                    }
+                }
+            }
+        }
+        
+        // Apply swaps using blend
+        *indices = _mm512_mask_blend_epi32(swap_mask, *indices, partner_indices);
+        *values = _mm512_mask_blend_ps(swap_mask, *values, partner_values);
     }
 
 
@@ -555,13 +610,20 @@ mod tests {
         let mut acc = Avx512Accumulator::new(2);
         
         // Add more elements than initial capacity
+        // Note: Using (i+1) as value to avoid zero, since sparse matrices skip zero values
         for i in 0..100 {
-            acc.accumulate(i, i as f32);
+            acc.accumulate(i, (i + 1) as f32);
         }
         
         let (indices, values) = acc.extract_result();
         assert_eq!(indices.len(), 100);
         assert_eq!(values.len(), 100);
+        
+        // Verify correctness
+        for i in 0..100 {
+            assert_eq!(indices[i], i);
+            assert_eq!(values[i], (i + 1) as f32);
+        }
     }
 
     #[test]
