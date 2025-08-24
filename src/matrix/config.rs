@@ -166,19 +166,11 @@ pub fn detect_architecture() -> Architecture {
 
     #[cfg(target_arch = "x86_64")]
     {
-        // Check for AVX-512 support using is_x86_feature_detected macro
-        #[cfg(target_feature = "avx512f")]
-        {
+        // Check for AVX-512 support using runtime feature detection
+        if is_x86_feature_detected!("avx512f") {
             return Architecture::X86WithAVX512;
-        }
-        #[cfg(not(target_feature = "avx512f"))]
-        {
-            // Runtime detection for x86
-            if std::is_x86_feature_detected!("avx512f") {
-                return Architecture::X86WithAVX512;
-            } else {
-                return Architecture::X86WithoutAVX512;
-            }
+        } else {
+            return Architecture::X86WithoutAVX512;
         }
     }
 
