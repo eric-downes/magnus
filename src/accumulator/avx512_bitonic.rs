@@ -3,6 +3,8 @@
 //! This module implements a vectorized bitonic sorting network for 16 elements
 //! using AVX512 intrinsics.
 
+#![cfg(target_arch = "x86_64")]
+
 use std::arch::x86_64::*;
 
 /// Perform a single compare-exchange operation between two AVX512 vectors
